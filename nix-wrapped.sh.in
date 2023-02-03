@@ -1,0 +1,149 @@
+#!/usr/bin/env sh
+# Nix-wrap (c) Karim Vergnes <me@thesola.io>
+# Licensed under GNU GPLv2
+# Required commands:
+#  - sed
+#  - tar (with gzip support)
+#  - rm, mv, tail, uname, env, chmod, mkdir (coreutils)
+#  - git
+#  - kill
+#  - one of wget, curl or python3 (with SSL support)
+#  - sh with source and declare -A
+# A C++ toolchain is also required for building Nix locally.
+
+SYSTEM="$(uname -s).$(uname -m)"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+THIS_SCRIPT="$0"
+
+# Pull a file or directory from the resource tarball linked into this
+# script. Useful for semi-offline or completely offline operation.
+_untar() {
+    {
+        sed -n '/^-----BEGIN ARCHIVE SECTION-----/,$p' "$THIS_SCRIPT" \
+            | tail -n +2                                              \
+            | gzip -d -c 2>/dev/null                                  \
+            | tar x "$@"
+    } || {
+        # The resource tarball is required since it contains the feature
+        # attributes for this script. We bail out since there is no
+        # situation where tar failing would bode well.
+        >&2 echo "Could not extract resource archive."
+        >&2 echo "Check that tar is installed and can extract gzipped archives."
+        >&2 echo "If the issue persists, this script's resource archive may be missing or corrupted."
+        >&2 echo "This script can be rebuilt using nix-wrap"
+        kill -ABRT $$
+    }
+}
+
+# Check that we have the required dependencies to build Nix locally, then
+# do so.
+_try_build_nix() {
+    if [[ $SOURCE_OFFLINE == "y" ]]
+    then
+        _untar nix-source -C "$REPO_ROOT/.nix-wrap"
+    else
+        _dl "https://github.com/nixos/nix/archive/refs/tags/2.13.1.tar.gz" "/tmp/nix-source.tar.gz"
+        tar xzf /tmp/nix-source.tar.gz -C "$REPO_ROOT/.nix-wrap"
+        rm /tmp/nix-source.tar.gz
+        mv "$REPO_ROOT/.nix-wrap/nix-2.13.1" "$REPO_ROOT/.nix-wrap/nix-source"
+    fi
+    echo "Not implemented"
+}
+
+# Best-attempt script for downloading files. We first try wget, then cURL,
+# then Python 3.
+_dl() {
+    if which wget >&/dev/null
+    then
+        wget "$1" -O"$2"
+    elif which curl >&/dev/null
+    then
+        curl -L "$1" -o "$2"
+    elif which python3 >&/dev/null
+    then
+        python3 <<EOF
+from urllib.request import urlopen
+with open('$2') as fi:
+  with urlopen('$1') as rq:
+    fi.write(rq.read())
+EOF
+    else
+        >&2 echo "One of 'wget', 'curl' or 'python3' is required to download files."
+        >&2 echo "Install one of these then try again."
+        return 1
+    fi
+}
+
+# Try a set of strategies to obtain a statically built Nix binary
+_get_nix() {
+    if [[ -v XDG_CACHE_HOME ]]
+    then
+        USER_CACHE="$XDG_CACHE_HOME"
+    elif [[ $(uname -s) == Darwin ]]
+    then
+        USER_CACHE="$HOME/Library/Caches"
+    else
+        USER_CACHE="$HOME/.cache"
+    fi
+
+    # Check if the binary already exists
+    [[ -f "$USER_CACHE/nix-static" ]] && return 0
+
+    # Look in our locally packaged binaries
+    if [[ " ${BINARY_OFFLINE[*]} " == *"$SYSTEM"* ]]
+    then
+        _untar nix-static.$SYSTEM -C "$USER_CACHE"
+        mv "$USER_CACHE/nix-static.$SYSTEM" "$USER_CACHE/nix-static"
+        return 0
+    fi
+
+    # Download binary from online artifacts
+    _dl "https://github.com/thesola10/nix-wrap/releases/latest/nix-static.$SYSTEM" "$USER_CACHE/nix-static" && return 0
+
+    # Build Nix locally from source
+    _try_build_nix && return 0
+
+    # Everything failed, bail out
+    return 1
+}
+
+# Load feature attributes of our resource tarball
+source <(_untar features -O)
+
+mkdir -p "$REPO_ROOT/.nix-wrap"
+
+declare -A EXTRA_ARGS
+
+
+# Unpack builtin Nix channels for channel-oriented commands
+if [[ "$0" =~ "nix-(shell|build|env)" ]]
+then
+    for chn in ${PINNED_CHANNELS[@]}
+    do
+        _untar "$chn" -C "$REPO_ROOT/.nix-wrap"
+        EXTRA_ARGS+=("--arg" "$chn" "$REPO_ROOT/.nix-wrap/$chn")
+    done
+fi
+
+if which nix >&/dev/null
+then
+    exec -a "$0" nix "${EXTRA_ARGS[@]}" "$@"
+else
+    if _get_nix && chmod +x "$USER_CACHE/nix-static"
+    then
+        # This is required if the Nix binary was built locally.
+        # It is highly unlikely that the user have static copies of all the
+        # libraries required by Nix, so it's easier to build a shared binary.
+        # After all, this binary isn't meant to leave its host machine.
+        LD_LIBRARY_PATH="$USER_CACHE/nix-lib:$LD_LIBRARY_PATH" \
+        exec -a "$0" "$USER_CACHE/nix-static" "${EXTRA_ARGS[@]}" "$@"
+    else
+        >&2 echo "Failed to obtain Nix. Check your internet connection."
+        exit 1
+    fi
+fi
+
+exit 1  # Prevent overrun into resource tarball
+
+# The following archive data has been masked through alt screen buffer.
+-----BEGIN ARCHIVE SECTION-----
