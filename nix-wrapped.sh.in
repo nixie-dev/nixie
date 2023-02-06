@@ -15,24 +15,28 @@ SYSTEM="$(uname -s).$(uname -m)"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 THIS_SCRIPT="$0"
 
+# Output an error message to stderr then nuke ourselves
+_bail() {
+    >&2 echo $@
+    >&2 echo "This script can be rebuilt using nix-wrap"
+    kill -ABRT $$
+}
+
 # Pull a file or directory from the resource tarball linked into this
 # script. Useful for semi-offline or completely offline operation.
 _untar() {
     {
-        sed -n '/^-----BEGIN ARCHIVE SECTION-----/,$p' "$THIS_SCRIPT" \
+    sed -n '/^-----BEGIN ARCHIVE SECTION-----/,$p' "$THIS_SCRIPT" \
             | tail -n +2                                              \
-            | gzip -d -c 2>/dev/null                                  \
-            | tar x "$@"
-    } || {
+            | gzip -d -c 2>/dev/null
+    if ! ([[ $? == 2 ]] || [[ $? == 0 ]])
+    then
         # The resource tarball is required since it contains the feature
         # attributes for this script. We bail out since there is no
         # situation where tar failing would bode well.
-        >&2 echo "Could not extract resource archive."
-        >&2 echo "Check that tar is installed and can extract gzipped archives."
-        >&2 echo "If the issue persists, this script's resource archive may be missing or corrupted."
-        >&2 echo "This script can be rebuilt using nix-wrap"
-        kill -ABRT $$
-    }
+        _bail "Could not find or decompress resource archive."
+    fi
+    } | tar x "$@"
 }
 
 # Check that we have the required dependencies to build Nix locally, then
@@ -74,6 +78,13 @@ EOF
     fi
 }
 
+# Download script wrapper to retrieve files from the source derivation this
+# script was built with. Requires SOURCE_CACHE to be the host name for a
+# Cachix-compatible HTTPS host (i.e. with endpoint /serve/xxx-hash/path)
+_dl_source() {
+    _dl "https://$SOURCE_CACHE/serve/$SOURCE_DERIVATION/$1" "$2"
+}
+
 # Try a set of strategies to obtain a statically built Nix binary
 _get_nix() {
     if [[ -v XDG_CACHE_HOME ]]
@@ -97,8 +108,8 @@ _get_nix() {
         return 0
     fi
 
-    # Download binary from online artifacts
-    _dl "https://github.com/thesola10/nix-wrap/releases/latest/nix-static.$SYSTEM" "$USER_CACHE/nix-static" && return 0
+    # Download binary from source derivation
+    _dl_source "nix-static.$SYSTEM" "$USER_CACHE/nix-static" && return 0
 
     # Build Nix locally from source
     _try_build_nix && return 0
@@ -108,7 +119,10 @@ _get_nix() {
 }
 
 # Load feature attributes of our resource tarball
-source <(_untar features -O)
+source <(_untar features -O || _bail "The resource archive is missing or malformed.")
+
+[[ -v SOURCE_CACHE ]] || [[ -v SOURCE_DERIVATION ]] \
+    || _bail "The features file in the resource archive is missing or malformed."
 
 mkdir -p "$REPO_ROOT/.nix-wrap"
 
@@ -124,6 +138,13 @@ then
         EXTRA_ARGS+=("--arg" "$chn" "$REPO_ROOT/.nix-wrap/$chn")
     done
 fi
+
+# Apply experimental features if listed
+[[ "$EXTRA_FEATURES" == "" ]] || EXTRA_ARGS+=("--extra-experimental-features" "$EXTRA_FEATURES")
+
+# Apply extra substituters and their signing keys (e.g. cachix) if listed
+[[ "$EXTRA_SUBSTITUTERS" == "" ]] || EXTRA_ARGS+=("--extra-substituters" "$EXTRA_SUBSTITUTERS")
+[[ "$EXTRA_TRUSTED_PUBLIC_KEYS" == "" ]] || EXTRA_ARGS+=("--extra-trusted-public-keys" "$EXTRA_TRUSTED_PUBLIC_KEYS")
 
 if which nix >&/dev/null
 then
