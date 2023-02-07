@@ -13,7 +13,7 @@
 
 SYSTEM="$(uname -s).$(uname -m)"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-THIS_SCRIPT="$0"
+THIS_SCRIPT="$(readlink -e $0)"
 
 ##### UTILITY FUNCTIONS #####
 
@@ -38,7 +38,7 @@ _untar() {
         # situation where tar failing would bode well.
         _bail "Could not find or decompress resource archive."
     fi
-    } | tar x "$@"
+    } | tar -x --overwrite "$@"
 }
 
 # Best-attempt script for downloading files. We first try wget, then cURL,
@@ -67,25 +67,28 @@ _dl() {
 # script was built with. Requires SOURCE_CACHE to be the host name for a
 # Cachix-compatible HTTPS host (i.e. with endpoint /serve/xxx-hash/path)
 _pull_source() {
-    {
-        _untar "sources/$1" -C "$USER_CACHE"
-        mv "$USER_CACHE/$1" "$2"
-    } || {
-        _dl "https://$SOURCE_CACHE/serve/$SOURCE_DERIVATION/$1.tar.gz" "$USER_CACHE/$1.tar.gz"
-        gzip -d -c "$USER_CACHE/$1.tar.gz" | tar x -C "$USER_CACHE"
-        mv "$USER_CACHE/$1" "$2"
-        rm "$USER_CACHE/$1.tar.gz"
-    }
+    (
+        cd "$USER_CACHE"
+        _untar "sources/$1"
+        mv "$1" "$2"
+    ) || (
+        cd "$USER_CACHE"
+        _dl "https://$SOURCE_CACHE/serve/$SOURCE_DERIVATION/$1.tar.gz" "$1.tar.gz"
+        gzip -d -c "$1.tar.gz" | tar x
+        mv "$1" "$2"
+        rm "$1.tar.gz"
+    )
 }
 
 # Idem for static Nix binaries
 _pull_nix_bin() {
-    {
-        _untar "$1" -C "$USER_CACHE"
-        mv "$USER_CACHE/$1" "$2"
-    } || {
+    (
+        cd "$USER_CACHE"
+        _untar "$1"
+        mv "$1" "$2"
+    ) || (
         _dl "https://$SOURCE_CACHE/serve/$NIX_BINS_DERIVATION/$1" "$2"
-    }
+    )
 }
 
 # Check that we have the required dependencies to build Nix locally, then
@@ -142,9 +145,9 @@ if [[ "$0" =~ nix-(shell|build|env) ]]
 then
     for chn in ${PINNED_CHANNELS[@]}
     do
-        _untar "$chn" -C "$REPO_ROOT/.nix-wrap"
-        EXTRA_ARGS+=("--arg" "$chn" "$REPO_ROOT/.nix-wrap/$chn")
+        (cd $REPO_ROOT/.nix-wrap; _untar "$chn" 2>/dev/null)
     done
+    export NIX_PATH="$REPO_ROOT/.nix-wrap:$NIX_PATH"
 fi
 
 # Emulate nix-shell interpreter behavior
@@ -183,7 +186,7 @@ fi
 
 if [[ $nix_daemon_warn == 1 ]] && \
     pgrep nix-daemon >/dev/null 2>&1 && \
-    ! grep "trusted-users\s*=.*$(whoami)" /etc/nix/nix.conf >/dev/null 2>&1
+    ! grep "trusted-users\s*=.*$(whoami 2>/dev/null)" /etc/nix/nix.conf >/dev/null 2>&1
 then
     >&2 echo "This nix wrapper script specifies additional binary caches,"
     >&2 echo "but you are running on a multi-user install as an untrusted user."
@@ -202,7 +205,9 @@ else
         # libraries required by Nix, so it's easier to build a shared binary.
         # After all, this binary isn't meant to leave its host machine.
         LD_LIBRARY_PATH="$USER_CACHE/nix-lib:$LD_LIBRARY_PATH" \
-        exec -a "$0" "$USER_CACHE/nix-static" "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
+        exec -a "$0" "$USER_CACHE/nix-static" \
+            --store "$(readlink -e $HOME/.local/share/nix/root)" \
+            "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
     else
         >&2 echo "Failed to obtain Nix. Check your internet connection."
         exit 1
