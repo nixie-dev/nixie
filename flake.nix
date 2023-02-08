@@ -11,6 +11,7 @@
       { default = nix-wrap;
         nix-wrap = pkgs.callPackage ./builder {};
         sources = pkgs.callPackage ./sources {};
+        static-bins = pkgs.callPackage ./nix-static-bins.nix {};
       };
     });
 }

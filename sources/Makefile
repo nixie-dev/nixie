@@ -16,8 +16,8 @@ BOOST_VER 		:= 1.81.0
 BOOST_ARCHIVE	:= $(WORKDIR)/boost.tar.gz
 BOOST_DIR		= boost_$(subst .,_,$(BOOST_VER))
 
-BOOST_ADD_HEADERS = core,utility,io,system,thread,context,lexical_cast,config,format,coroutine2,container,chrono,atomic,predef,move,assert,detail,type_traits,intrusive,mpl,date_time,bind,align,preprocessor,ratio,exception,smart_ptr,numeric,functional,container_hash,describe,tuple,iterator,function,integer,type_index,algorithm,range,concept
-BOOST_ADD_MODULES = system,thread,context,format,coroutine2,container,chrono,atomic
+BOOST_ADD_HEADERS = core,utility,io,system,thread,context,lexical_cast,config,format,coroutine2,container,chrono,atomic,predef,move,assert,detail,type_traits,intrusive,mpl,date_time,bind,align,preprocessor,ratio,exception,smart_ptr,numeric,functional,container_hash,describe,tuple,iterator,function,integer,type_index,algorithm,range,concept,optional
+BOOST_ADD_MODULES = system,thread,context,format,coroutine2,container,chrono,atomic,optional
 
 THIS_SYSTEM		= $(shell uname -s)
 
