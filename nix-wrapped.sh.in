@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#vim: ts=2 sw=2
+# vim: ts=2 sw=2
 # Nix-wrap (c) Karim Vergnes <me@thesola.io>
 # Licensed under GNU GPLv2
 # Required commands:
@@ -40,7 +40,7 @@ _untar() {
     # situation where tar failing would bode well.
     _bail "Could not find or decompress resource archive."
   fi
-  } | tar -x --overwrite "$@"
+  } | tar -x "$@"
 }
 
 # Best-attempt script for downloading files. We first try wget, then cURL,
@@ -139,7 +139,7 @@ _find_or_build_nlohmann_json () {
   pkg-config nlohmann_json && return 0
 
   _pull_source "nlohmann_json" "$source_root/nlohmann_json"
-  
+
   export NLOHMANN_JSON_LIBS="$source_root/nlohmann_json/single_include"
   export NLOHMANN_JSON_CFLAGS="-I$source_root/nlohmann_json/single_include"
 }
@@ -255,7 +255,8 @@ if [[ "$0" =~ nix-(shell|build|env) ]]
 then
   for chn in ${PINNED_CHANNELS[@]}
   do
-    (cd $REPO_ROOT/.nix-wrap; _untar "$chn" 2>/dev/null)
+    [[ -d "$REPO_ROOT/.nix-wrap/$chn" ]] \
+      || (cd $REPO_ROOT/.nix-wrap; _untar "$chn" 2>/dev/null)
   done
   export NIX_PATH="$REPO_ROOT/.nix-wrap:$NIX_PATH"
 fi
@@ -314,10 +315,23 @@ else
     # It is highly unlikely that the user have static copies of all the
     # libraries required by Nix, so it's easier to build a shared binary.
     # After all, this binary isn't meant to leave its host machine.
-    LD_LIBRARY_PATH="$USER_CACHE/nix-lib:$LD_LIBRARY_PATH" \
-    exec -a "$0" "$USER_CACHE/nix-static" \
-      --store "$(readlink -e $HOME/.local/share/nix/root)" \
-      "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
+    export LD_LIBRARY_PATH="$USER_CACHE/nix-lib:$LD_LIBRARY_PATH"
+
+    if [[ "$SYSTEM" =~ Darwin ]]
+    then
+      # wow apple thanks
+      user_save="$(whoami)"
+      >&2 echo "Root privileges are required to mount the Nix store on macOS."
+      >&2 echo "To avoid this issue in the future, install Nix on your system"
+      >&2 echo "from https://nixos.org/download.html#nix-install-macos"
+      >&2 echo "(or go bug Apple about their lack of namespace support)"
+      mkdir -p "$HOME/Library/nix-wrap"
+      sudo sh -c "[[ -d /nix ]] || { echo nix >> /etc/synthetic.conf; /System/Library/Filesystems/apfs.fs/Contents/MacOS/apfs.util -f; }; "
+    else
+      exec -a "$0" "$USER_CACHE/nix-static" \
+        --store "$(readlink -e $HOME/.local/share/nix/root)" \
+        "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
+    fi
   else
     >&2 echo "Failed to obtain Nix. Check your internet connection."
     exit 1
