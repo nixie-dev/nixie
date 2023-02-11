@@ -10,12 +10,16 @@
 #  - kill
 #  - one of wget, curl or python3 (with SSL support)
 #  - sh with source and declare -a
-# A C++ toolchain is also required for building Nix locally.
+# Requirements for building binaries locally:
+#  - A C and C++ compiler toolchain
+#  - pkg-config
+#  - GNU Make
+#  - flex + bison
 
 SYSTEM="$(uname -s).$(uname -m)"
-REPO_ROOT="$(git rev-parse --show-toplevel)"
 THIS_SCRIPT="$(readlink -e $0)"
 PWD_SAVE=$PWD
+REPO_ROOT="$(git rev-parse --show-toplevel "${THIS_SCRIPT%/*}")"
 
 ##### UTILITY FUNCTIONS #####
 
@@ -54,7 +58,12 @@ _dl() {
     curl -f -L "$1" -o "$2"
   elif which python3 >&/dev/null
   then
-    echo -e "from urllib.request import urlopen\nwith open('$2') as fi:\n with urlopen('$1') as rq:\n  fi.write(rq.read())" | python3
+    python3 <<EOF
+from urllib.request import urlopen
+with open('$2') as fi:
+  with urlopen('$1') as rq:
+    fi.write(rq.read())
+EOF
   else
     >&2 echo "One of 'wget', 'curl' or 'python3' is required to download files."
     >&2 echo "Install one of these then try again."
@@ -210,10 +219,14 @@ _try_build_nix() {
 
 # Try a set of strategies to obtain a statically built Nix binary
 _get_nix() {
+  #TODO: Remove this line once #1 is fixed, this gives us a quick fallthrough
+  # to _macos_workaround_nix()
+  [[ "$SYSTEM" =~ Darwin ]] && return 0
+
   if [[ -v XDG_CACHE_HOME ]]
   then
     USER_CACHE="$XDG_CACHE_HOME"
-  elif [[ $(uname -s) == Darwin ]]
+  elif [[ "$SYSTEM" =~ Darwin ]]
   then
     USER_CACHE="$HOME/Library/Caches"
   else
@@ -231,6 +244,17 @@ _get_nix() {
 
   # Everything failed, bail out
   return 1
+}
+
+
+##### RUNNER SCRIPTS
+
+# This function exists as a placeholder while a solution to #1 is being worked on.
+_macos_workaround_nix () {
+  >&2 echo "macOS lacks the features required for nix-wrap to work,"
+  >&2 echo "and finding a workaround has turned out to be much harder than I thought."
+  >&2 echo "Help is appreciated at https://github.com/thesola10/nix-wrap/issues/1"
+  _bail "Install Nix system-wide: https://nixos.org/download.html#nix-instal-macos"
 }
 
 
@@ -312,7 +336,7 @@ else
   if _get_nix && chmod +x "$USER_CACHE/nix-static"
   then
     # This is required if the Nix binary was built locally.
-    # It is highly unlikely that the user have static copies of all the
+    # It is highly unlikely that the user has static copies of all the
     # libraries required by Nix, so it's easier to build a shared binary.
     # After all, this binary isn't meant to leave its host machine.
     export LD_LIBRARY_PATH="$USER_CACHE/nix-lib:$LD_LIBRARY_PATH"
@@ -320,13 +344,7 @@ else
     if [[ "$SYSTEM" =~ Darwin ]]
     then
       # wow apple thanks
-      user_save="$(whoami)"
-      >&2 echo "Root privileges are required to mount the Nix store on macOS."
-      >&2 echo "To avoid this issue in the future, install Nix on your system"
-      >&2 echo "from https://nixos.org/download.html#nix-install-macos"
-      >&2 echo "(or go bug Apple about their lack of namespace support)"
-      mkdir -p "$HOME/Library/nix-wrap"
-      sudo sh -c "[[ -d /nix ]] || { echo nix >> /etc/synthetic.conf; /System/Library/Filesystems/apfs.fs/Contents/MacOS/apfs.util -f; }; "
+      _macos_workaround_nix "$0" "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
     else
       exec -a "$0" "$USER_CACHE/nix-static" \
         --store "$(readlink -e $HOME/.local/share/nix/root)" \
@@ -342,5 +360,4 @@ fi
 exit 1
 cat <<DONOTPARSE
 
-# The following archive data has been masked through alt screen buffer.
 -----BEGIN ARCHIVE SECTION-----
