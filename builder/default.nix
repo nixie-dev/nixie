@@ -1,6 +1,6 @@
-{ pkgs ? import <nixpkgs> {}, ... }:
+{ stdenv, ... }:
 
-pkgs.stdenv.mkDerivation {
+stdenv.mkDerivation {
   pname = "nix-wrap";
   version = "0.0.1";
 

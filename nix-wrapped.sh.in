@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # vim: ts=2 sw=2
 # Nix-wrap (c) Karim Vergnes <me@thesola.io>
 # Licensed under GNU GPLv2
@@ -17,9 +17,19 @@
 #  - flex + bison
 
 SYSTEM="$(uname -s).$(uname -m)"
-THIS_SCRIPT="$(readlink -e $0)"
+THIS_SCRIPT="$(readlink -f $0)"
 PWD_SAVE=$PWD
 REPO_ROOT="$(git rev-parse --show-toplevel "${THIS_SCRIPT%/*}")"
+
+if [[ "$XDG_CACHE_HOME" != "" ]]
+then
+  USER_CACHE="$XDG_CACHE_HOME"
+elif [[ "$SYSTEM" =~ Darwin ]]
+then
+  USER_CACHE="$HOME/Library/Caches"
+else
+  USER_CACHE="$HOME/.cache"
+fi
 
 ##### UTILITY FUNCTIONS #####
 
@@ -109,7 +119,7 @@ _find_or_build_openssl () {
   cd "$source_root/openssl"
   ./config && make
 
-  cp ./libcrypto.so "$USER_CACHE/nix-lib/"
+  cp ./libcrypto.* "$USER_CACHE/nix-lib/"
 
   export OPENSSL_LIBS="$USER_CACHE/nix-lib"
   export OPENSSL_CFLAGS="-I$source_root/openssl/include"
@@ -138,7 +148,7 @@ _find_or_build_lowdown () {
   cd "$source_root/lowdown"
   ./configure && make
 
-  cp ./liblowdown.so "$USER_CACHE/nix-lib/"
+  cp ./liblowdown.* "$USER_CACHE/nix-lib/"
 
   export LOWDOWN_LIBS="$USER_CACHE/nix-lib"
   export LOWDOWN_CFLAGS="-I$source_root/lowdown"
@@ -195,8 +205,8 @@ _try_build_nix() {
   # Populate macOS SDK paths
   if [[ "$SYSTEM" =~ Darwin ]]
   then
-    macos_sdk="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-    [[ -d $macos_sdk ]] || _bail "Building Nix from source requires the Xcode macOS platform SDK."
+    macos_sdk="$(xcrun --show-sdk-path)"
+    [[ -d $macos_sdk ]] || _bail "The macOS SDK from Xcode or CommandLineTools is required to build Nix."
 
     export LIBCURL_LIBS=$macos_sdk/usr/lib
     export LIBCURL_CFLAGS=$macos_sdk/usr/include
@@ -219,20 +229,6 @@ _try_build_nix() {
 
 # Try a set of strategies to obtain a statically built Nix binary
 _get_nix() {
-  #TODO: Remove this line once #1 is fixed, this gives us a quick fallthrough
-  # to _macos_workaround_nix()
-  [[ "$SYSTEM" =~ Darwin ]] && return 0
-
-  if [[ -v XDG_CACHE_HOME ]]
-  then
-    USER_CACHE="$XDG_CACHE_HOME"
-  elif [[ "$SYSTEM" =~ Darwin ]]
-  then
-    USER_CACHE="$HOME/Library/Caches"
-  else
-    USER_CACHE="$HOME/.cache"
-  fi
-
   # Check if the binary already exists
   [[ -f "$USER_CACHE/nix-static" ]] && return 0
 
@@ -249,23 +245,29 @@ _get_nix() {
 
 ##### RUNNER SCRIPTS
 
-# This function exists as a placeholder while a solution to #1 is being worked on.
 _macos_workaround_nix () {
-  >&2 echo "macOS lacks the features required for nix-wrap to work,"
-  >&2 echo "and finding a workaround has turned out to be much harder than I thought."
-  >&2 echo "Help is appreciated at https://github.com/thesola10/nix-wrap/issues/1"
-  _bail "Install Nix system-wide: https://nixos.org/download.html#nix-instal-macos"
+  CMDNAME="$1"
+  shift 1
+  mkdir -p $HOME/Library/nix
+
+  _untar libfakedir.$(uname -m).dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
+    || _bail "libfakedir.dylib missing for macOS $(uname -m)."
+
+  DYLD_INSERT_LIBRARIES="$USER_CACHE/nix-lib/libfakedir.dylib" \
+  FAKEDIR_PATTERN=/nix \
+  FAKEDIR_TARGET=$HOME/Library/nix \
+    exec -a "$CMDNAME" "$@"
 }
 
 
 ##### ENTRY POINT #####
 
 # Load feature attributes of our resource tarball
-eval "$(_untar features -O || _bail "The resource archive is missing or malformed.")"
+eval "$(_untar -O features || _bail "The resource archive is missing or malformed.")"
 
 # Running without a specified sources derivation is not supported, even if sources
 # are shipped offline.
-[[ -v SOURCE_CACHE ]] || [[ -v SOURCE_DERIVATION ]] || [[ -v NIX_BINS_DERIVATION ]] \
+[[ "$SOURCE_CACHE" != "" ]] || [[ "$SOURCE_DERIVATION" != "" ]] || [[ "$NIX_BINS_DERIVATION" != "" ]] \
   || _bail "The features file in the resource archive is missing or malformed."
 
 mkdir -p "$REPO_ROOT/.nix-wrap"
@@ -313,11 +315,11 @@ then
 fi
 
 # Apply experimental features if listed
-[[ -v EXTRA_FEATURES ]] && EXTRA_ARGS+=("--extra-experimental-features" "$EXTRA_FEATURES")
+[[ "$EXTRA_FEATURES" != "" ]] && EXTRA_ARGS+=("--extra-experimental-features" "$EXTRA_FEATURES")
 
 # Apply extra substituters and their signing keys (e.g. cachix) if listed
-[[ -v EXTRA_SUBSTITUTERS ]] && EXTRA_ARGS+=("--extra-substituters" "$EXTRA_SUBSTITUTERS") && nix_daemon_warn=1
-[[ -v EXTRA_TRUSTED_PUBLIC_KEYS ]] && EXTRA_ARGS+=("--extra-trusted-public-keys" "$EXTRA_TRUSTED_PUBLIC_KEYS") && nix_daemon_warn=1
+[[ "$EXTRA_SUBSTITUTERS" != "" ]] && EXTRA_ARGS+=("--extra-substituters" "$EXTRA_SUBSTITUTERS") && nix_daemon_warn=1
+[[ "$EXTRA_TRUSTED_PUBLIC_KEYS" != "" ]] && EXTRA_ARGS+=("--extra-trusted-public-keys" "$EXTRA_TRUSTED_PUBLIC_KEYS") && nix_daemon_warn=1
 
 if [[ $nix_daemon_warn == 1 ]] && \
   pgrep nix-daemon >/dev/null 2>&1 && \
@@ -347,7 +349,7 @@ else
       _macos_workaround_nix "$0" "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
     else
       exec -a "$0" "$USER_CACHE/nix-static" \
-        --store "$(readlink -e $HOME/.local/share/nix/root)" \
+        --store "$(readlink -f $HOME/.local/share/nix/root)" \
         "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
     fi
   else
