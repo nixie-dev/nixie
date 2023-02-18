@@ -1,0 +1,26 @@
+name: "Upload source archives"
+on:
+  push:
+    paths:
+      - 'sources/**'
+      - flake.nix
+      - flake.lock
+
+
+jobs:
+  sources:
+    name: Build and upload sources to Cachix
+    runs-on: ubuntu-latest
+    environment: Cachix
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v17
+      - name: Set up Cachix access
+        uses: cachix/cachix-action@v11
+        with:
+          name: nix-wrap
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - run: nix --extra-experimental-features "nix-command flakes" build .#sources
