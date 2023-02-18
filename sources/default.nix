@@ -1,5 +1,5 @@
 { stdenv, boost, openssl, lowdown, nlohmann_json, brotli, libsodium, editline
-, gnutar, coreutils, findutils, python3, ... }:
+, gnutar, coreutils, findutils, python3, nix, ... }:
 
 let
   srcs_simple =
@@ -9,6 +9,7 @@ let
     ];
   srcs_dir =
     [ nlohmann_json
+      nix
       # I want pname to match the pkg-config package checked against like in the script
       (brotli.overrideAttrs (_: { pname = "libbrotlicommon"; }))
       (editline.overrideAttrs (_: { pname = "libeditline"; }))
@@ -35,6 +36,6 @@ in stdenv.mkDerivation {
   + builtins.foldl'
       (l: r: l + "\npython3 ./tarmod.py ${r.src} $out/${r.pname}.tar.gz ${r.pname}") "" srcs_simple
   + builtins.foldl'
-      (l: r: l + "\ntar --transform='s,.*nix/store/[a-z0-9-]*-source/,${r.pname}/,' -czf $out/${r.pname}.tar.gz ${r.src}") "" srcs_dir
+      (l: r: l + "\ncp -r ${r.src} ${r.pname} && chmod -R u+w ${r.pname} && tar -czf $out/${r.pname}.tar.gz ${r.pname}") "" srcs_dir
   ;
 }

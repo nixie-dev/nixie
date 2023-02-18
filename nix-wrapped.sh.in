@@ -5,7 +5,7 @@
 # Required commands:
 #  - sed
 #  - tar (with gzip support)
-#  - rm, mv, tail, uname, env, chmod, mkdir (coreutils)
+#  - rm, mv, tail, uname, env, chmod, mkdir, tee (coreutils)
 #  - git
 #  - kill
 #  - one of wget, curl or python3 (with SSL support)
@@ -20,6 +20,13 @@ SYSTEM="$(uname -s).$(uname -m)"
 THIS_SCRIPT="$(readlink -f $0)"
 PWD_SAVE=$PWD
 REPO_ROOT="$(git rev-parse --show-toplevel "${THIS_SCRIPT%/*}"| head -n 1)"
+
+if [[ "$SYSTEM" =~ Darwin ]]
+then
+  DLL_EXT="dylib"
+else
+  DLL_EXT="so"
+fi
 
 if [[ "$XDG_CACHE_HOME" != "" ]]
 then
@@ -116,10 +123,20 @@ _pull_nix_bin() {
 _find_or_build_openssl () {
   pkg-config libcrypto && return 0
 
+  echo -ne "\033]0;Building Nix: libcrypto (1/8)\007"
   _pull_source "openssl" "$source_root/openssl"
   cd "$source_root/openssl"
   chmod +x ./config
-  ./config && make
+
+  # Did you know? The OpenSSL Makefile doesn't include generated headers to
+  # build deps! No one knows how to write a good Makefile nowadays.
+  ./config && {
+      for hdr in $(grep ".*\\.h:" Makefile | cut -f 1 -d :)
+      do
+        make $hdr
+      done
+    } &&
+    make libcrypto.$DLL_EXT
 
   cp ./libcrypto.* "$USER_CACHE/nix-lib/"
 
@@ -131,6 +148,7 @@ _find_or_build_autoconf () {
   libname="$1"
   varname="$2"
 
+  echo -ne "\033]0;Building Nix: $libname ($nth/8)\007"
   pkg-config $libname && return 0
 
   _pull_source "$libname" "$source_root/$libname"
@@ -146,9 +164,17 @@ _find_or_build_autoconf () {
 _find_or_build_lowdown () {
   pkg-config lowdown && return 0
 
+  echo -ne "\033]0;Building Nix: lowdown (4/8)\007"
   _pull_source "lowdown" "$source_root/lowdown"
   cd "$source_root/lowdown"
   ./configure && make
+
+  if [[ "$SYSTEM" =~ Darwin ]]
+  then
+    # macOS' clang doesn't support the GCC-esque --soname, and the library
+    # output name would be wrong anyway.
+    cc -shared -o liblowdown.1.dylib *.o
+  fi
 
   cp ./liblowdown.* "$USER_CACHE/nix-lib/"
 
@@ -159,6 +185,7 @@ _find_or_build_lowdown () {
 _find_or_build_nlohmann_json () {
   pkg-config nlohmann_json && return 0
 
+  echo -ne "\033]0;Building Nix: nlohmann_json (3/8)\007"
   _pull_source "nlohmann_json" "$source_root/nlohmann_json"
 
   export NLOHMANN_JSON_LIBS="$source_root/nlohmann_json/single_include"
@@ -177,9 +204,10 @@ _find_or_build_boost () {
 
   [[ $boost_not_found == 1 ]] || return 0
 
+  echo -ne "\033]0;Building Nix: boost (2/8)\007"
   _pull_source "boost" "$source_root/boost"
   cd "$source_root/boost"
-  ./boostrap.sh && b2 --with-system --with-thread --with-context --with-container --with-chrono --static
+  ./bootstrap.sh && ./b2 --with-system --with-thread --with-context --with-container --with-chrono --static
 
   export BOOST_ROOT="$source_root/boost"
 }
@@ -194,13 +222,14 @@ _try_build_nix() {
   _find_or_build_boost
   _find_or_build_nlohmann_json
   _find_or_build_lowdown
-  libpath=              incpfx=c \
+  libpath=              incpfx=c              nth=5\
       _find_or_build_autoconf libbrotlicommon LIBBROTLI
-  libpath=src/libsodium incpfx=src/libsodium \
+  libpath=src/libsodium incpfx=src/libsodium  nth=6\
       _find_or_build_autoconf libsodium       SODIUM
-  libpath=src           incpfx= \
+  libpath=src           incpfx=               nth=7\
       _find_or_build_autoconf libeditline     EDITLINE
 
+  echo -ne "\033]0;Building Nix (8/8)\007"
   _pull_source "nix" "$source_root/nix"
 
   cd "$source_root/nix"
@@ -248,7 +277,7 @@ _get_nix() {
     && { tput rmcup; return 0; }
 
   # Build Nix locally from source
-  _try_build_nix \
+  _try_build_nix 2>&1 | tee nix-build.log \
     && { tput rmcup; return 0; }
 
   # Everything failed, bail out
