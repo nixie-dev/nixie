@@ -24,8 +24,10 @@ REPO_ROOT="$(git rev-parse --show-toplevel "${THIS_SCRIPT%/*}"| head -n 1)"
 if [[ "$SYSTEM" =~ Darwin ]]
 then
   DLL_EXT="dylib"
+  USER_STORE="$HOME/Library/Nix"
 else
   DLL_EXT="so"
+  USER_STORE="$HOME/.local/share/nix/root"
 fi
 
 if [[ "$XDG_CACHE_HOME" != "" ]]
@@ -291,14 +293,14 @@ _get_nix() {
 _macos_workaround_nix () {
   CMDNAME="$1"
   shift 1
-  mkdir -p $HOME/Library/nix
+  mkdir -p $USER_STORE/nix
 
   _untar libfakedir.dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
     || _bail "libfakedir.dylib missing, cannot proceed."
 
   DYLD_INSERT_LIBRARIES="$USER_CACHE/nix-lib/libfakedir.dylib" \
   FAKEDIR_PATTERN=/nix \
-  FAKEDIR_TARGET=$HOME/Library/nix \
+  FAKEDIR_TARGET=$USER_STORE/nix \
     exec -a "$CMDNAME" "$@"
 }
 
@@ -376,6 +378,14 @@ fi
 
 if which nix >&/dev/null
 then
+  # Here, we check that the user just installed Nix proper on their system,
+  # so we migrate paths away from their home to avoid duplicates.
+  if   [[ -d $USER_STORE/nix/store ]] && [[ -d /nix/store ]]
+  then
+    >&2 echo "Migrating Nix store to system-wide install..."
+    nix copy --from $USER_STORE --all --no-check-sigs
+  fi
+
   exec -a "$0" nix "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
 else
   if _get_nix && chmod +x "$USER_CACHE/nix-static"
