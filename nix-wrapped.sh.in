@@ -187,6 +187,7 @@ _find_or_build_boost () {
 # do so.
 _try_build_nix() {
   source_root="$REPO_ROOT/.nix-wrap/sources"
+  mkdir -p $source_root
 
   _find_or_build_openssl
   _find_or_build_boost
@@ -262,8 +263,8 @@ _macos_workaround_nix () {
   shift 1
   mkdir -p $HOME/Library/nix
 
-  _untar libfakedir.$(uname -m).dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
-    || _bail "libfakedir.dylib missing for macOS $(uname -m)."
+  _untar libfakedir.dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
+    || _bail "libfakedir.dylib missing, cannot proceed."
 
   DYLD_INSERT_LIBRARIES="$USER_CACHE/nix-lib/libfakedir.dylib" \
   FAKEDIR_PATTERN=/nix \
