@@ -1,5 +1,5 @@
 { stdenv, boost, openssl, lowdown, nlohmann_json, brotli, libsodium, editline
-, gnutar, coreutils, findutils, ... }:
+, gnutar, coreutils, findutils, python3, ... }:
 
 let
   srcs_simple =
@@ -24,6 +24,7 @@ in stdenv.mkDerivation {
   nativeBuildInputs =
     [ coreutils
       findutils
+      python3
     ];
 
   buildPhase = ''
@@ -32,8 +33,8 @@ in stdenv.mkDerivation {
     cp boost-shaved.tar.gz $out/boost.tar.gz
   ''
   + builtins.foldl'
-      (l: r: l + "\ncp ${r.src} $out/${r.pname}.tar.gz") "" srcs_simple
+      (l: r: l + "\npython3 ./tarmod.py ${r.src} $out/${r.pname}.tar.gz ${r.pname}") "" srcs_simple
   + builtins.foldl'
-      (l: r: l + "\ntar --transform='s,/nix/store/.*/,${r.pname}/,' -czf $out/${r.pname}.tar.gz ${r.src}") "" srcs_dir
+      (l: r: l + "\ntar --transform='s,.*nix/store/[a-z0-9-]*-source/,${r.pname}/,' -czf $out/${r.pname}.tar.gz ${r.src}") "" srcs_dir
   ;
 }
