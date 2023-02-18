@@ -35,6 +35,7 @@ fi
 
 # Output an error message to stderr then nuke ourselves
 _bail() {
+  tput rmcup
   >&2 echo $@
   >&2 echo "This script can be rebuilt using nix-wrap"
   kill -ABRT $$
@@ -229,16 +230,27 @@ _try_build_nix() {
 
 # Try a set of strategies to obtain a statically built Nix binary
 _get_nix() {
+  # Acquiring Nix produces a lot of output, so we use alt-buffer.
+  tput smcup
+  echo -e "\033]0;Building Nix...\007"
+
+  # And we set a trap to exist alt-buffer on ^C cause we're no savages.
+  trap "tput rmcup; exit 1" SIGKILL SIGTERM SIGINT SIGABRT
+
   # Check if the binary already exists
-  [[ -f "$USER_CACHE/nix-static" ]] && return 0
+  [[ -f "$USER_CACHE/nix-static" ]] \
+    && { tput rmcup; return 0; }
 
   # Look in our sources for prebuilt binary
-  _pull_nix_bin "nix-static.$SYSTEM" "$USER_CACHE/nix-static" && return 0
+  _pull_nix_bin "nix-static.$SYSTEM" "$USER_CACHE/nix-static" \
+    && { tput rmcup; return 0; }
 
   # Build Nix locally from source
-  _try_build_nix && return 0
+  _try_build_nix \
+    && { tput rmcup; return 0; }
 
   # Everything failed, bail out
+  tput rmcup
   return 1
 }
 
