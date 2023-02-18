@@ -118,6 +118,7 @@ _find_or_build_openssl () {
 
   _pull_source "openssl" "$source_root/openssl"
   cd "$source_root/openssl"
+  chmod +x ./config
   ./config && make
 
   cp ./libcrypto.* "$USER_CACHE/nix-lib/"
