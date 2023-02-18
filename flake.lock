@@ -1,5 +1,28 @@
 {
   "nodes": {
+    "fakedir": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "utils": [
+          "flake-utils"
+        ]
+      },
+      "locked": {
+        "lastModified": 1676731855,
+        "narHash": "sha256-4v3vqgQYwymdsFcmHF6gAfnjwwc45F9UFDw/iA5ARO4=",
+        "owner": "thesola10",
+        "repo": "fakedir",
+        "rev": "3d68fb2f258074d5dc9df7821f7cc372456a8ee7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "thesola10",
+        "repo": "fakedir",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "locked": {
         "lastModified": 1667395993,
@@ -33,6 +56,7 @@
     },
     "root": {
       "inputs": {
+        "fakedir": "fakedir",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs"
       }

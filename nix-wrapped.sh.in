@@ -233,7 +233,7 @@ _try_build_nix() {
 _get_nix() {
   # Acquiring Nix produces a lot of output, so we use alt-buffer.
   tput smcup
-  echo -e "\033]0;Building Nix...\007"
+  echo -ne "\033]0;Building Nix...\007"
 
   # And we set a trap to exist alt-buffer on ^C cause we're no savages.
   trap "tput rmcup; exit 1" SIGKILL SIGTERM SIGINT SIGABRT

@@ -1,5 +1,8 @@
 { nixpkgs ? <nixpkgs>
-, pkgs ? import nixpkgs {}, ... }:
+, fakedir ? builtins.fetchGit "https://github.com/thesola10/fakedir"
+, pkgs ? import nixpkgs {}
+, libfakedir ? pkgs.callPackage fakedir
+, ... }:
 
 let
   builtSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
