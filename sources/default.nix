@@ -34,6 +34,6 @@ in stdenv.mkDerivation {
   + builtins.foldl'
       (l: r: l + "\ncp ${r.src} $out/${r.pname}.tar.gz") "" srcs_simple
   + builtins.foldl'
-      (l: r: l + "\ntar -C ${r.src} -czf $out/${r.pname}.tar.gz .") "" srcs_dir
+      (l: r: l + "\ntar --transform='s,/nix/store/.*/,${r.pname}/,' -czf $out/${r.pname}.tar.gz ${r.src}") "" srcs_dir
   ;
 }

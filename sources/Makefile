@@ -16,20 +16,20 @@ BOOST_ADD_MODULES = system,thread,context,format,coroutine2,container,chrono,ato
 boost-shaved.tar.gz: $(BOOST_ARCHIVE)
 	@mkdir -p $(WORKDIR)
 	@$(call rich_echo,"UNTAR","$(BOOST_ARCHIVE)")
-	@$(TAR) xjf $(BOOST_ARCHIVE) --strip-components=1 -C $(WORKDIR)
+	@$(TAR) xjf $(BOOST_ARCHIVE) --transform "s,^boost_[0-9_]*/,boost/," -C $(WORKDIR)
 	@$(call rich_echo,"TAR","$@")
 	@cd $(WORKDIR) && $(TAR) -czf ../$@ \
-		$$(find . -maxdepth 1 -type f) \
-		./boost/*.hpp ./boost/*.h \
-		./boost/{$(BOOST_ADD_HEADERS)} \
-		./libs/{$(BOOST_ADD_MODULES),core,config,headers} \
-		./status \
-		./tools
+		$$(find boost -maxdepth 1 -type f) \
+		boost/boost/*.hpp boost/boost/*.h \
+		boost/boost/{$(BOOST_ADD_HEADERS)} \
+		boost/libs/{$(BOOST_ADD_MODULES),core,config,headers} \
+		boost/status \
+		boost/tools
 
 $(BOOST_ARCHIVE):
 	@mkdir -p $(@D)
 	@$(call rich_echo,"WGET","$@")
-	@$(WGET) "https://boostorg.jfrog.io/artifactory/main/release/$(BOOST_VER)/source/..tar.gz" -O $@
+	@$(WGET) "https://boostorg.jfrog.io/artifactory/main/release/$(BOOST_VER)/source/boost_$(subst .,_,$(BOOST_VER)).tar.bz2" -O $@
 
 ## Remove generated files
 clean:
