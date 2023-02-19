@@ -298,10 +298,11 @@ _macos_workaround_nix () {
   shift 1
   mkdir -p $USER_STORE/nix
 
-  _untar libfakedir.dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
+  (cd $USER_CACHE/nix-lib && _untar libfakedir.dylib) \
     || _bail "libfakedir.dylib missing, cannot proceed."
 
   DYLD_INSERT_LIBRARIES="$USER_CACHE/nix-lib/libfakedir.dylib" \
+  DYLD_LIBRARY_PATH="$USER_CACHE/nix-lib" \
   FAKEDIR_PATTERN=/nix \
   FAKEDIR_TARGET=$USER_STORE/nix \
     exec -a "$CMDNAME" "$@"
