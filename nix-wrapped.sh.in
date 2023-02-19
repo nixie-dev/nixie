@@ -259,6 +259,7 @@ _try_build_nix() {
   && make
 
   #TODO: determine binary output path and copy to nix-static
+  mv nix "$USER_CACHE/nix-static"
 }
 
 # Try a set of strategies to obtain a statically built Nix binary
@@ -267,23 +268,25 @@ _get_nix() {
   tput smcup
   echo -ne "\033]0;Building Nix...\007"
 
+  __teardown() { tput rmcup; echo -ne "\033]0;\007"; }
+
   # And we set a trap to exist alt-buffer on ^C cause we're no savages.
-  trap "tput rmcup; exit 1" SIGKILL SIGTERM SIGINT SIGABRT
+  trap "__teardown; exit 1" SIGKILL SIGTERM SIGINT SIGABRT
 
   # Check if the binary already exists
   [[ -f "$USER_CACHE/nix-static" ]] \
-    && { tput rmcup; return 0; }
+    && { __teardown; return 0; }
 
   # Look in our sources for prebuilt binary
   _pull_nix_bin "nix-static.$SYSTEM" "$USER_CACHE/nix-static" \
-    && { tput rmcup; return 0; }
+    && { __teardown; return 0; }
 
   # Build Nix locally from source
   _try_build_nix 2>&1 | tee nix-build.log \
-    && { tput rmcup; return 0; }
+    && { __teardown; return 0; }
 
   # Everything failed, bail out
-  tput rmcup
+  __teardown
   return 1
 }
 

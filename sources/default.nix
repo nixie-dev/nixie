@@ -11,7 +11,6 @@ let
     [ nlohmann_json
       # I want pname to match the pkg-config package checked against like in the script
       (brotli.overrideAttrs (_: { pname = "libbrotlicommon"; }))
-      (editline.overrideAttrs (_: { pname = "libeditline"; }))
     ];
 
   nix_configured_src = stdenv.mkDerivation {
@@ -27,7 +26,22 @@ let
     installPhase = ''
       mkdir -p $out
       cp -r $src $out/nix
-      chmod -R u+w $out/nix
+    '';
+  };
+
+  editline_configured_src = stdenv.mkDerivation {
+    inherit (editline) version src nativeBuildInputs;
+    pname = "editline-configured-source";
+
+    configurePhase = ''
+      ./autogen.sh
+    '';
+
+    dontBuild = true;
+
+    installPhase = ''
+      mkdir -p $out
+      cp -r $src $out/libeditline
     '';
   };
 in stdenv.mkDerivation {
@@ -48,7 +62,13 @@ in stdenv.mkDerivation {
     mkdir -p $out
     make BOOST_ARCHIVE=${boost.src} BOOST_VER=${boost.version} TAR=${gnutar}/bin/tar
     cp boost-shaved.tar.gz $out/boost.tar.gz
-    tar -C ${nix_configured_src} -czf $out/nix.tar.gz nix
+    cp -r ${nix_configured_src} nixsrc
+    chmod -R u+w nixsrc
+    tar -C nixsrc -czf $out/nix.tar.gz nix
+
+    cp -r ${editline_configured_src} elsrc
+    chmod -R u+w elsrc
+    tar -C elsrc -czf $out/libeditline.tar.gz libeditline
   ''
   + builtins.foldl'
       (l: r: l + "\npython3 ./tarmod.py ${r.src} $out/${r.pname}.tar.gz ${r.pname}") "" srcs_simple
