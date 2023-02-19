@@ -98,6 +98,7 @@ EOF
 # script was built with. Requires SOURCE_CACHE to be the host name for a
 # Cachix-compatible HTTPS host (i.e. with endpoint /serve/xxx-hash/path)
 _pull_source() {
+  [[ -d $2 ]] ||
   (
     cd "$USER_CACHE"
     _untar "sources/$1"
