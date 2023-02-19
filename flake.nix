@@ -18,8 +18,11 @@
         sources = pkgs.callPackage ./sources {};
         static-bins = pkgs.callPackage ./nix-static-bins.nix
           { inherit nixpkgs fakedir;
-            libfakedir = fakedir.packages.${system}.default;
+            libfakedir = fakedir.packages.${system}.fakedir-universal;
           };
-      };
+      } // (if system == "x86_64-darwin" || system == "aarch64-darwin"
+      then {
+        libfakedir = fakedir.packages.${system}.fakedir;
+      } else {});
     });
 }

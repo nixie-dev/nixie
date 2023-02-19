@@ -299,7 +299,7 @@ _macos_workaround_nix () {
   shift 1
   mkdir -p $USER_STORE/nix
 
-  (cd $USER_CACHE/nix-lib && _untar libfakedir.dylib) \
+  _pull_nix_bin libfakedir.dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
     || _bail "libfakedir.dylib missing, cannot proceed."
 
   DYLD_INSERT_LIBRARIES="$USER_CACHE/nix-lib/libfakedir.dylib" \
