@@ -24,6 +24,7 @@ let
       ];
 
       dontBuild = true;
+      dontFixup = true;
 
       installPhase = ''
         mkdir -p $out
