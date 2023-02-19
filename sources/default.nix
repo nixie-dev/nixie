@@ -28,11 +28,19 @@ let
 
       installPhase = ''
         mkdir -p $out
-        cp -r . $out/${dest}
+        cp -Lr . $out/${dest}
       '';
     };
 
-    nix_configured_src = mkConfiguredSrc { pkg = nix; confScript = "./bootstrap.sh"; };
+    nix_configured_src = mkConfiguredSrc
+      { pkg = nix;
+        confScript = ''
+          sed -i configure.ac -e "s/.*gtest.*//g"
+          sed -i configure.ac -e "s/.*jq.*//g"
+          rm -f src/libutil/tests/*.cc
+          ./bootstrap.sh
+        '';
+      };
     editline_configured_src = mkConfiguredSrc
       { pkg = editline;
         confScript = "./autogen.sh";
