@@ -1,22 +1,33 @@
 { stdenv, boost, openssl, lowdown, nlohmann_json, brotli, libsodium, editline
-, gnutar, coreutils, findutils, python3, nix, ... }:
+, gnutar, coreutils, findutils, python3, nix
+, automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config, ... }:
 
 let
 
 
   mkConfiguredSrc = { pkg, confScript, dest?pkg.pname }:
     stdenv.mkDerivation {
-      inherit (pkg) version src nativeBuildInputs;
+      inherit (pkg) version src;
       inherit dest;
       pname = "${pkg.pname}-configured-sources";
 
       configurePhase = confScript;
 
+      nativeBuildInputs =
+      [ automake
+        autoconf
+        autoconf-archive
+        m4
+        bc
+        libtool
+        pkg-config
+      ];
+
       dontBuild = true;
 
       installPhase = ''
         mkdir -p $out
-        cp -r $src $out/${dest}
+        cp -r . $out/${dest}
       '';
     };
 
