@@ -14,6 +14,7 @@
 #  - pkg-config
 #  - GNU Make
 #  - flex + bison
+#  - perl
 
 SYSTEM="$(uname -s).$(uname -m)"
 THIS_SCRIPT="$(readlink -f $0)"
@@ -329,8 +330,10 @@ declare -a EXTRA_ARGS
 
 declare -a CMDL_ARGS=("$@")
 
+NIXCMD="nix"
+
 # Unpack builtin Nix channels for channel-oriented commands
-if [[ "$0" =~ nix-(shell|build|env) ]]
+if [[ "$0" =~ nix-(shell|build|env)$ ]]
 then
   for chn in ${PINNED_CHANNELS[@]}
   do
@@ -339,6 +342,7 @@ then
   done
   export NIX_PATH="$REPO_ROOT/.nix-wrap:$NIX_PATH"
 fi
+
 
 # Emulate nix-shell interpreter behavior
 if [[ "$0" =~ "nix-shell" ]] && [[ -f "$1" ]] && ! [[ "$1" =~ .nix$ ]]
@@ -367,12 +371,30 @@ then
   } < "$1"
 fi
 
+# Command substitution feature
+if [[ "$0" =~ nix$ ]] || [[ "$0" =~ nix-(shell|build|env|channel|hash|instantiate|store)$ ]]
+then
+  NIXCMD="$0"
+elif [[ -f "$REPO_ROOT/flake.nix" ]]
+then
+  # Try to run named command from flake develop
+  NIXCMD="nix"
+  CMDL_ARGS=("develop" "$REPO_ROOT" "-c" "${0##*/}" "$@")
+elif [[ -f "$REPO_ROOT/shell.nix" ]]
+then
+  # Try to run named command from shell
+  NIXCMD="nix-shell"
+  CMDL_ARGS=("$REPO_ROOT/shell.nix" "--command" "${0##*/}$(printf ' %q' "$@")")
+fi
+
+
 # Apply experimental features if listed
 [[ "$EXTRA_FEATURES" != "" ]] && EXTRA_ARGS+=("--extra-experimental-features" "$EXTRA_FEATURES")
 
 # Apply extra substituters and their signing keys (e.g. cachix) if listed
 [[ "$EXTRA_SUBSTITUTERS" != "" ]] && EXTRA_ARGS+=("--extra-substituters" "$EXTRA_SUBSTITUTERS") && nix_daemon_warn=1
 [[ "$EXTRA_TRUSTED_PUBLIC_KEYS" != "" ]] && EXTRA_ARGS+=("--extra-trusted-public-keys" "$EXTRA_TRUSTED_PUBLIC_KEYS") && nix_daemon_warn=1
+
 
 if [[ $nix_daemon_warn == 1 ]] && \
   pgrep nix-daemon >/dev/null 2>&1 && \
@@ -395,7 +417,7 @@ then
     rm -rf $USER_STORE
   fi
 
-  exec -a "$0" nix "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
+  exec -a "$NIXCMD" nix "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
 else
   if _get_nix && chmod +x "$USER_CACHE/nix-static"
   then
@@ -410,7 +432,7 @@ else
       # wow apple thanks
       _macos_workaround_nix "$0" "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
     else
-      exec -a "$0" "$USER_CACHE/nix-static" \
+      exec -a "$NIXCMD" "$USER_CACHE/nix-static" \
         --store "$(readlink -f $HOME/.local/share/nix/root)" \
         "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
     fi
