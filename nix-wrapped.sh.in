@@ -3,7 +3,6 @@
 # Nix-wrap (c) Karim Vergnes <me@thesola.io>
 # Licensed under GNU GPLv2
 # Required commands:
-#  - sed
 #  - tar (with gzip support)
 #  - rm, mv, tail, uname, env, chmod, mkdir, tee (coreutils)
 #  - git
@@ -54,9 +53,12 @@ _bail() {
 # script. Useful for semi-offline or completely offline operation.
 _untar() {
   {
-  sed -n '/^-----BEGIN ARCHIVE SECTION-----/,$p' "$THIS_SCRIPT" \
-      | tail -n +2                                              \
-      | gzip -d -c 2>/dev/null
+    { read -r M
+      while ! [[ "$M" =~ ^-----BEGIN\ ARCHIVE\ SECTION----- ]]
+      do read -r M
+      done
+      gzip -d -c 2>/dev/null
+    } < "$THIS_SCRIPT"
   if ! ([[ $? == 2 ]] || [[ $? == 0 ]])
   then
     # The resource tarball is required since it contains the feature
