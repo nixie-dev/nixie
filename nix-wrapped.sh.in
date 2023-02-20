@@ -388,7 +388,8 @@ then
   if   [[ -d $USER_STORE/nix/store ]] && [[ -d /nix/store ]]
   then
     >&2 echo "Migrating Nix store to system-wide install..."
-    nix copy --from $USER_STORE --all --no-check-sigs
+    nix copy --from $USER_STORE --all --no-check-sigs &&\
+    rm -rf $USER_STORE
   fi
 
   exec -a "$0" nix "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
