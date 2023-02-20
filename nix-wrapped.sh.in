@@ -301,6 +301,7 @@ _macos_workaround_nix () {
   shift 1
   mkdir -p $USER_STORE/nix
 
+  [[ -f "$USER_CACHE/nix-lib/libfakedir.dylib" ]] || \
   _pull_nix_bin libfakedir.dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
     || _bail "libfakedir.dylib missing, cannot proceed."
 
@@ -383,11 +384,11 @@ then
   >&2 echo "the trusted-users entry in /etc/nix/nix.conf."
 fi
 
-if which nix >&/dev/null
+if [[ -d /nix/store ]] && which nix >&/dev/null
 then
   # Here, we check that the user just installed Nix proper on their system,
   # so we migrate paths away from their home to avoid duplicates.
-  if   [[ -d $USER_STORE/nix/store ]] && [[ -d /nix/store ]]
+  if [[ -d $USER_STORE/nix/store ]]
   then
     >&2 echo "Migrating Nix store to system-wide install..."
     nix copy --from $USER_STORE --all --no-check-sigs &&\
