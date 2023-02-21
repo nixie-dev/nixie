@@ -22,7 +22,7 @@
         sources = pkgs.callPackage ./sources {};
         static-bins = pkgs.callPackage ./nix-static-bins.nix
           { inherit nixpkgs fakedir;
-            libfakedir = fakedir.packages.${system}.fakedir-universal;
+            libfakedir = fakedir.packages.aarch64-darwin.fakedir-universal;
           };
       } // (if system == "x86_64-darwin" || system == "aarch64-darwin"
       then {
