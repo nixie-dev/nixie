@@ -21,7 +21,7 @@ in pkgs.stdenv.mkDerivation {
 
   components = builtins.foldl'
     (l: r: l // { "${r.system}" = r.nixStatic; })
-    {} systemsNixpkgs;
+    { fakedir = libfakedir; } systemsNixpkgs;
 
   installPhase =
     (let

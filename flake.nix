@@ -1,6 +1,6 @@
 { description = "Put Nix in everything!";
 
-  inputs.nixpkgs.url = github:nixos/nixpkgs?ref=nixos-22.11;
+  inputs.nixpkgs.url = github:nixos/nixpkgs;
   inputs.flake-utils.url = github:numtide/flake-utils;
   inputs.fakedir =
     { url = github:thesola10/fakedir;
