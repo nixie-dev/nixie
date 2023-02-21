@@ -1,7 +1,7 @@
 { stdenv, ... }:
 
 stdenv.mkDerivation {
-  pname = "nix-wrap";
+  pname = "nixie";
   version = "0.0.1";
 
   src = ./.;

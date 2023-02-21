@@ -13,8 +13,8 @@
     let pkgs = import nixpkgs { inherit system; };
     in
     { packages = rec
-      { default = nix-wrap;
-        nix-wrap = pkgs.callPackage ./builder {};
+      { default = nixie;
+        nixie = pkgs.callPackage ./builder {};
         sources = pkgs.callPackage ./sources {};
         static-bins = pkgs.callPackage ./nix-static-bins.nix
           { inherit nixpkgs fakedir;

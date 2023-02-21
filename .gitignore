@@ -1,6 +1,6 @@
 features
 *.tgz
 *.tar.gz
-.nix-wrap
+.nixie
 work
 __pycache__

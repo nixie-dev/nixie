@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # vim: ts=2 sw=2
-# Nix-wrap (c) Karim Vergnes <me@thesola.io>
+# Nixie (c) Karim Vergnes <me@thesola.io>
 # Licensed under GNU GPLv2
 # Required commands:
 #  - tar (with gzip support)
@@ -46,7 +46,7 @@ fi
 _bail() {
   tput rmcup
   >&2 echo $@
-  >&2 echo "This script can be rebuilt using nix-wrap"
+  >&2 echo "This script can be rebuilt using the nixie tool"
   kill -ABRT $$
 }
 
@@ -221,7 +221,7 @@ _find_or_build_boost () {
 # Check that we have the required dependencies to build Nix locally, then
 # do so.
 _try_build_nix() {
-  source_root="$REPO_ROOT/.nix-wrap/sources"
+  source_root="$REPO_ROOT/.nixie/sources"
   mkdir -p $source_root
 
   _find_or_build_openssl
@@ -324,7 +324,7 @@ eval "$(_untar -O features || _bail "The resource archive is missing or malforme
 [[ "$SOURCE_CACHE" != "" ]] || [[ "$SOURCE_DERIVATION" != "" ]] || [[ "$NIX_BINS_DERIVATION" != "" ]] \
   || _bail "The features file in the resource archive is missing or malformed."
 
-mkdir -p "$REPO_ROOT/.nix-wrap"
+mkdir -p "$REPO_ROOT/.nixie"
 
 declare -a EXTRA_ARGS
 
@@ -337,10 +337,10 @@ if [[ "$0" =~ nix-(shell|build|env)$ ]]
 then
   for chn in ${PINNED_CHANNELS[@]}
   do
-    [[ -d "$REPO_ROOT/.nix-wrap/$chn" ]] \
-      || (cd $REPO_ROOT/.nix-wrap; _untar "$chn" 2>/dev/null)
+    [[ -d "$REPO_ROOT/.nixie/$chn" ]] \
+      || (cd $REPO_ROOT/.nixie; _untar "$chn" 2>/dev/null)
   done
-  export NIX_PATH="$REPO_ROOT/.nix-wrap:$NIX_PATH"
+  export NIX_PATH="$REPO_ROOT/.nixie:$NIX_PATH"
 fi
 
 

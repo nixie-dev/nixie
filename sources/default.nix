@@ -66,7 +66,7 @@ let
       brotli_configured_src
     ];
 in stdenv.mkDerivation {
-  pname = "nix-wrap-sources";
+  pname = "nixie-sources";
   version = "0.0.1";
 
   dontInstall = true;
