@@ -13,15 +13,11 @@ let
           then { overrides = [ import ./nixpkgs-darwin-static.nix ]; }
           else {})
     ) builtSystems;
-in pkgs.stdenv.mkDerivation {
+in
+pkgs.stdenv.mkDerivation {
   pname = "nix-static-binaries";
   version = "0.0.1";
-
   src = pkgs.emptyDirectory;
-
-  components = builtins.foldl'
-    (l: r: l // { "${r.system}" = r.nixStatic; })
-    { fakedir = libfakedir; } systemsNixpkgs;
 
   installPhase =
     (let
@@ -32,4 +28,6 @@ in pkgs.stdenv.mkDerivation {
       "mkdir -p $out"
       systemsNixpkgs)
     + "; cp ${libfakedir}/lib/libfakedir.dylib $out/libfakedir.dylib";
-}
+} // builtins.foldl'
+  (l: r: l // { "${r.system}-nix-static" = r.nixStatic; })
+  { fakedir = libfakedir; } systemsNixpkgs
