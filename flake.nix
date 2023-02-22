@@ -20,8 +20,8 @@
       { default = nixie;
         nixie = pkgs.callPackage ./builder {};
         sources = pkgs.callPackage ./sources {};
-        static-bins = pkgs.callPackage ./nix-static-bins.nix
-          { inherit nixpkgs fakedir;
+        static-bins = import ./nix-static-bins.nix
+          { inherit nixpkgs fakedir pkgs;
             libfakedir = fakedir.packages.aarch64-darwin.fakedir-universal;
           };
       } // (if system == "x86_64-darwin" || system == "aarch64-darwin"
