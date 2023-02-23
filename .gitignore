@@ -4,3 +4,4 @@ features
 .nixie
 work
 __pycache__
+result

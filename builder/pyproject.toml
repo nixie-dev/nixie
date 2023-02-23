@@ -1,0 +1,15 @@
+[project]
+name = "nixie"
+authors = [ { "name" = "Karim Vergnes", "email" = "me@thesola.io" } ]
+license = { "file" = "LICENSE" }
+readme = "README.md"
+urls = { "Source" = "https://github.com/thesola10/nixie" }
+dependencies = [ "click" ]
+dynamic = [ "version", "description" ]
+
+[build-system]
+requires = [ "flit_core>=3.2,<4" ]
+build-backend = "flit_core.buildapi"
+
+[project.scripts]
+nixie = "nixie:main"
