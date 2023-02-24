@@ -1,6 +1,6 @@
-from click import Context
+from rich.console import Console
 
-def _cmd(ctx: Context, nocommand=False, **args):
+def _cmd(console: Console, nocommand=False, **args):
     if nocommand:
         print("Called as root command")
     else:

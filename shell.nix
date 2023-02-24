@@ -2,7 +2,7 @@
 let
   builder = pkgs.callPackage ./builder {};
 in pkgs.mkShell {
-  name = "nix-wrap";
+  name = "nixie";
 
   nativeBuildInputs =
   [ builder

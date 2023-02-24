@@ -1,6 +1,7 @@
 import functools
 import click
 from click_option_group import OptionGroup
+from rich.console       import Console
 
 from . import init, add_tool, for_cmd, update
 
@@ -51,7 +52,7 @@ def _use_builder_group(fn):
 @click.pass_context
 def main(ctx: click.Context, **kwargs):
     if ctx.invoked_subcommand is None:
-        init._cmd(ctx, nocommand=True, **kwargs)
+        init._cmd(Console(), nocommand=True, **kwargs)
 
 
 @main.command("init", help='Install Nixie in the current repository')
@@ -65,17 +66,15 @@ def main(ctx: click.Context, **kwargs):
               help='Do not add entries to .gitignore for the .nixie work directory.')
 @click.option('--no-gitattributes', is_flag=True, default=False,
               help='Do not add Linguist info to .gitattributes for the generated script.')
-@click.pass_context
-def _init(ctx: click.Context, **kwargs):
-    init._cmd(ctx, **kwargs)
+def _init(**kwargs):
+    init._cmd(Console(), **kwargs)
 
 
 @main.command("update", help="Update or reconfigure the repository's Nix script")
 @_use_global_group
 @_use_builder_group
-@click.pass_context
-def _update(ctx: click.Context, **kwargs):
-    update._cmd(ctx, **kwargs)
+def _update(**kwargs):
+    update._cmd(Console(), **kwargs)
 
 @main.command("for", help="Install Nixie according to a template")
 @click.argument('template', nargs=1)
@@ -85,14 +84,12 @@ def _update(ctx: click.Context, **kwargs):
               help='Like the nix-shell -p option, a package or list of packages to be made available in your dev environment.')
 @click.option('--no-git-init', is_flag=True, default=False,
               help='Fail if the current directory is not a Git repository.')
-@click.pass_context
-def _for(ctx: click.Context, **kwargs):
-    for_cmd._cmd(ctx, **kwargs)
+def _for(**kwargs):
+    for_cmd._cmd(Console(), **kwargs)
 
 
 @main.command("add-tool", help='Searches for command in Nixpkgs, then adds it to the repository')
 @click.argument('command', nargs=2)
 @_use_global_group
-@click.pass_context
-def _add_tool(ctx: click.Context, **kwargs):
-    add_tool._cmd(ctx, **kwargs)
+def _add_tool(**kwargs):
+    add_tool._cmd(Console(), **kwargs)

@@ -1,4 +1,4 @@
-from click import Context
+from rich.console import Console
 
-def _cmd(ctx: Context, **args):
+def _cmd(console: Console, **args):
     print("nope")
