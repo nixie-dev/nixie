@@ -10,15 +10,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1676998664,
-        "narHash": "sha256-MaF/ud4NaDWeHchMwFN1gPl6AL+c45tZK7wO02rIOiw=",
-        "owner": "thesola10",
+        "lastModified": 1677240967,
+        "narHash": "sha256-SrMzp3IFLPqjIgaPLm3HFe/TAHMuFS+qbQoLbNNJ9pQ=",
+        "owner": "nixie-dev",
         "repo": "fakedir",
-        "rev": "7654771dc1d30b68b4b54247ea46e47639e3d2a2",
+        "rev": "38563ef91f2acee2747e879567f0749bce5eda88",
         "type": "github"
       },
       "original": {
-        "owner": "thesola10",
+        "owner": "nixie-dev",
         "repo": "fakedir",
         "type": "github"
       }

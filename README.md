@@ -2,7 +2,7 @@
 
 Nixie is a lightweight solution to ship the [Nix package manager](https://nixos.org) together with a project repository, regardless of host architecture. It leverages a [brand new feature](https://github.com/NixOS/nix/blob/master/doc/manual/src/release-notes/rl-2.10.md) starting with Nix 2.10, which allows the default Nix binary to host a sandboxed Nix store with no privileges.
 
-On macOS, non-root Nix store support is made possible by [fakedir](https://github.com/thesola10/fakedir), which is shipped with the script as a Universal library.
+On macOS, non-root Nix store support is made possible by [fakedir](https://github.com/nixie-dev/fakedir), which is shipped with the script as a Universal library.
 
 ## How do I install Nixie?
 
@@ -18,7 +18,7 @@ To "install" Nixie onto your project's Git repository, you need to be running th
 You only need to run one command. Make sure your current directory is this of the project you wish to populate.
 
 ```sh
-nix run github:thesola10/nixie
+nix run github:nixie-dev/nixie
 ```
 
 </details>
@@ -35,7 +35,7 @@ In this case, you need to retrieve Nixie manually, either by cloning this reposi
 #### As a Nix channel
 
 ```sh
-nix-channel --add https://github.com/thesola10/nixie/archive/master.tar.gz nixie
+nix-channel --add https://github.com/nixie-dev/nixie/archive/master.tar.gz nixie
 nix-channel --update
 nix-env -iA nixie
 ```
@@ -43,7 +43,7 @@ nix-env -iA nixie
 #### By cloning this repository
 
 ```sh
-git clone https://github.com/thesola10/nixie
+git clone https://github.com/nixie-dev/nixie
 nix-shell /path/to/cloned/nixie/shell.nix
 ```
 

@@ -3,7 +3,7 @@ name = "nixie"
 authors = [ { "name" = "Karim Vergnes", "email" = "me@thesola.io" } ]
 license = { "file" = "LICENSE" }
 readme = "README.md"
-urls = { "Source" = "https://github.com/thesola10/nixie" }
+urls = { "Source" = "https://github.com/nixie-dev/nixie" }
 dependencies = [ "click", "rich", "click-option-group" ]
 dynamic = [ "version", "description" ]
 
