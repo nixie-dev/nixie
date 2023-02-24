@@ -19,5 +19,7 @@ python3Packages.buildPythonApplication {
 
   propagatedBuildInputs = with python3Packages;
     [ click
+      rich
+      click-option-group
     ];
 }
