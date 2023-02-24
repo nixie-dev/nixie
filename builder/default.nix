@@ -21,5 +21,6 @@ python3Packages.buildPythonApplication {
     [ click
       rich
       click-option-group
+      python-dotenv
     ];
 }
