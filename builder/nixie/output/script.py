@@ -1,7 +1,8 @@
-from io         import BytesIO, StringIO
-from pathlib    import Path
-from shlex      import shlex
-from dotenv     import dotenv_values
+from io                   import BytesIO, StringIO
+from pathlib              import Path
+from shlex                import shlex
+from dotenv               import dotenv_values
+from importlib.resources  import files
 
 class NixieFeatures:
     extra_features: list[str]
@@ -25,7 +26,7 @@ class NixieFeatures:
         self.extra_substituters = kvs["EXTRA_SUBSTITUTERS"].split(' ')
         self.extra_trusted_public_keys = kvs["EXTRA_TRUSTED_PUBLIC_KEYS"].split(' ')
         self.source_cache = kvs["SOURCE_CACHE"]
-        self.sources_drv = kvs["SOURCES_DERIVATION"]
+        self.sources_drv = kvs["SOURCE_DERIVATION"]
         self.bins_drv = kvs["NIX_BINS_DERIVATION"]
 
     def print_features(self) -> str:
@@ -33,9 +34,9 @@ class NixieFeatures:
         EXTRA_FEATURES="{' '.join(self.extra_features)}"
         EXTRA_SUBSTITUTERS="{' '.join(self.extra_substituters)}"
         EXTRA_TRUSTED_PUBLIC_KEYS="{' '.join(self.extra_trusted_public_keys)}"
-        SOURCE_CACHE={source_cache}
-        SOURCES_DERIVATION={sources_drv}
-        NIX_BINS_DERIVATION={bins_drv}
+        SOURCE_CACHE={self.source_cache}
+        SOURCE_DERIVATION={self.sources_drv}
+        NIX_BINS_DERIVATION={self.bins_drv}
         '''
 
 class NixieScript:
@@ -51,6 +52,12 @@ class NixieScript:
     def print_features(self) -> str:
         return features.print_features()
 
-    def build(self) -> BytesIO:
-        outstream = BytesIO()
+    def build(self, dest: BytesIO):
+        from .tarball import ResourceTarball
 
+        dest = BytesIO()
+        template = files('nixie.output').joinpath('nix-wrapped.sh.in').read_text()
+        dest.write(str.encode(template))
+        rtb = ResourceTarball()
+        rtb.useFeatures(self.features)
+        rtb.writeInto(dest)

@@ -14,7 +14,7 @@ python3Packages.buildPythonApplication {
   '';
 
   nativeBuildInputs = with python3Packages;
-    [ flit-core
+    [ setuptools
     ];
 
   propagatedBuildInputs = with python3Packages;
