@@ -3,6 +3,7 @@ import tarfile as tf
 from pathlib import Path
 from io      import BytesIO
 from .script import NixieFeatures
+from os      import path
 
 class ResourceTarball:
     features: NixieFeatures
@@ -21,3 +22,5 @@ class ResourceTarball:
         featsinfo.size = len(strfeats)
         with tf.open(fileobj=dest, mode='w|gz') as m:
             m.addfile(featsinfo, BytesIO(strfeats))
+            for name, tgt in self.features.pinned_channels:
+                m.add(path.realpath(tgt), f'channels/{name}')

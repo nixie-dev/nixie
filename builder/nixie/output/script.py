@@ -13,6 +13,10 @@ class NixieFeatures:
     sources_drv: str
     bins_drv: str
 
+    pinned_channels: dict[str, Path] = {}
+    include_sources: bool = False
+    include_bins: bool = False
+
     def load(self, file: StringIO):
         '''Populate object from parsed features file.
         '''
@@ -36,10 +40,6 @@ class NixieFeatures:
 
 class NixieScript:
     features: NixieFeatures
-
-    pinned_channels: dict[str, Path]
-    include_sources: bool = False
-    include_bins: bool = False
 
     def __init__(self, features: NixieFeatures):
         self.features = features
