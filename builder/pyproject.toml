@@ -5,7 +5,13 @@ authors = [ { "name" = "Karim Vergnes", "email" = "me@thesola.io" } ]
 license = { "file" = "LICENSE" }
 readme = "README.md"
 urls = { "Source" = "https://github.com/nixie-dev/nixie" }
-dependencies = [ "click", "rich", "click-option-group", "python-dotenv" ]
+dependencies = [
+    "click",
+    "rich",
+    "click-option-group",
+    "python-dotenv",
+    "pzp"
+    ]
 dynamic = [ "version" ]
 
 [build-system]

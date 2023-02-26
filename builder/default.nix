@@ -1,6 +1,18 @@
-{ lib, python3Packages, ... }:
+{ lib, python3Packages, fetchPypi, ... }:
 
-python3Packages.buildPythonApplication {
+let
+  pzp = python3Packages.buildPythonPackage rec {
+    pname = "pzp";
+    version = "0.0.19";
+
+    src = fetchPypi {
+      inherit pname version;
+      sha256 = "sha256-SU9v7WPIAY8qKYrzp9KC+8yysGVGHcwcPmGvDb/0nik=";
+    };
+
+    doCheck = false;
+  };
+in python3Packages.buildPythonApplication {
   pname = "nixie";
   version = "0.0.1";
 
@@ -22,5 +34,6 @@ python3Packages.buildPythonApplication {
       rich
       click-option-group
       python-dotenv
+      pzp
     ];
 }

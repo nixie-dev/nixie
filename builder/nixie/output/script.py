@@ -13,12 +13,7 @@ class NixieFeatures:
     sources_drv: str
     bins_drv: str
 
-    def __init__(self):
-        '''Create an empty features object.
-        '''
-        pass
-
-    def __init__(self, file: StringIO):
+    def load(self, file: StringIO):
         '''Populate object from parsed features file.
         '''
         kvs = dotenv_values(stream=file)
@@ -55,9 +50,9 @@ class NixieScript:
     def build(self, dest: BytesIO):
         from .tarball import ResourceTarball
 
-        dest = BytesIO()
         template = files('nixie.output').joinpath('nix-wrapped.sh.in').read_text()
         dest.write(str.encode(template))
         rtb = ResourceTarball()
         rtb.useFeatures(self.features)
         rtb.writeInto(dest)
+

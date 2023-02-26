@@ -60,7 +60,7 @@ _untar() {
       done
       gzip -d -c 2>/dev/null
     } < "$THIS_SCRIPT"
-  if ! ([[ $? == 2 ]] || [[ $? == 0 ]])
+  if ! [[ $? =~ ^[02]$ ]]
   then
     # The resource tarball is required since it contains the feature
     # attributes for this script. We bail out since there is no

@@ -16,6 +16,8 @@ class ResourceTarball:
         self.features = features
 
     def writeInto(self, dest: BytesIO):
-        strfeats = self.features.print_features()
+        strfeats = str.encode(self.features.print_features())
+        featsinfo = tf.TarInfo('features')
+        featsinfo.size = len(strfeats)
         with tf.open(fileobj=dest, mode='w|gz') as m:
-            m.addfile(tf.TarInfo('features'), strfeats)
+            m.addfile(featsinfo, BytesIO(strfeats))
