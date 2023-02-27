@@ -3,7 +3,7 @@ import click
 from click_option_group import OptionGroup
 from rich.console       import Console
 
-from . import init, add_tool, for_cmd, update
+from .commands import init, add_tool, for_cmd, update
 
 '''This module specifically defines all command line options for Nixie and
 their documentation.

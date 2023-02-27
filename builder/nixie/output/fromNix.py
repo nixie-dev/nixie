@@ -14,12 +14,13 @@ def flake_eval(expr: str) -> str:
     '''
     pass
 
-def flake_build(expr: str, dest: Path) -> str:
+def flake_build(expr: str) -> str:
     '''Evaluate and build a Nix flake expression and return the resulting
     store path
 
     This function calls the Nix binary.
     '''
+    pass
 
 def fetchCachix(host: str, path: str, member: str, dest: Path):
     '''Download a store path member using a Cachix-compatible API
@@ -28,7 +29,7 @@ def fetchCachix(host: str, path: str, member: str, dest: Path):
     '''
     pass
 
-def fetchHydra(host: str, path: str, dest: Path):
+def fetchHydra(host: str, path: str):
     '''Download a store path using Nix's native NAR acquisition system
 
     This function calls the Nix binary.
