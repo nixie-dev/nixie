@@ -1,8 +1,11 @@
 import functools
 import click
 import os
+import logging
+
 from click_option_group import OptionGroup
 from rich.console       import Console
+from rich.logging       import RichHandler
 
 from .commands import init, add_tool, for_cmd, update
 
@@ -44,6 +47,18 @@ def _use_builder_group(fn):
 @click.version_option()
 @click.pass_context
 def main(ctx: click.Context, **kwargs):
+    '''This function serves two roles:
+    It sets up prerequisites common to every command, such as the working directory
+    and rich logger, and it handles calling the default action if no command is
+    given.
+    '''
+    logging.basicConfig(
+            level = os.getenv('NIXIE_LOG_LEVEL', 'INFO'),
+            format = '%(message)s',
+            handlers = [RichHandler(rich_tracebacks = True,
+                                    tracebacks_suppress = [click],
+                                    log_time_format = "")
+                        ])
     if kwargs['c'] != '':
         os.chdir(kwargs['c'])
     if ctx.invoked_subcommand is None:
@@ -81,6 +96,6 @@ def _for(**kwargs):
 
 
 @main.command("add-tool", help='Searches for command in Nixpkgs, then adds it to the repository')
-@click.argument('command', nargs=2)
+@click.argument('command', nargs=-1, required=True)
 def _add_tool(**kwargs):
     add_tool._cmd(Console(), **kwargs)

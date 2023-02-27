@@ -1,8 +1,8 @@
 import git
 import os
 
-from pzp import pzp
-
+from pzp        import pzp
+from logging    import error
 
 def pick(prompt: str, opts):
     hg = { 'height': 10 } if len(opts) >= 8 else {}
@@ -16,13 +16,10 @@ def ask(prompt: str, default_no = False):
     result = pick(prompt, qs)
     return (not default_no) if result == None else (result == "Yes")
 
-def print_error(cn, *m, **mm):
-    return cn.print(f'[red bold]Error[/red bold]:', *m, **mm)
-
 def goto_git_root(cn):
     try:
         gr = git.Repo(os.getcwd(), search_parent_directories=True)
         os.chdir(gr.git.rev_parse("--show-toplevel"))
     except git.exc.InvalidGitRepositoryError:
-        print_error(cn, os.getcwd() + ":", "Not a Git repository.")
+        error(f"{os.getcwd()}: Not a Git repository.")
         exit(1)
