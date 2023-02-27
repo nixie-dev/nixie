@@ -35,5 +35,6 @@ in python3Packages.buildPythonApplication {
       click-option-group
       python-dotenv
       pzp
+      gitpython
     ];
 }

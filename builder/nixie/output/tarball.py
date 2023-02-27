@@ -27,6 +27,22 @@ class ResourceTarball:
             self.features.include_sources = 'sources' in [ m.name for m in mms ]
             self.features.include_bins = 'nix-static.Linux.x86_64' in [ m.name for m in mms ]
 
+    def __del__(self):
+        if self.original is not None:
+            self.original.close()
+
+    def _push_channel(self, m: tf.TarFile, name, tgt):
+        '''Push a Nix channel into the archive, either from the specified path,
+        or from the original archive in memory (if applicable)
+        '''
+        if tgt is not None:
+            m.add(path.realpath(tgt), f'channels/{name}')
+        else:
+            mms = self.original.getmembers()
+            chn = [ fi for fi in mms if re.match(f'^channels/{name}/.*', fi.name) ]
+            for fil in chn:
+                m.addfile(fil, self.original.extractfile(fil))
+
     def writeInto(self, dest: BytesIO):
         '''Build and write the archive into the given bytestream.
         '''
@@ -36,4 +52,5 @@ class ResourceTarball:
         with tf.open(fileobj=dest, mode='w|gz') as m:
             m.addfile(featsinfo, BytesIO(strfeats))
             for name, tgt in self.features.pinned_channels:
-                m.add(path.realpath(tgt), f'channels/{name}')
+                _push_channel(m, name, tgt)
+

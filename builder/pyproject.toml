@@ -10,7 +10,8 @@ dependencies = [
     "rich",
     "click-option-group",
     "python-dotenv",
-    "pzp"
+    "pzp",
+    "gitpython"
     ]
 dynamic = [ "version" ]
 

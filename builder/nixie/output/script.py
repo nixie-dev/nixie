@@ -53,7 +53,7 @@ class NixieScript:
     from .tarball import ResourceTarball
 
     features: NixieFeatures
-    tarball: ResourceTarball
+    tarball: ResourceTarball = None
 
     DELIMITER = b'-----BEGIN ARCHIVE SECTION-----'
 
@@ -82,6 +82,8 @@ class NixieScript:
 
         template = files('nixie.output').joinpath('nix-wrapped.sh.in').read_text()
         dest.write(str.encode(template))
-        self.tarball = ResourceTarball(self.features)
+        if self.tarball is None:
+            self.tarball = ResourceTarball()
+        self.tarball.features = self.features
         self.tarball.writeInto(dest)
 
