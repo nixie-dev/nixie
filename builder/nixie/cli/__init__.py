@@ -1,5 +1,6 @@
 import functools
 import click
+import os
 from click_option_group import OptionGroup
 from rich.console       import Console
 
@@ -10,16 +11,7 @@ their documentation.
 Respective subcommands are defined in submodules.
 '''
 
-global_group = OptionGroup("Global options")
 builder_group = OptionGroup("Common build options (init, update, for)")
-
-def _use_global_group(fn):
-    @global_group.option('-C', default='',
-                         help='Run in another directory instead of the current')
-    @functools.wraps(fn)
-    def wrapper(*args, **kwargs):
-        return fn(*args, **kwargs)
-    return wrapper
 
 def _use_builder_group(fn):
     @builder_group.option('-I', '--with-channel', multiple=True, default=[],
@@ -46,17 +38,19 @@ def _use_builder_group(fn):
 
 @click.group(invoke_without_command=True,
              help='Automatically set up Nixie in the current repository')
-@_use_global_group
 @_use_builder_group
+@click.option('-C', default='', type=click.types.Path(),
+              help='Run in another directory instead of the current.')
 @click.version_option()
 @click.pass_context
 def main(ctx: click.Context, **kwargs):
+    if kwargs['c'] != '':
+        os.chdir(kwargs['c'])
     if ctx.invoked_subcommand is None:
         init._cmd(Console(), nocommand=True, **kwargs)
 
 
 @main.command("init", help='Install Nixie in the current repository')
-@_use_global_group
 @_use_builder_group
 @click.option('-o', '--output-name', default='',
               help='Name of the resulting script. Special names such as \'nix-shell\' allow the script to run as that utility.')
@@ -71,14 +65,12 @@ def _init(**kwargs):
 
 
 @main.command("update", help="Update or reconfigure the repository's Nix script")
-@_use_global_group
 @_use_builder_group
 def _update(**kwargs):
     update._cmd(Console(), **kwargs)
 
 @main.command("for", help="Install Nixie according to a template")
 @click.argument('template', nargs=1)
-@_use_global_group
 @_use_builder_group
 @click.option('-p', '--extra-package', multiple=True, default=[],
               help='Like the nix-shell -p option, a package or list of packages to be made available in your dev environment.')
@@ -90,6 +82,5 @@ def _for(**kwargs):
 
 @main.command("add-tool", help='Searches for command in Nixpkgs, then adds it to the repository')
 @click.argument('command', nargs=2)
-@_use_global_group
 def _add_tool(**kwargs):
     add_tool._cmd(Console(), **kwargs)
