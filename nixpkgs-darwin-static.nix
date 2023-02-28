@@ -1,12 +1,14 @@
 self: super:
-{ darwin = super.darwin // {
-    Libsystem = super.buildPackages.darwin.Libsystem;
-    LibsystemCross = super.buildPackages.darwin.Libsystem;
+{ libcCross = super.buildPackages.darwin.Libsystem;
+
+  targetPackages = super.targetPackages // {
+    libcCross = self.libcCross;
+    darwin = self.darwin;
   };
 
-  libcCross = super.buildPackages.darwin.Libsystem;
-
   runtimeShellPackage = super.buildPackages.bash;
+
+  llvmPackages = super.llvmPackages_15;
 
   # Setting this prevents static libc++ from being used
   #targetPackages = self;

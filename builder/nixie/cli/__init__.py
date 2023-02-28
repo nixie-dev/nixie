@@ -2,6 +2,7 @@ import functools
 import click
 import os
 import logging
+import git
 
 from click_option_group import OptionGroup
 from rich.console       import Console
@@ -52,12 +53,14 @@ def main(ctx: click.Context, **kwargs):
     and rich logger, and it handles calling the default action if no command is
     given.
     '''
+    _debug = os.getenv('NIXIE_DEBUG') is not None
     logging.basicConfig(
-            level = os.getenv('NIXIE_LOG_LEVEL', 'INFO'),
+            level = 'DEBUG' if _debug else 'INFO',
             format = '%(message)s',
             handlers = [RichHandler(rich_tracebacks = True,
-                                    tracebacks_suppress = [click],
-                                    log_time_format = "")
+                                    tracebacks_suppress = [click, git],
+                                    log_time_format = "",
+                                    show_path=_debug)
                         ])
     if kwargs['c'] != '':
         os.chdir(kwargs['c'])

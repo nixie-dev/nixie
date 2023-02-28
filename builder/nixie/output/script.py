@@ -82,8 +82,11 @@ class NixieScript:
 
         template = files('nixie.output').joinpath('nix-wrapped.sh.in').read_text()
         dest.write(str.encode(template))
+        # We need to carry over any existing tarball object, since it holds
+        # the previous version of the resource tarball, to transfer channels
+        # not found on the user's own install.
         if self.tarball is None:
-            self.tarball = ResourceTarball()
+            self.tarball = ResourceTarball(self.features)
         self.tarball.features = self.features
         self.tarball.writeInto(dest)
 
