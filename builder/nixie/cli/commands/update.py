@@ -23,6 +23,7 @@ def _cmd(console: Console, **args):
             except:
                 error("No nix script found in this repository. Run 'nixie init' to generate one.")
                 exit(1)
+
     debug(ns.features.print_features())
     if ns.features.include_sources:
         debug("This script includes sources.")
@@ -31,7 +32,7 @@ def _cmd(console: Console, **args):
     debug("Included channels: %s" %list(ns.features.pinned_channels.keys()))
 
     if args['extra_experimental_features'] != '':
-        ns.features.extra_features = args['extra_experimental_features']
+        ns.features.extra_features = args['extra_experimental_features'].split(' ')
     ns.features.extra_substituters += args['extra_substituters'].split(' ')
     ns.features.extra_trusted_public_keys += args['extra_trusted_public_keys'].split(' ')
     if args['source_cache'] != '':
@@ -44,4 +45,3 @@ def _cmd(console: Console, **args):
         ns.include_sources = args['with_sources']
     if args['with_binaries'] is not None:
         ns.include_bins = args['with_binaries']
-

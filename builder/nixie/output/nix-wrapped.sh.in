@@ -444,5 +444,3 @@ fi
 # Prevent overrun into resource tarball
 exit 1
 cat <<DONOTPARSE
-
------BEGIN ARCHIVE SECTION-----

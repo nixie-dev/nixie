@@ -18,6 +18,7 @@ class ResourceTarball:
     def __init__(self, origin: NixieFeatures | BytesIO):
         '''Construct the object, either from a generated NixieFeatures, or
         from an existing tarball buffer.
+        Existing tarball construction may take a while.
         '''
         if type(origin) is NixieFeatures:
             self.features = origin
