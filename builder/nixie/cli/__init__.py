@@ -3,6 +3,7 @@ import click
 import os
 import logging
 import git
+import tempfile
 
 from click_option_group import OptionGroup
 from rich.console       import Console
@@ -20,15 +21,17 @@ builder_group = OptionGroup("Common build options (init, update, for)")
 def _use_builder_group(fn):
     @builder_group.option('-I', '--with-channel', multiple=True, default=[],
                           help='Include a snapshot of Nix channel in the script.')
-    @builder_group.option('--with-binaries', default=False, is_flag=True,
+    @builder_group.option('--with-binaries/--without-binaries', is_flag=True, default=None,
                           help='Embed prebuilt binaries for Linux and macOS in the script.')
-    @builder_group.option('--with-sources', default=False, is_flag=True,
+    @builder_group.option('--with-sources/--without-sources', is_flag=True, default=None,
                           help='Embed source code required to build Nix in the script.')
+    @builder_group.option('--extra-experimental-features', default='',
+                          help='Like the Nix option of the same name, a space-separated string listing the Nix experimental features to be enabled by default.')
     @builder_group.option('--extra-substituters', default='',
                           help='Like the Nix option of the same name, a space-separated string listing the Nix cache substituters to use by default. --extra-trusted-public-keys may need to be specified as well.')
     @builder_group.option('--extra-trusted-public-keys', default='',
                           help='Like the Nix option of the same name, a space-separated string listing the public keys for the extra Nix cache substituters.')
-    @builder_group.option('--source-cache', default='nix-wrap.cachix.org', show_default=True,
+    @builder_group.option('--source-cache', default='',
                           help='The server from which the Nix script will download its resources. See Cachix API documentation for more information.')
     @builder_group.option('--sources-derivation', default='',
                           help='The hash or path to the Nix derivation containing .tar.gz archives for the Nix source code. See documentation for more info.')
@@ -61,7 +64,7 @@ def main(ctx: click.Context, **kwargs):
                                     tracebacks_suppress = [click, git],
                                     log_time_format = "",
                                     show_path=_debug)
-                        ])
+                       ])
     if kwargs['c'] != '':
         os.chdir(kwargs['c'])
     if ctx.invoked_subcommand is None:
@@ -72,11 +75,11 @@ def main(ctx: click.Context, **kwargs):
 @_use_builder_group
 @click.option('-o', '--output-name', default='',
               help='Name of the resulting script. Special names such as \'nix-shell\' allow the script to run as that utility.')
-@click.option('--auto', is_flag=True, default=False,
+@click.option('--auto', is_flag=True, default=None,
               help='Automatically detect which template to use according to other files.')
-@click.option('--no-gitignore', is_flag=True, default=False,
+@click.option('--no-gitignore', is_flag=True, default=None,
               help='Do not add entries to .gitignore for the .nixie work directory.')
-@click.option('--no-gitattributes', is_flag=True, default=False,
+@click.option('--no-gitattributes', is_flag=True, default=None,
               help='Do not add Linguist info to .gitattributes for the generated script.')
 def _init(**kwargs):
     init._cmd(Console(), **kwargs)
@@ -92,8 +95,12 @@ def _update(**kwargs):
 @_use_builder_group
 @click.option('-p', '--extra-package', multiple=True, default=[],
               help='Like the nix-shell -p option, a package or list of packages to be made available in your dev environment.')
-@click.option('--no-git-init', is_flag=True, default=False,
+@click.option('--no-git-init', is_flag=True, default=None,
               help='Fail if the current directory is not a Git repository.')
+@click.option('--no-gitignore', is_flag=True, default=None,
+              help='Do not add entries to .gitignore for the .nixie work directory.')
+@click.option('--no-gitattributes', is_flag=True, default=None,
+              help='Do not add Linguist info to .gitattributes for the generated script.')
 def _for(**kwargs):
     for_cmd._cmd(Console(), **kwargs)
 

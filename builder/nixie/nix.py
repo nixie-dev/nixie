@@ -51,7 +51,8 @@ def flake_build(expr: str) -> str:
     '''
     r = subprocess.run(NIX_COMMAND + ['build', '--print-out-paths', '--no-link', expr], capture_output=True)
     if r.returncode != 0:
-        errs = '\n'.join([m.decode() for m in r.stderr.split(b'\n') if m[:8] != b'warning:'])
+        errs = '\n'.join([m.decode() for m in r.stderr.split(b'\n')
+                                     if m[:8] != b'warning:'])
         raise RuntimeError(_filter_msgs(r.stderr.decode()))
     return r.stdout.decode('utf-8').strip()
 
@@ -69,9 +70,19 @@ def downloadIndex():
     '''
 
 
-def findIndex(path: str) -> str:
+def findIndex(path: str) -> list[str]:
     '''Scan nix-index for a derivation containing the given path.
     '''
+    r = subprocess.run(['nix-locate', '-1', '--at-root', '-w', path], capture_output=True)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr.decode())
+    results = [m.decode() for m in r.stdout.split(b'\n')
+                          if m != b'' and m[0] != 40 and m[-1] != 41 ]
+    if (len(results) == 0):
+        raise FileNotFoundError(f'{path}: not in Nixpkgs index')
+    else:
+        return results
+
 
 
 #TODO: see if this is really important (or feasible)

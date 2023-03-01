@@ -53,14 +53,16 @@ class ResourceTarball:
         '''Write the entire contents of a given tarball into ours,
         usually for including source archives for offline use.
         '''
-        with tf.open(src, mode='r:gz') as m:
+        with tf.open(src, mode='r:*') as m:
             for fs in m.getmembers():
                 newfs = deepcopy(fs)
                 newfs.name = prefix + '/' + fs.name
                 n.addfile(newfs, m.extractfile(fs))
 
-    def writeInto(self, dest: BytesIO):
+    def writeInto(self, dest: BytesIO, tmpdir: Path = None):
         '''Build and write the archive into the given bytestream.
+        tmpdir must be set if features specify included sources or binaries,
+        and the relevant drvs must have been prefetched or prebuilt.
         '''
         strfeats = str.encode(self.features.print_features())
         featsinfo = tf.TarInfo('features')
@@ -69,4 +71,9 @@ class ResourceTarball:
             m.addfile(featsinfo, BytesIO(strfeats))
             for name, tgt in self.features.pinned_channels.items():
                 self._push_channel(m, name, tgt)
-
+            if self.features.include_sources:
+                for f in tmpdir.joinpath(self.features.sources_drv).iterdir():
+                    self.transplant(m, f, 'sources')
+            if self.features.include_bins:
+                for f in tmpdir.joinpath(self.features.bins_drv).iterdir():
+                    m.add(f)
