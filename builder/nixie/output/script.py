@@ -1,6 +1,7 @@
 import operator
 
 from io                   import BytesIO, StringIO
+from tarfile              import TarFile
 from pathlib              import Path
 from shlex                import shlex
 from dotenv               import dotenv_values
@@ -19,7 +20,7 @@ class NixieFeatures:
     sources_drv:  str
     bins_drv:     str
 
-    pinned_channels: dict[str, Path] = {}
+    pinned_channels: dict[str, Path|TarFile] = {}
     include_sources: bool = False
     include_bins:    bool = False
 

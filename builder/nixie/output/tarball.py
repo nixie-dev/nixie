@@ -40,6 +40,9 @@ class ResourceTarball:
         '''Push a Nix channel into the archive, either from the specified path,
         or from the original archive in memory (if applicable)
         '''
+        if type(tgt) is tf.TarFile:
+            debug(f"Adding channel '{name}' from tarball")
+            self.transplant(n, tgt, f'channels/{name}', strip_root=True)
         if tgt is not None:
             debug(f"Adding channel '{name}' from {tgt}")
             n.add(path.realpath(tgt), f'channels/{name}')
@@ -50,15 +53,20 @@ class ResourceTarball:
             for fil in chn:
                 n.addfile(fil, self.original.extractfile(fil))
 
-    def transplant(self, n: tf.TarFile, src: Path, prefix: str):
+    def transplant(self, n: tf.TarFile, src: tf.TarFile, prefix: str, strip_root=False):
         '''Write the entire contents of a given tarball into ours,
         usually for including source archives for offline use.
+        Suitable for stream use.
         '''
-        with tf.open(src, mode='r:*') as m:
-            for fs in m.getmembers():
-                newfs = deepcopy(fs)
+        fs = src.next()
+        while fs is not None:
+            newfs = deepcopy(fs)
+            if strip_root:
+                newfs.name = re.sub("^[a-zA-Z0-9-.]*/", "%s/" %prefix, fs.name)
+            else:
                 newfs.name = prefix + '/' + fs.name
-                n.addfile(newfs, m.extractfile(fs))
+            n.addfile(newfs, src.extractfile(fs))
+            fs = src.next()
 
     def writeInto(self, dest: BytesIO, tmpdir: Path = None):
         '''Build and write the archive into the given bytestream.
@@ -74,7 +82,8 @@ class ResourceTarball:
                 self._push_channel(m, name, tgt)
             if self.features.include_sources:
                 for f in tmpdir.joinpath(self.features.sources_drv).iterdir():
-                    self.transplant(m, f, 'sources')
+                    with tf.open(f, mode='r:*') as fm:
+                        self.transplant(m, fm, 'sources')
             if self.features.include_bins:
                 for f in tmpdir.joinpath(self.features.bins_drv).iterdir():
                     m.add(f)

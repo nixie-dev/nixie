@@ -3,11 +3,11 @@
 let
   pzp = python3Packages.buildPythonPackage rec {
     pname = "pzp";
-    version = "0.0.20";
+    version = "0.0.22";
 
     src = fetchPypi {
       inherit pname version;
-      sha256 = "sha256-qr+s9lDHknBwKC6XaxuzhSGYZeHCJwo5ox/zwfC0JSo=";
+      sha256 = "sha256-RPx0nnB9+cC/n7eOX0hF21TxM/yEkGy/akRnqV/YN8E=";
     };
 
     doCheck = false;

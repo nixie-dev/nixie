@@ -1,8 +1,11 @@
 import git
 import os
 
+from tarfile    import TarFile
+from pathlib    import Path
 from pzp        import Finder, GenericAction, InfoStyle
 from logging    import error, warn
+from ..         import nix_channels
 
 def pick(prompt: str, opts, open_ended = False, **ws):
     '''Pick from a selection of items, displaying a leading prompt.
@@ -14,7 +17,7 @@ def pick(prompt: str, opts, open_ended = False, **ws):
         ws.update(height=10)
     fnd = Finder(opts, prompt_str=prompt + ' ',
                  fullscreen=False,
-                 #layout='reverse',  # disabled due to andreax9/pzp#4
+                 layout='reverse',
                  **ws)
     try:
         fnd.show()
@@ -50,3 +53,29 @@ def goto_git_root(fail=True):
         else:
             warn(f"{os.getcwd()}: Not a Git repository.")
             raise e
+
+def nix_chn_from_arg(arg: str) -> Path|TarFile:
+    '''Parse the argument passed to --with-channel, and automatically invoke
+    channel retrieval functions.
+    If the argument is an URL, the returned object will be a TarFile.
+    Otherwise, it will be a Path.
+    '''
+    if '=' in arg:
+        name = arg.split('=')[0]
+        path = arg.split('=')[1]
+        if path[:5] == "http:" or path[:6] == "https:":
+            try:
+                return nix_channels.download_channel(path)
+            except Exception:
+                #TODO: specialize
+                error(f"Failed to download '{path}'")
+                exit(1)
+        else:
+            return Path(path)
+    else:
+        nc = nix_channels.find_channel(arg)
+        if nc is not None:
+            return nc
+        else:
+            error(f"Channel not found: '{arg}'. Try running 'nix-channel --update'.")
+            exit(1)

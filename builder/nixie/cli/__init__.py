@@ -86,6 +86,7 @@ def _init(**kwargs):
 
 
 @main.command("update", help="Update or reconfigure the repository's Nix script")
+@click.argument('script', nargs=1, required=False)
 @_use_builder_group
 def _update(**kwargs):
     update._cmd(Console(), **kwargs)
