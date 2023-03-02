@@ -33,6 +33,9 @@ class ResourceTarball:
             self.features.include_bins = 'nix-static.Linux.x86_64' in [ m.name for m in mms ]
 
     def __del__(self):
+        '''Destructor to close the original archive if it was used in the
+        creation of this object.
+        '''
         if self.original is not None:
             self.original.close()
 
