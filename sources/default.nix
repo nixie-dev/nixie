@@ -83,6 +83,7 @@ in stdenv.mkDerivation {
     mkdir -p $out
     make BOOST_ARCHIVE=${boost.src} BOOST_VER=${boost.version} TAR=${gnutar}/bin/tar
     cp boost-shaved.tar.gz $out/boost.tar.gz
+
   ''
   + builtins.foldl'
       (l: r: l + "\npython3 ./tarmod.py ${r.src} $out/${r.pname}.tar.gz ${r.pname}") "" srcs_simple
@@ -90,5 +91,5 @@ in stdenv.mkDerivation {
       (l: r: l + "\ncp -r ${r.src} ${r.pname} && chmod -R u+w ${r.pname} && tar -czf $out/${r.pname}.tar.gz ${r.pname}") "" srcs_dir
   + builtins.foldl'
       (l: r: l + "\ncp -r ${r}/${r.dest} work && chmod -R u+w work/${r.dest} && tar -C work -czf $out/${r.dest}.tar.gz ${r.dest}") "" srcs_configured
-  ;
+  + "\nls $out > $out/filelist";
 }

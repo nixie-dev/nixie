@@ -28,14 +28,17 @@ pkgs.stdenv.mkDerivation {
   src = pkgs.emptyDirectory;
 
   installPhase =
-    (let
+    let
       sys = r: r.stdenv.hostPlatform.uname.system;
       cpu = r: r.stdenv.hostPlatform.uname.processor;
-    in builtins.foldl'
+    in (builtins.foldl'
       (l: r: "${l}; cp ${r.nixStatic}/bin/nix $out/nix.${sys r}.${cpu r}")
       "mkdir -p $out"
       systemsPkgs)
-    + "; cp ${libfakedir}/lib/libfakedir.dylib $out/libfakedir.dylib";
+    + '';
+      cp ${libfakedir}/lib/libfakedir.dylib $out/libfakedir.dylib
+      ls $out > $out/filelist
+    '';
 } // builtins.foldl'
   (l: r: l // { "${r.system}-nix-static" = r.nixStatic; })
   { fakedir = libfakedir; } systemsPkgs

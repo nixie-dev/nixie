@@ -54,14 +54,20 @@ def flake_build(expr: str) -> str:
         raise RuntimeError(_filter_msgs(r.stderr.decode()))
     return r.stdout.decode('utf-8').strip()
 
-def fetchCachix(host: str, path: str, member: str, dest: Path):
-    '''Download a store path member using a Cachix-compatible API
+def fetchCachix(host: str, path: str, dest: Path):
+    '''Download a store path with a filelist using a Cachix-compatible API
 
     This function does not call the Nix binary.
     '''
-    with open(dest, 'wb') as fi:
-        with urlopen(f'https://{host}/serve/{hashify(path)}/{member}') as rq:
-            fi.write(rq.read())
+    filelist: list[str]
+    dest_hash = dest.joinpath(hashify(path))
+    dest_hash.mkdir(parents=True, exist_ok=True)
+    with urlopen(f'https://{host}/serve/{hashify(path)}/filelist') as rq:
+        filelist = rq.read().split('\n')
+    for file in filelist:
+        with open(dest_hash.joinpath(file), 'wb') as fi:
+            with urlopen(f'https://{host}/serve/{hashify(path)}/{file}') as rq:
+                fi.write(rq.read())
 
 def findIndex(path: str) -> list[str]:
     '''Scan nix-index for a derivation containing the given path.
