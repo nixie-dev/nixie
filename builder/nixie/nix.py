@@ -63,11 +63,6 @@ def fetchCachix(host: str, path: str, member: str, dest: Path):
         with urlopen(f'https://{host}/serve/{hashify(path)}/{member}') as rq:
             fi.write(rq.read())
 
-def downloadIndex():
-    '''Retrieve pre-built nix-index database from the Internet.
-    '''
-
-
 def findIndex(path: str) -> list[str]:
     '''Scan nix-index for a derivation containing the given path.
     '''

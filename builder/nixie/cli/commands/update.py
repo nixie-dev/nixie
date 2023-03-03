@@ -4,7 +4,7 @@ from rich.console import Console
 from logging      import debug, error
 
 from ...output    import script
-from ..           import common
+from ..           import common, fetchers
 
 def _open_default_paths() -> script.NixieScript:
     common.goto_git_root()
@@ -26,7 +26,7 @@ def _cmd(console: Console, **args):
     with console.status("Retrieving Nix channels...", spinner='earth') as st:
         newchns = common.channels_from_args(args, st)
     with console.status("Fetching latest resources...", spinner='earth') as st:
-        srcs_eval, bins_eval = common.eval_latest_sources(args)
+        srcs_eval, bins_eval = fetchers.eval_latest_sources(args)
 
     with console.status("Reading Nix script configuration...", spinner='dots12') as st:
         if args['script'] is not None:

@@ -5,7 +5,7 @@ from tarfile        import TarFile
 from pathlib        import Path
 from pzp            import Finder, GenericAction, InfoStyle
 from logging        import error, warn, exception, debug
-from urllib.error   import URLError, HTTPError
+from urllib.error   import HTTPError
 from copy           import deepcopy
 
 from ..output       import script
@@ -25,7 +25,10 @@ defaultFeatures.include_bins    = False
 
 
 def get_cache():
-    cach = Path(os.getenv('XDG_CACHE_HOME', '~/.cache')).expanduser().joinpath('nixie')
+    return Path(os.getenv('XDG_CACHE_HOME', '~/.cache')).expanduser()
+
+def get_appcache():
+    cach = get_cache().joinpath('nixie')
     cach.mkdir(exist_ok=True, parents=True)
     return cach
 
@@ -138,38 +141,3 @@ def features_from_args(args: dict, old = defaultFeatures) -> script.NixieFeature
         feat.include_bins = args['with_binaries']
     return feat
 
-def _rsrc_fallback(what, e):
-    try:
-        with open(get_cache().joinpath(what), 'r') as fi:
-            warn("Failed to retrieve latest resources, using last known.")
-            return read(fi)
-    except:
-        error("Failed to retrieve latest resources.")
-        error(e.args[0])
-        exit(1)
-
-def eval_latest_sources(args: dict, st = None):
-    '''Evaluates and/or retrieves the latest derivations for sources and
-    binaries, and performs prefetch if appropriate.
-    '''
-    if args['sources_derivation'] == '':
-        try:
-            srcs_eval = nix.flake_eval(nix.EXPR_NIXIE_SOURCES)
-            with open(get_cache().joinpath('srcs'), 'w') as fi:
-                fi.write(srcs_eval)
-        except RuntimeError as e:
-            srcs_eval = _rsrc_fallback('srcs', e)
-    else:
-        srcs_eval = args['sources_derivation']
-    if args['binaries_derivation'] == '':
-        try:
-            bins_eval = nix.flake_eval(nix.EXPR_NIXIE_BINARIES)
-            with open(get_cache().joinpath('bins'), 'w') as fi:
-                fi.write(bins_eval)
-        except RuntimeError as e:
-            bins_eval = _rsrc_fallback('bins', e)
-    else:
-        bins_eval = args['binaries_derivation']
-    debug(f"Sources derivation: {srcs_eval}")
-    debug(f"Binaries derivation: {bins_eval}")
-    return srcs_eval, bins_eval

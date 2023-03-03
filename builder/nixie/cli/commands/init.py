@@ -7,7 +7,7 @@ from logging        import debug, error, warn
 
 from ...output      import script
 from ...            import nix
-from ..             import common
+from ..             import common,fetchers
 
 def _cmd(console: Console, nocommand=False, **args):
     outn: str
@@ -28,7 +28,7 @@ def _cmd(console: Console, nocommand=False, **args):
     with console.status("Retrieving Nix channels...", spinner='earth') as st:
         chns = common.channels_from_args(args, st)
     with console.status("Fetching latest resources...", spinner="earth") as st:
-        srcs_eval, bins_eval = common.eval_latest_sources(args)
+        srcs_eval, bins_eval = fetchers.eval_latest_sources(args)
 
     if args['with_binaries']:
         pass #TODO: perform prefetch

@@ -2,11 +2,18 @@ from rich.console import Console
 from logging      import debug, info, warn, error
 
 from ...          import nix
-from ..           import common
+from ..           import common, fetchers
 
 def _cmd(console: Console, **args):
     common.goto_git_root()
     nixes = []
+    with console.status("Downloading latest Nixpkgs index...", spinner="earth") as ld:
+        try:
+            fetchers.download_nix_index()
+        except Exception as e:
+            ld.stop()
+            error(f"Failed to download Nixpkgs index: {e.args[1]}")
+            exit(1)
     with console.status(f"Looking up commands...", spinner='arrow2') as ld:
         for cmd in args['command']:
             ld.update(f"Looking up command '{cmd}'...")
