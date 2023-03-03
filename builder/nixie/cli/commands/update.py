@@ -52,6 +52,7 @@ def _cmd(console: Console, **args):
     ns.features.sources_drv = srcs_eval
     ns.features.bins_drv = bins_eval
 
+    #TODO: perform nixpkgs version check
     if len(args['with_channel']) > 0:
         ns.features.pinned_channels.update(newchns)
 

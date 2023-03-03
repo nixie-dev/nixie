@@ -23,6 +23,12 @@ defaultFeatures.pinned_channels = []
 defaultFeatures.include_sources = False
 defaultFeatures.include_bins    = False
 
+
+def get_cache():
+    cach = Path(os.getenv('XDG_CACHE_HOME', '~/.cache')).expanduser().joinpath('nixie')
+    cach.mkdir(exist_ok=True, parents=True)
+    return cach
+
 def pick(prompt: str, opts, open_ended = False, **ws):
     '''Pick from a selection of items, displaying a leading prompt.
     If open_ended is set, the function is susceptible to return an item
@@ -132,6 +138,15 @@ def features_from_args(args: dict, old = defaultFeatures) -> script.NixieFeature
         feat.include_bins = args['with_binaries']
     return feat
 
+def _rsrc_fallback(what, e):
+    try:
+        with open(get_cache().joinpath(what), 'r') as fi:
+            warn("Failed to retrieve latest resources, using last known.")
+            return read(fi)
+    except:
+        error("Failed to retrieve latest resources.")
+        error(e.args[0])
+        exit(1)
 
 def eval_latest_sources(args: dict, st = None):
     '''Evaluates and/or retrieves the latest derivations for sources and
@@ -140,19 +155,19 @@ def eval_latest_sources(args: dict, st = None):
     if args['sources_derivation'] == '':
         try:
             srcs_eval = nix.flake_eval(nix.EXPR_NIXIE_SOURCES)
+            with open(get_cache().joinpath('srcs'), 'w') as fi:
+                fi.write(srcs_eval)
         except RuntimeError as e:
-            error("Failed to retrieve latest sources.")
-            error(e.args[0])
-            exit(1)
+            srcs_eval = _rsrc_fallback('srcs', e)
     else:
         srcs_eval = args['sources_derivation']
     if args['binaries_derivation'] == '':
         try:
             bins_eval = nix.flake_eval(nix.EXPR_NIXIE_BINARIES)
+            with open(get_cache().joinpath('bins'), 'w') as fi:
+                fi.write(bins_eval)
         except RuntimeError as e:
-            error("Failed to retrieve latest binaries.")
-            error(e.args[0])
-            exit(1)
+            bins_eval = _rsrc_fallback('bins', e)
     else:
         bins_eval = args['binaries_derivation']
     debug(f"Sources derivation: {srcs_eval}")

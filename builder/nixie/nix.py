@@ -12,8 +12,6 @@ EXPR_NIXIE_BINARIES = "github:nixie-dev/nixie#packages.x86_64-linux.static-bins"
 
 NIX_COMMAND = [ 'nix', '--extra-experimental-features', 'nix-command flakes' ]
 
-def get_cache():
-    return Path(os.getenv('XDG_CACHE_HOME', '~/.cache')).expanduser()
 
 def hashify(path: str) -> str:
     '''Ensures that a given string is a bare Nix hash, for use with Cachix API.
@@ -82,13 +80,3 @@ def findIndex(path: str) -> list[str]:
         raise FileNotFoundError(f'{path}: not in Nixpkgs index')
     else:
         return results
-
-
-
-#TODO: see if this is really important (or feasible)
-def fetchHydra(host: str, path: str):
-    '''Download a store path using Nix's native NAR acquisition system
-
-    This function calls the Nix binary.
-    '''
-    pass
