@@ -98,6 +98,20 @@ def nix_chn_from_arg(arg: str) -> Path|TarFile:
             error(f"Channel not found: '{arg}'. Try running 'nix-channel --update'.")
             exit(1)
 
+def channels_from_args(args: dict, st = None) -> dict:
+    '''Parses given command line arguments and extracts a fresh Nix channel
+    dict from them, while prefetching Internet sources if applicable.
+    '''
+    newchns = dict()
+    for chn in args['with_channel']:
+        chn_name = chn[:chn.index('=')]
+        if st is not None:
+            st.update(f"Retrieving Nix channel '{chn_name}'")
+        newc = common.nix_chn_from_arg(chn)
+        debug(f"Channel '{chn_name}' resolved to: {newc}")
+        newchns.update({chn_name: newc})
+    return newchns
+
 def features_from_args(args: dict, old: script.NixieFeatures = defaultFeatures) -> script.NixieFeatures:
     feat = deepcopy(old)
     if args['extra_experimental_features'] != '':

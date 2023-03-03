@@ -25,12 +25,7 @@ def _cmd(console: Console, **args):
     newchns = dict()
 
     with console.status("Retrieving Nix channels...", spinner='earth') as st:
-        for chn in args['with_channel']:
-            chn_name = chn[:chn.index('=')]
-            st.update(f"Retrieving Nix channel '{chn_name}'")
-            newc = common.nix_chn_from_arg(chn)
-            debug(f"Channel '{chn_name}' resolved to: {newc}")
-            newchns.update({chn_name: newc})
+        newchns = common.channels_from_args(args, st)
 
     with console.status("Reading Nix script configuration...", spinner='dots12') as st:
         if args['script'] is not None:
