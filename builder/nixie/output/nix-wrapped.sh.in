@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# vim: ts=2 sw=2
+# vim: ts=2 sw=2 fdm=marker fmr={,} fdl=0
 # Nixie (c) Karim Vergnes <me@thesola.io>
 # Licensed under GNU GPLv2
 # Required commands:
@@ -344,7 +344,7 @@ fi
 
 
 # Emulate nix-shell interpreter behavior
-if [[ "$0" =~ "nix-shell" ]] && [[ -f "$1" ]] && ! [[ "$1" =~ .nix$ ]]
+if [[ "$0" =~ nix-shell$ ]] && [[ -f "$1" ]] && ! [[ "$1" =~ .nix$ ]]
 then
   {
     read
