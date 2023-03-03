@@ -4,7 +4,7 @@ import os
 from tarfile        import TarFile
 from pathlib        import Path
 from pzp            import Finder, GenericAction, InfoStyle
-from logging        import error, warn, exception
+from logging        import error, warn, exception, debug
 from urllib.error   import URLError, HTTPError
 from copy           import deepcopy
 
@@ -104,10 +104,13 @@ def channels_from_args(args: dict, st = None) -> dict:
     '''
     newchns = dict()
     for chn in args['with_channel']:
-        chn_name = chn[:chn.index('=')]
+        if '=' in chn:
+            chn_name = chn[:chn.index('=')]
+        else:
+            chn_name = chn
         if st is not None:
             st.update(f"Retrieving Nix channel '{chn_name}'")
-        newc = common.nix_chn_from_arg(chn)
+        newc = nix_chn_from_arg(chn)
         debug(f"Channel '{chn_name}' resolved to: {newc}")
         newchns.update({chn_name: newc})
     return newchns

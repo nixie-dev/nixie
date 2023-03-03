@@ -24,4 +24,4 @@ def _cmd(console: Console, **args):
                 error(f"Could not find command '{cmd}' in Nixpkgs.")
                 exit(1)
     debug(nixes)
-    console.print("Not implemented.")
+    error("Command lookup is not implemented.")
