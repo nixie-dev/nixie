@@ -3,6 +3,8 @@ import re
 import os
 
 from pathlib        import Path
+from urllib         import request
+from tarfile        import TarFile
 
 def _get_nixpath_entry(name: str) -> Path:
     '''Find a mapping path (which contains '=') from the NIX_PATH that
@@ -48,11 +50,17 @@ def find_channel(name: str) -> Path:
     # No match.
     return None
 
-def download_channel(name: str, url: str, dest: Path):
-    '''Downloads a Nix channel from a given URL into the given directory,
-    under the name '{name}.tar.xz' in the case of a hydra-style channel,
-    or {name}.tar.{compression} if it is a tarball URL.
+def download_channel(url: str) -> TarFile:
+    '''Downloads a Nix channel from a given URL into a streamed TarFile.
     '''
+    session = None
+    m = re.search(".*\\.tar\\.([gx]z|bz2|zstd)$", url)
+    if m is not None:
+        session = request.urlopen(url)
+        return TarFile.open(fileobj=session, mode='r|'+m[1])
+    else:
+        session = request.urlopen(url + "/nixexprs.tar.xz")
+        return TarFile.open(fileobj=session, mode='r:xz')
 
 def _nixpkgs_getver(svnrev: str):
     '''Extracts the revision number from the 'svn-revision' format

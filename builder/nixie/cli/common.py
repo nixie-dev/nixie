@@ -1,11 +1,12 @@
 import git
 import os
 
-from tarfile    import TarFile
-from pathlib    import Path
-from pzp        import Finder, GenericAction, InfoStyle
-from logging    import error, warn
-from ..         import nix_channels
+from tarfile        import TarFile
+from pathlib        import Path
+from pzp            import Finder, GenericAction, InfoStyle
+from logging        import error, warn, exception
+from urllib.error   import URLError, HTTPError
+from ..             import nix_channels
 
 def pick(prompt: str, opts, open_ended = False, **ws):
     '''Pick from a selection of items, displaying a leading prompt.
@@ -66,9 +67,11 @@ def nix_chn_from_arg(arg: str) -> Path|TarFile:
         if path[:5] == "http:" or path[:6] == "https:":
             try:
                 return nix_channels.download_channel(path)
+            except HTTPError as e:
+                error(f"'{path}': {e.reason}")
+                exit(1)
             except Exception:
-                #TODO: specialize
-                error(f"Failed to download '{path}'")
+                exception(f"'{path}': Unknown error.")
                 exit(1)
         else:
             return Path(path)

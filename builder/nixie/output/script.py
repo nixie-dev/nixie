@@ -57,6 +57,7 @@ class NixieScript:
 
     features: NixieFeatures
     tarball: ResourceTarball = None
+    fname: Path
 
     DELIMITER = b'-----BEGIN ARCHIVE SECTION-----'
 
@@ -68,6 +69,7 @@ class NixieScript:
             self.features = origin
         else:
             from .tarball import ResourceTarball
+            self.fname = origin
             with open(origin, mode='rb') as f:
                 finddel = lambda b: b[:len(self.DELIMITER)] == self.DELIMITER
                 lines = f.readlines(64000)

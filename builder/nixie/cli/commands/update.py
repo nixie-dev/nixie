@@ -22,6 +22,16 @@ def _open_default_paths() -> script.NixieScript:
 
 def _cmd(console: Console, **args):
     ns: script.NixieScript
+    newchns = dict()
+
+    with console.status("Retrieving Nix channels...", spinner='earth') as st:
+        for chn in args['with_channel']:
+            chn_name = chn[:chn.index('=')]
+            st.update(f"Retrieving Nix channel '{chn_name}'")
+            newc = common.nix_chn_from_arg(chn)
+            debug(f"Channel '{chn_name}' resolved to: {newc}")
+            newchns.update({chn_name: newc})
+
     with console.status("Reading Nix script configuration...", spinner='dots12') as st:
         if args['script'] is not None:
             try:
@@ -57,7 +67,8 @@ def _cmd(console: Console, **args):
     if args['with_binaries'] is not None:
         ns.include_bins = args['with_binaries']
     if len(args['with_channel']) > 0:
-        for chn in args['with_channel']:
-            newc = common.nix_chn_from_arg(chn)
-            debug(f"Channel '{chn}' resolved to: {newc}")
-            ns.features.pinned_channels.update({chn: newc})
+        ns.features.pinned_channels.update(newchns)
+
+    with console.status("Updating Nix script...", spinner='dots12') as st:
+        with open(ns.fname, mode='wb') as fi:
+            ns.build(fi)

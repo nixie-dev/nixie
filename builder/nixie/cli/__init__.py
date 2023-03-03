@@ -17,6 +17,7 @@ Respective subcommands are defined in submodules.
 '''
 
 builder_group = OptionGroup("Common build options (init, update, for)")
+cons = Console()
 
 def _use_builder_group(fn):
     @builder_group.option('-I', '--with-channel', multiple=True, default=[],
@@ -58,17 +59,18 @@ def main(ctx: click.Context, **kwargs):
     '''
     _debug = os.getenv('NIXIE_DEBUG') is not None
     logging.basicConfig(
-            level = 'DEBUG' if _debug else 'INFO',
-            format = '%(message)s',
+            level    = 'DEBUG' if _debug else 'INFO',
+            format   = '%(message)s',
             handlers = [RichHandler(rich_tracebacks = True,
                                     tracebacks_suppress = [click, git],
-                                    log_time_format = "",
-                                    show_path=_debug)
+                                    log_time_format     = "",
+                                    console             = cons,
+                                    show_path           = _debug)
                        ])
     if kwargs['c'] != '':
         os.chdir(kwargs['c'])
     if ctx.invoked_subcommand is None:
-        init._cmd(Console(), nocommand=True, **kwargs)
+        init._cmd(cons, nocommand=True, **kwargs)
 
 
 @main.command("init", help='Install Nixie in the current repository')
@@ -82,14 +84,14 @@ def main(ctx: click.Context, **kwargs):
 @click.option('--no-gitattributes', is_flag=True, default=None,
               help='Do not add Linguist info to .gitattributes for the generated script.')
 def _init(**kwargs):
-    init._cmd(Console(), **kwargs)
+    init._cmd(cons, **kwargs)
 
 
 @main.command("update", help="Update or reconfigure the repository's Nix script")
 @click.argument('script', nargs=1, required=False)
 @_use_builder_group
 def _update(**kwargs):
-    update._cmd(Console(), **kwargs)
+    update._cmd(cons, **kwargs)
 
 @main.command("for", help="Install Nixie according to a template")
 @click.argument('template', nargs=1)
@@ -103,10 +105,10 @@ def _update(**kwargs):
 @click.option('--no-gitattributes', is_flag=True, default=None,
               help='Do not add Linguist info to .gitattributes for the generated script.')
 def _for(**kwargs):
-    for_cmd._cmd(Console(), **kwargs)
+    for_cmd._cmd(cons, **kwargs)
 
 
 @main.command("add-tool", help='Searches for command in Nixpkgs, then adds it to the repository')
 @click.argument('command', nargs=-1, required=True)
 def _add_tool(**kwargs):
-    add_tool._cmd(Console(), **kwargs)
+    add_tool._cmd(cons, **kwargs)

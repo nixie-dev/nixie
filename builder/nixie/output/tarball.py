@@ -5,6 +5,7 @@ from pathlib import Path
 from io      import BytesIO
 from os      import path
 from logging import debug
+from copy    import deepcopy
 
 from .script import NixieFeatures
 from ..      import nix
@@ -46,7 +47,7 @@ class ResourceTarball:
         if type(tgt) is tf.TarFile:
             debug(f"Adding channel '{name}' from tarball")
             self.transplant(n, tgt, f'channels/{name}', strip_root=True)
-        if tgt is not None:
+        elif tgt is not None:
             debug(f"Adding channel '{name}' from {tgt}")
             n.add(path.realpath(tgt), f'channels/{name}')
         else:
@@ -54,7 +55,10 @@ class ResourceTarball:
             mms = self.original.getmembers()
             chn = [ fi for fi in mms if re.match(f'^channels/{name}/.*', fi.name) ]
             for fil in chn:
-                n.addfile(fil, self.original.extractfile(fil))
+                if fil.isfile():
+                    n.addfile(fil, self.original.extractfile(fil))
+                else:
+                    n.addfile(fil)
 
     def transplant(self, n: tf.TarFile, src: tf.TarFile, prefix: str, strip_root=False):
         '''Write the entire contents of a given tarball into ours,
@@ -65,10 +69,13 @@ class ResourceTarball:
         while fs is not None:
             newfs = deepcopy(fs)
             if strip_root:
-                newfs.name = re.sub("^[a-zA-Z0-9-.]*/", "%s/" %prefix, fs.name)
+                newfs.name = re.sub("^[a-zA-Z0-9.-]*/", "%s/" %prefix, fs.name)
             else:
                 newfs.name = prefix + '/' + fs.name
-            n.addfile(newfs, src.extractfile(fs))
+            if fs.isfile():
+                n.addfile(newfs, src.extractfile(fs))
+            else:
+                n.addfile(newfs)
             fs = src.next()
 
     def writeInto(self, dest: BytesIO, tmpdir: Path = None):
