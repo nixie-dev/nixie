@@ -51,21 +51,8 @@ def _cmd(console: Console, **args):
     if ns.features.include_bins:
         debug("This script includes binaries.")
     debug("Included channels: %s" %list(ns.features.pinned_channels.keys()))
+    ns.features = common.features_from_args(args, ns.features)
 
-    if args['extra_experimental_features'] != '':
-        ns.features.extra_features = args['extra_experimental_features'].split(' ')
-    ns.features.extra_substituters += args['extra_substituters'].split(' ')
-    ns.features.extra_trusted_public_keys += args['extra_trusted_public_keys'].split(' ')
-    if args['source_cache'] != '':
-        ns.features.source_cache = args['source_cache']
-    if args['sources_derivation'] != '':
-        ns.features.sources_drv = args['sources_derivation']
-    if args['binaries_derivation'] != '':
-        ns.features.bins_drv = args['binaries_derivation']
-    if args['with_sources'] is not None:
-        ns.include_sources = args['with_sources']
-    if args['with_binaries'] is not None:
-        ns.include_bins = args['with_binaries']
     if len(args['with_channel']) > 0:
         ns.features.pinned_channels.update(newchns)
 

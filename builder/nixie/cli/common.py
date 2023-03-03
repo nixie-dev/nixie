@@ -6,7 +6,22 @@ from pathlib        import Path
 from pzp            import Finder, GenericAction, InfoStyle
 from logging        import error, warn, exception
 from urllib.error   import URLError, HTTPError
+from copy           import deepcopy
+
+from ..output       import script
 from ..             import nix_channels
+
+
+defaultFeatures = script.NixieFeatures()
+defaultFeatures.extra_features = []
+defaultFeatures.extra_substituters = []
+defaultFeatures.extra_trusted_public_keys = []
+
+defaultFeatures.source_cache = "nix-wrap.cachix.org"
+
+defaultFeatures.pinned_channels = []
+defaultFeatures.include_sources = False
+defaultFeatures.include_bins    = False
 
 def pick(prompt: str, opts, open_ended = False, **ws):
     '''Pick from a selection of items, displaying a leading prompt.
@@ -82,3 +97,21 @@ def nix_chn_from_arg(arg: str) -> Path|TarFile:
         else:
             error(f"Channel not found: '{arg}'. Try running 'nix-channel --update'.")
             exit(1)
+
+def features_from_args(args: dict, old: script.NixieFeatures = defaultFeatures) -> script.NixieFeatures:
+    feat = deepcopy(old)
+    if args['extra_experimental_features'] != '':
+        feat.extra_features = args['extra_experimental_features'].split(' ')
+    feat.extra_substituters += args['extra_substituters'].split(' ')
+    feat.extra_trusted_public_keys += args['extra_trusted_public_keys'].split(' ')
+    if args['source_cache'] != '':
+        feat.source_cache = args['source_cache']
+    if args['sources_derivation'] != '':
+        feat.sources_drv = args['sources_derivation']
+    if args['binaries_derivation'] != '':
+        feat.bins_drv = args['binaries_derivation']
+    if args['with_sources'] is not None:
+        feat.include_sources = args['with_sources']
+    if args['with_binaries'] is not None:
+        feat.include_bins = args['with_binaries']
+    return feat
