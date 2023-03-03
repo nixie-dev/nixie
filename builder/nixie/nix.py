@@ -3,7 +3,7 @@ import re
 import os
 
 from pathlib        import Path
-from urllib         import request
+from urllib.request import urlopen, Request
 
 NIXIE_HOST = "nix-wrap.cachix.org"
 
@@ -60,14 +60,21 @@ def fetchCachix(host: str, path: str, dest: Path):
     This function does not call the Nix binary.
     '''
     filelist: list[str]
-    dest_hash = dest.joinpath(hashify(path))
+    hs = {"User-Agent": "Mozilla/5.0"}
+    dest_hash = Path(dest).joinpath(hashify(path))
     dest_hash.mkdir(parents=True, exist_ok=True)
-    with urlopen(f'https://{host}/serve/{hashify(path)}/filelist') as rq:
-        filelist = rq.read().split('\n')
+
+    # don't even ask me why cachix blocks urllib specifically
+    # user-agents are a mistake
+    rq = Request(f'https://{host}/serve/{hashify(path)}/filelist', headers=hs)
+    with urlopen(rq) as rq:
+        filelist = [f.decode() for f in rq.read().split(b'\n') if len(f)]
     for file in filelist:
         with open(dest_hash.joinpath(file), 'wb') as fi:
-            with urlopen(f'https://{host}/serve/{hashify(path)}/{file}') as rq:
+            m = Request(f'https://{host}/serve/{hashify(path)}/{file}', headers=hs)
+            with urlopen(m) as rq:
                 fi.write(rq.read())
+    dest_hash.joinpath('filelist').unlink(missing_ok=True)
 
 def findIndex(path: str) -> list[str]:
     '''Scan nix-index for a derivation containing the given path.

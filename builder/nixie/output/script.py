@@ -82,7 +82,7 @@ class NixieScript:
     def print_features(self) -> str:
         return features.print_features()
 
-    def build(self, dest: BytesIO):
+    def build(self, dest: BytesIO, tmpdir: Path = None):
         from .tarball import ResourceTarball
 
         template = files('nixie.output').joinpath('nix-wrapped.sh.in').read_text()
@@ -94,5 +94,5 @@ class NixieScript:
         if self.tarball is None:
             self.tarball = ResourceTarball(self.features)
         self.tarball.features = self.features
-        self.tarball.writeInto(dest)
+        self.tarball.writeInto(dest, Path(tmpdir))
 
