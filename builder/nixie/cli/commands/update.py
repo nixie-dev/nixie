@@ -2,7 +2,6 @@ import tempfile
 
 from rich.console import Console
 from logging      import debug, error
-from os           import path
 
 from ...output    import script
 from ..           import common

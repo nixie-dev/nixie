@@ -12,7 +12,7 @@ from ..             import common
 def _cmd(console: Console, nocommand=False, **args):
     outn: str
 
-    if args['output_name'] != '':
+    if 'output_name' in args and args['output_name'] != '':
         outn = args['output_name']
     else:
         common.goto_git_root()

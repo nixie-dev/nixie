@@ -115,7 +115,10 @@ def channels_from_args(args: dict, st = None) -> dict:
         newchns.update({chn_name: newc})
     return newchns
 
-def features_from_args(args: dict, old: script.NixieFeatures = defaultFeatures) -> script.NixieFeatures:
+def features_from_args(args: dict, old = defaultFeatures) -> script.NixieFeatures:
+    '''Parses given command line arguments and constructs or updates a features
+    object reflecting them.
+    '''
     feat = deepcopy(old)
     if args['extra_experimental_features'] != '':
         feat.extra_features = args['extra_experimental_features'].split(' ')
@@ -123,10 +126,6 @@ def features_from_args(args: dict, old: script.NixieFeatures = defaultFeatures) 
     feat.extra_trusted_public_keys += args['extra_trusted_public_keys'].split(' ')
     if args['source_cache'] != '':
         feat.source_cache = args['source_cache']
-    if args['sources_derivation'] != '':
-        feat.sources_drv = args['sources_derivation']
-    if args['binaries_derivation'] != '':
-        feat.bins_drv = args['binaries_derivation']
     if args['with_sources'] is not None:
         feat.include_sources = args['with_sources']
     if args['with_binaries'] is not None:
@@ -139,11 +138,21 @@ def eval_latest_sources(args: dict, st = None):
     binaries, and performs prefetch if appropriate.
     '''
     if args['sources_derivation'] == '':
-        srcs_eval = nix.flake_eval(nix.EXPR_NIXIE_SOURCES)
+        try:
+            srcs_eval = nix.flake_eval(nix.EXPR_NIXIE_SOURCES)
+        except RuntimeError as e:
+            error("Failed to retrieve latest sources.")
+            error(e.args[0])
+            exit(1)
     else:
         srcs_eval = args['sources_derivation']
     if args['binaries_derivation'] == '':
-        bins_eval = nix.flake_eval(nix.EXPR_NIXIE_BINARIES)
+        try:
+            bins_eval = nix.flake_eval(nix.EXPR_NIXIE_BINARIES)
+        except RuntimeError as e:
+            error("Failed to retrieve latest binaries.")
+            error(e.args[0])
+            exit(1)
     else:
         bins_eval = args['binaries_derivation']
     debug(f"Sources derivation: {srcs_eval}")
