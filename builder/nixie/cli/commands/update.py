@@ -26,6 +26,8 @@ def _cmd(console: Console, **args):
 
     with console.status("Retrieving Nix channels...", spinner='earth') as st:
         newchns = common.channels_from_args(args, st)
+    with console.status("Fetching latest resources...", spinner='earth') as st:
+        srcs_eval, bins_eval = common.eval_latest_sources(args)
 
     with console.status("Reading Nix script configuration...", spinner='dots12') as st:
         if args['script'] is not None:
@@ -47,6 +49,9 @@ def _cmd(console: Console, **args):
         debug("This script includes binaries.")
     debug("Included channels: %s" %list(ns.features.pinned_channels.keys()))
     ns.features = common.features_from_args(args, ns.features)
+
+    ns.features.sources_drv = srcs_eval
+    ns.features.bins_drv = bins_eval
 
     if len(args['with_channel']) > 0:
         ns.features.pinned_channels.update(newchns)

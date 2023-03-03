@@ -9,7 +9,7 @@ from urllib.error   import URLError, HTTPError
 from copy           import deepcopy
 
 from ..output       import script
-from ..             import nix_channels
+from ..             import nix, nix_channels
 
 
 defaultFeatures = script.NixieFeatures()
@@ -132,3 +132,20 @@ def features_from_args(args: dict, old: script.NixieFeatures = defaultFeatures) 
     if args['with_binaries'] is not None:
         feat.include_bins = args['with_binaries']
     return feat
+
+
+def eval_latest_sources(args: dict, st = None):
+    '''Evaluates and/or retrieves the latest derivations for sources and
+    binaries, and performs prefetch if appropriate.
+    '''
+    if args['sources_derivation'] == '':
+        srcs_eval = nix.flake_eval(nix.EXPR_NIXIE_SOURCES)
+    else:
+        srcs_eval = args['sources_derivation']
+    if args['binaries_derivation'] == '':
+        bins_eval = nix.flake_eval(nix.EXPR_NIXIE_BINARIES)
+    else:
+        bins_eval = args['binaries_derivation']
+    debug(f"Sources derivation: {srcs_eval}")
+    debug(f"Binaries derivation: {bins_eval}")
+    return srcs_eval, bins_eval

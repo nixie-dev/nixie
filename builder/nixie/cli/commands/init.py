@@ -27,18 +27,13 @@ def _cmd(console: Console, nocommand=False, **args):
 
     with console.status("Retrieving Nix channels...", spinner='earth') as st:
         chns = common.channels_from_args(args, st)
+    with console.status("Fetching latest resources...", spinner="earth") as st:
+        srcs_eval, bins_eval = common.eval_latest_sources(args)
 
-    with console.status("Fetching latest resources...") as st:
-        if args['sources_derivation'] == '':
-            srcs_eval = nix.flake_eval(nix.EXPR_NIXIE_SOURCES)
-        else:
-            srcs_eval = args['sources_derivation']
-        if args['binaries_derivation'] == '':
-            bins_eval = nix.flake_eval(nix.EXPR_NIXIE_BINARIES)
-        else:
-            bins_eval = args['binaries_derivation']
-    debug(f"Sources derivation: {srcs_eval}")
-    debug(f"Binaries derivation: {bins_eval}")
+    if args['with_binaries']:
+        pass #TODO: perform prefetch
+    if args['with_sources']:
+        pass
 
     feats = common.features_from_args(args)
     feats.sources_drv = srcs_eval
@@ -47,7 +42,7 @@ def _cmd(console: Console, nocommand=False, **args):
 
     scr = script.NixieScript(feats)
 
-    with console.status("Building script...") as st:
+    with console.status("Building script...", spinner='dots12') as st:
         with open(outn, mode='wb') as fi:
             scr.build(fi)
     os.chmod(outn, os.stat(outn).st_mode | stat.S_IEXEC)
