@@ -53,7 +53,7 @@ def eval_latest_sources(args: dict, st = None):
     return srcs_eval, bins_eval
 
 def _tmplink(tdir: Path, drv: str):
-    locdrv = Path('/nix/store/').glob(f'{drv}*')
+    locdrv = list(Path('/nix/store/').glob(f'{drv}*'))
     if len(locdrv) == 0:
         error('Derivation could not be found locally. Check your Internet connection and supplied derivation hash then try again.')
     else:
