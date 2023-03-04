@@ -1,5 +1,3 @@
-import tempfile
-
 from rich.console import Console
 from logging      import debug, error
 
@@ -23,7 +21,7 @@ def _cmd(console: Console, **args):
     ns: script.NixieScript
     newchns = dict()
 
-    tdir = tempfile.mkdtemp(prefix='nixie-')
+    tdir = common.mktmp()
 
     with console.status("Retrieving Nix channels...", spinner='earth') as st:
         newchns = common.channels_from_args(args, st)

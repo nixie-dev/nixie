@@ -1,4 +1,3 @@
-import tempfile
 import stat
 import os
 
@@ -12,7 +11,7 @@ from ..             import common,fetchers
 def _cmd(console: Console, nocommand=False, **args):
     outn: str
 
-    tdir = tempfile.mkdtemp(prefix='nixie-')
+    tdir = common.mktmp()
 
     if 'output_name' in args and args['output_name'] != '':
         outn = args['output_name']
