@@ -20,6 +20,7 @@ def _cmd(console: Console, nocommand=False, **args):
         outn = './nix'
 
     if nocommand or args['auto']:
+        #TODO: implement template predicates and application
         warn("Templates are not yet implemented.")
 
     chns = dict()

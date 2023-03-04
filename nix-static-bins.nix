@@ -5,7 +5,14 @@
 , ... }:
 
 let
-  builtSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
+  builtSystems = [
+    "x86_64-linux"
+    "aarch64-linux"
+
+    # Support on hold pending bintools fixes
+    #"x86_64-darwin"
+    #"aarch64-darwin"
+  ];
   systemsPkgs =
     map (s:
       let parsedSystem = pkgs.lib.systems.parse.mkSystemFromString s;

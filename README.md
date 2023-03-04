@@ -1,5 +1,11 @@
 # Nixie, the zero-install dev environment
 
+## DISCLAIMER
+
+Nixie is currently alpha software, provided as-is with no guarantee. The builder and generated scripts are subject to change, and the current feature set is not to be considered final.
+
+---
+
 Nixie is a lightweight solution to ship the [Nix package manager](https://nixos.org) together with a project repository, regardless of host architecture. It leverages a [brand new feature](https://github.com/NixOS/nix/blob/master/doc/manual/src/release-notes/rl-2.10.md) starting with Nix 2.10, which allows the default Nix binary to host a sandboxed Nix store with no privileges.
 
 On macOS, non-root Nix store support is made possible by [fakedir](https://github.com/nixie-dev/fakedir), which is shipped with the script as a Universal library.

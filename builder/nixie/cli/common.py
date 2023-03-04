@@ -36,7 +36,7 @@ def get_appcache():
     return cach
 
 def mktmp() -> str:
-    '''Creates a temporary work directory and hooks its deletion at exit.
+    '''Create a temporary work directory and hook its deletion at exit.
     '''
     tdir = tempfile.mkdtemp(prefix='nixie-')
     cleanup = lambda: shutil.rmtree(tdir)
