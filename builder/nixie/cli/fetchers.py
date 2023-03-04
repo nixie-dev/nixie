@@ -2,6 +2,7 @@ import os
 
 from logging        import debug, warn, error
 from urllib.request import urlopen
+from pathlib        import Path
 from .              import common
 from ..             import nix, nix_channels
 
@@ -50,3 +51,26 @@ def eval_latest_sources(args: dict, st = None):
     debug(f"Sources derivation: {srcs_eval}")
     debug(f"Binaries derivation: {bins_eval}")
     return srcs_eval, bins_eval
+
+def _tmplink(tdir: Path, drv: str):
+    locdrv = Path('/nix/store/').glob(f'{drv}*')
+    if len(locdrv) == 0:
+        error('Derivation could not be found locally. Check your Internet connection and supplied derivation hash then try again.')
+    else:
+        tdir.joinpath('{drv}').symlink_to(locdrv[0])
+
+def prefetch_resources(serv: str, tdir: Path, bins_eval: str, srcs_eval: str, args: dict, st = None):
+    if args['with_binaries']:
+        st.update("Downloading offline binaries...")
+        try:
+            nix.fetchCachix(serv, bins_eval, tdir)
+        except:
+            warn("Binaries derivation could not be downloaded.")
+            _tmplink(tdir, bins_eval)
+    if args['with_sources']:
+        st.update("Downloading offline sources...")
+        try:
+            nix.fetchCachix(serv, srcs_eval, tdir)
+        except:
+            warn("Sources derivation could not be downloaded.")
+            _tmplink(tdir, srcs_eval)

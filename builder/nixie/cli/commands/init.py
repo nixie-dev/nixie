@@ -12,7 +12,7 @@ from ..             import common,fetchers
 def _cmd(console: Console, nocommand=False, **args):
     outn: str
 
-    tdir = tempfile.mkdtemp(prefix='nixie')
+    tdir = tempfile.mkdtemp(prefix='nixie-')
 
     if 'output_name' in args and args['output_name'] != '':
         outn = args['output_name']
@@ -38,11 +38,7 @@ def _cmd(console: Console, nocommand=False, **args):
     feats.pinned_channels = chns
 
     with console.status("Downloading offline binaries...", spinner="earth") as st:
-        if args['with_binaries']:
-            nix.fetchCachix(feats.source_cache, bins_eval, tdir)
-        if args['with_sources']:
-            st.update("Downloading offline sources...")
-            nix.fetchCachix(feats.source_cache, srcs_eval, tdir)
+        fetchers.prefetch_resources(feats.source_cache, tdir, bins_eval, srcs_eval, args, st)
 
     scr = script.NixieScript(feats)
 

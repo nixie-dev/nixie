@@ -23,6 +23,8 @@ def _cmd(console: Console, **args):
     ns: script.NixieScript
     newchns = dict()
 
+    tdir = tempfile.mkdtemp(prefix='nixie-')
+
     with console.status("Retrieving Nix channels...", spinner='earth') as st:
         newchns = common.channels_from_args(args, st)
     with console.status("Fetching latest resources...", spinner='earth') as st:
@@ -52,8 +54,11 @@ def _cmd(console: Console, **args):
     ns.features.sources_drv = srcs_eval
     ns.features.bins_drv = bins_eval
 
+    with console.status("Downloading offline binaries...", spinner="earth") as st:
+        fetchers.prefetch_resources(ns.features.source_cache, tdir, bins_eval, srcs_eval, args, st)
+
     #TODO: perform nixpkgs version check
-    if len(args['with_channel']) > 0:
+    if len(newchns) > 0:
         ns.features.pinned_channels.update(newchns)
 
     with console.status("Updating Nix script...", spinner='dots12') as st:

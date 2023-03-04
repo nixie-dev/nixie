@@ -74,7 +74,6 @@ def fetchCachix(host: str, path: str, dest: Path):
             m = Request(f'https://{host}/serve/{hashify(path)}/{file}', headers=hs)
             with urlopen(m) as rq:
                 fi.write(rq.read())
-    dest_hash.joinpath('filelist').unlink(missing_ok=True)
 
 def findIndex(path: str) -> list[str]:
     '''Scan nix-index for a derivation containing the given path.
