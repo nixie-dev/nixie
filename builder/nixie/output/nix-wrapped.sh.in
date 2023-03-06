@@ -282,7 +282,7 @@ _get_nix() {
     && { __teardown; return 0; }
 
   # Look in our sources for prebuilt binary
-  _pull_nix_bin "nix-static.$SYSTEM" "$USER_CACHE/nix-static" \
+  _pull_nix_bin "nix.$SYSTEM" "$USER_CACHE/nix-static" \
     && { __teardown; return 0; }
 
   # Build Nix locally from source
