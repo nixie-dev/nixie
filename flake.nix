@@ -3,7 +3,7 @@
   inputs.nixpkgs.url = github:nixos/nixpkgs;
   inputs.flake-utils.url = github:numtide/flake-utils;
   inputs.nix =
-    { url = github:nixos/nix;
+    { url = github:nixos/nix/2.14.1;
       inputs.nixpkgs.follows = "nixpkgs";
     };
   inputs.fakedir =
