@@ -1,7 +1,18 @@
 { nixpkgs     ? <nixpkgs>
+  # Nixpkgs import (from flake)
+
 , fakedir     ? builtins.fetchGit "https://github.com/thesola10/fakedir"
+  # libfakedir import (from flake)
+
 , pkgs        ? import nixpkgs {}
+  # Nixpkgs evaluated set
+
 , libfakedir  ? pkgs.callPackage fakedir
+  # libfakedir evaluated package
+
+, nixStatics  ? {}
+  # Per-architecture set of static Nix binaries (non-exhaustive)
+
 , ... }:
 
 let
@@ -28,6 +39,10 @@ let
           }
           else {}))
     ) builtSystems;
+
+  nixPackage = r: if builtins.hasAttr "${r.system}" nixStatics
+                  then nixStatics."${r.system}"
+                  else r.nixStatic;
 in
 pkgs.stdenv.mkDerivation {
   pname = "nix-static-binaries";
@@ -39,7 +54,7 @@ pkgs.stdenv.mkDerivation {
       sys = r: r.stdenv.hostPlatform.uname.system;
       cpu = r: r.stdenv.hostPlatform.uname.processor;
     in (builtins.foldl'
-      (l: r: "${l}; cp ${r.nixStatic}/bin/nix $out/nix.${sys r}.${cpu r}")
+      (l: r: "${l}; cp ${nixPackage r}/bin/nix $out/nix.${sys r}.${cpu r}")
       "mkdir -p $out"
       systemsPkgs)
     + '';
@@ -47,5 +62,5 @@ pkgs.stdenv.mkDerivation {
       ls $out > $out/filelist
     '';
 } // builtins.foldl'
-  (l: r: l // { "${r.system}-nix-static" = r.nixStatic; })
+  (l: r: l // { "${r.system}-nix-static" = nixPackage r; })
   { fakedir = libfakedir; } systemsPkgs
