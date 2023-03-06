@@ -61,4 +61,4 @@ def _cmd(console: Console, **args):
 
     with console.status("Updating Nix script...", spinner='dots12') as st:
         with open(ns.fname, mode='wb') as fi:
-            ns.build(fi)
+            ns.build(fi, tdir)
