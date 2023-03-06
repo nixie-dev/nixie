@@ -1,4 +1,4 @@
-{ lib, python3Packages, fetchPypi, ... }:
+{ lib, python3Packages, fetchPypi, nix-index, ... }:
 
 let
   pzp = python3Packages.buildPythonPackage rec {
@@ -36,5 +36,6 @@ in python3Packages.buildPythonApplication {
       python-dotenv
       pzp
       gitpython
+      nix-index
     ];
 }
