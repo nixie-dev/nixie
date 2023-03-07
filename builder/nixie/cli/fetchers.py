@@ -5,6 +5,7 @@ from urllib.request import urlopen
 from pathlib        import Path
 from .              import common
 from ..             import nix, nix_channels
+from ..output       import script
 
 def download_nix_index():
     nid = common.get_cache().joinpath('nix-index')
@@ -59,18 +60,20 @@ def _tmplink(tdir: Path, drv: str):
     else:
         tdir.joinpath('{drv}').symlink_to(locdrv[0])
 
-def prefetch_resources(serv: str, tdir: Path, bins_eval: str, srcs_eval: str, args: dict, st = None):
-    if args['with_binaries']:
+def prefetch_resources(tdir: Path,
+                       feats: script.NixieFeatures,
+                       st = None):
+    if feats.include_bins:
         st.update("Downloading offline binaries...")
         try:
-            nix.fetchCachix(serv, bins_eval, tdir)
+            nix.fetchCachix(feats.source_cache, feats.bins_drv, tdir)
         except:
             warn("Binaries derivation could not be downloaded.")
-            _tmplink(tdir, bins_eval)
-    if args['with_sources']:
+            _tmplink(tdir, feats.bins_drv)
+    if feats.include_sources:
         st.update("Downloading offline sources...")
         try:
-            nix.fetchCachix(serv, srcs_eval, tdir)
+            nix.fetchCachix(feats.source_cache, feats.sources_drv, tdir)
         except:
             warn("Sources derivation could not be downloaded.")
-            _tmplink(tdir, srcs_eval)
+            _tmplink(tdir, feats.sources_drv)

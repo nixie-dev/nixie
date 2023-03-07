@@ -3,6 +3,7 @@ import os
 
 from rich.console   import Console
 from logging        import debug, error, warn
+from pathlib        import Path
 
 from ...output      import script
 from ...            import nix
@@ -10,6 +11,7 @@ from ..             import common,fetchers
 
 def _cmd(console: Console, nocommand=False, **args):
     outn: str
+    skipgen: bool
 
     tdir = common.mktmp()
 
@@ -17,9 +19,18 @@ def _cmd(console: Console, nocommand=False, **args):
         outn = args['output_name']
     else:
         common.goto_git_root()
-        outn = './nix'
+        if not Path('.').joinpath('flake.nix').exists():
+            if list(Path('.').rglob('*.nix').send(None)):
+                outn = './nix-shell'
+                skipgen = True
+            else:
+                outn = './nix'
+                skipgen = False
+        else:
+            skipgen = True
+            outn = './nix'
 
-    if nocommand or args['auto']:
+    if (nocommand or args['auto']) and not skipgen:
         #TODO: implement template predicates and application
         warn("Templates are not yet implemented.")
 
@@ -38,7 +49,7 @@ def _cmd(console: Console, nocommand=False, **args):
     feats.pinned_channels = chns
 
     with console.status("Downloading offline binaries...", spinner="earth") as st:
-        fetchers.prefetch_resources(feats.source_cache, tdir, bins_eval, srcs_eval, args, st)
+        fetchers.prefetch_resources(tdir, feats, st)
 
     scr = script.NixieScript(feats)
 
@@ -46,3 +57,4 @@ def _cmd(console: Console, nocommand=False, **args):
         with open(outn, mode='wb') as fi:
             scr.build(fi, tdir)
     os.chmod(outn, os.stat(outn).st_mode | stat.S_IEXEC)
+    common.setup_git_root(os.path.basename(outn))

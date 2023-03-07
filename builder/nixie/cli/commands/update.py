@@ -53,7 +53,7 @@ def _cmd(console: Console, **args):
     ns.features.bins_drv = bins_eval
 
     with console.status("Downloading offline binaries...", spinner="earth") as st:
-        fetchers.prefetch_resources(ns.features.source_cache, tdir, bins_eval, srcs_eval, args, st)
+        fetchers.prefetch_resources(tdir, ns.features, st)
 
     #TODO: perform nixpkgs version check
     if len(newchns) > 0:

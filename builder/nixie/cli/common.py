@@ -1,5 +1,6 @@
 import git
 import os
+import re
 import atexit
 import tempfile
 import shutil
@@ -152,3 +153,18 @@ def features_from_args(args: dict, old = defaultFeatures) -> script.NixieFeature
         feat.include_bins = args['with_binaries']
     return feat
 
+def setup_git_root(nixname: str):
+    with open('.gitignore', 'a+') as gi:
+        ents = [m for m in gi.read().split('\n')
+                        if re.match('^/?\.nixie', m)]
+        if len(ents) == 0:
+            gi.write('\n.nixie')
+        else:
+            debug('.gitignore already has our rule')
+    with open('.gitattributes', 'a+') as ga:
+        ents = [m for m in ga.read().split('\n')
+                        if re.match(nixname, m)]
+        if len(ents) == 0:
+            ga.write(f'\n{nixname}  linguist-generated')
+        else:
+            debug('.gitattributes already has our rule')

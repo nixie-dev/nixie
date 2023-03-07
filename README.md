@@ -1,4 +1,4 @@
-# Nixie, the zero-install dev environment
+![Nixie](https://raw.githubusercontent.com/nixie-dev/nixie/master/.github/logo.svg)
 
 ## DISCLAIMER
 

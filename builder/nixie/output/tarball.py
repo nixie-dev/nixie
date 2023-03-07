@@ -31,7 +31,7 @@ class ResourceTarball:
             chns = [ fi.name for fi in mms if re.match('^channels/[a-zA-Z0-9_-]+$', fi.name) ]
             self.features.pinned_channels = { k[9:]: None for k in chns }
             self.features.include_sources = 'sources' in [ m.name for m in mms ]
-            self.features.include_bins = 'nix-static.Linux.x86_64' in [ m.name for m in mms ]
+            self.features.include_bins = 'nix.Linux.x86_64' in [ m.name for m in mms ]
 
     def __del__(self):
         '''Destructor to close the original archive if it was used in the
@@ -100,4 +100,4 @@ class ResourceTarball:
                 bins = [ f for f in tmpdir.joinpath(self.features.bins_drv).iterdir()
                             if f.name != 'filelist' ]
                 for f in bins:
-                    m.add(f)
+                    m.add(f, path.basename(f))
