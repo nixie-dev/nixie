@@ -1,4 +1,5 @@
-![Nixie](https://raw.githubusercontent.com/nixie-dev/nixie/master/.github/logo.svg)
+![Nixie](https://raw.githubusercontent.com/nixie-dev/nixie/master/.github/logo.svg#gh-light-mode-only)
+![Nixie](https://raw.githubusercontent.com/nixie-dev/nixie/master/.github/logo-dark.svg#gh-dark-mode-only)
 
 ## DISCLAIMER
 
