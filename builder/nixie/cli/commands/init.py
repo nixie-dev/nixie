@@ -22,12 +22,13 @@ def _cmd(console: Console, nocommand=False, **args):
     else:
         common.goto_git_root()
         if not Path('.').joinpath('flake.nix').exists():
-            if list(Path('.').rglob('*.nix').send(None)):
+            try:
+                Path('.').rglob('*.nix').send(None)
                 outn = './nix-shell'
                 skipgen = True
-            else:
-                outn = './nix'
+            except StopIteration:
                 skipgen = False
+                outn = './nix'
         else:
             skipgen = True
             outn = './nix'
