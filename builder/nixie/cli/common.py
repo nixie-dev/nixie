@@ -153,14 +153,16 @@ def features_from_args(args: dict, old = defaultFeatures) -> script.NixieFeature
         feat.include_bins = args['with_binaries']
     return feat
 
-def setup_git_root(nixname: str):
-    with open('.gitignore', 'r+') as gi:
-        if not re.search('^/?\\.nixie', gi.read(), flags=re.MULTILINE):
-            gi.write('\n.nixie\n')
-        else:
-            debug('.gitignore already has our rule')
-    with open('.gitattributes', 'r+') as ga:
-        if not re.search(nixname, ga.read(), flags=re.MULTILINE):
-            ga.write(f'\n{nixname}  linguist-generated=true\n')
-        else:
-            debug('.gitattributes already has our rule')
+def setup_git_root(nixname: str, skipgi, skipga):
+    if not skipgi:
+        with open('.gitignore', 'r+') as gi:
+            if not re.search('^/?\\.nixie', gi.read(), flags=re.MULTILINE):
+                gi.write('\n.nixie\n')
+            else:
+                debug('.gitignore already has our rule')
+    if not skipga:
+        with open('.gitattributes', 'r+') as ga:
+            if not re.search(nixname, ga.read(), flags=re.MULTILINE):
+                ga.write(f'\n{nixname}  linguist-generated=true\n')
+            else:
+                debug('.gitattributes already has our rule')

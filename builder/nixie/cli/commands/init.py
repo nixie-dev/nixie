@@ -12,6 +12,8 @@ from ..             import common,fetchers
 def _cmd(console: Console, nocommand=False, **args):
     outn: str
     skipgen: bool
+    skipgi: bool = False
+    skipga: bool = False
 
     tdir = common.mktmp()
 
@@ -33,6 +35,9 @@ def _cmd(console: Console, nocommand=False, **args):
     if (nocommand or args['auto']) and not skipgen:
         #TODO: implement template predicates and application
         warn("Templates are not yet implemented.")
+    if not nocommand:
+        skipgi = args['no_gitignore']
+        skipga = args['no_gitattributes']
 
     chns = dict()
     srcs_eval: str
@@ -57,4 +62,4 @@ def _cmd(console: Console, nocommand=False, **args):
         with open(outn, mode='wb') as fi:
             scr.build(fi, tdir)
     os.chmod(outn, os.stat(outn).st_mode | stat.S_IEXEC)
-    common.setup_git_root(os.path.basename(outn))
+    common.setup_git_root(os.path.basename(outn), skipgi, skipga)
