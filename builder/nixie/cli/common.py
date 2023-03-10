@@ -155,13 +155,15 @@ def features_from_args(args: dict, old = defaultFeatures) -> script.NixieFeature
 
 def setup_git_root(nixname: str, skipgi, skipga):
     if not skipgi:
-        with open('.gitignore', 'r+') as gi:
+        with open('.gitignore', 'a+') as gi:
+            gi.seek(0, 0)
             if not re.search('^/?\\.nixie', gi.read(), flags=re.MULTILINE):
                 gi.write('\n.nixie\n')
             else:
                 debug('.gitignore already has our rule')
     if not skipga:
-        with open('.gitattributes', 'r+') as ga:
+        with open('.gitattributes', 'a+') as ga:
+            ga.seek(0, 0)
             if not re.search(nixname, ga.read(), flags=re.MULTILINE):
                 ga.write(f'\n{nixname}  linguist-generated=true\n')
             else:

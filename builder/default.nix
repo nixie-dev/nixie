@@ -14,7 +14,7 @@ let
   };
 in python3Packages.buildPythonApplication {
   pname = "nixie";
-  version = "0.0.1";
+  version = "0.1.2";
 
   src = ./.;
   format = "pyproject";
