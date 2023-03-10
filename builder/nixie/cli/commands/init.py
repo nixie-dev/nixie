@@ -32,6 +32,10 @@ def _cmd(console: Console, nocommand=False, **args):
             skipgen = True
             outn = './nix'
 
+    if Path(outn).exists():
+        error("A nix script has already been set up. Run 'nixie update' to update it.")
+        exit(1)
+
     if (nocommand or args['auto']) and not skipgen:
         #TODO: implement template predicates and application
         warn("Templates are not yet implemented.")
