@@ -158,7 +158,7 @@ def setup_git_root(nixname: str, skipgi, skipga):
         with open('.gitignore', 'a+') as gi:
             gi.seek(0, 0)
             if not re.search('^/?\\.nixie', gi.read(), flags=re.MULTILINE):
-                gi.write('\n.nixie\n')
+                gi.write('\n.nixie\nresult\n')
             else:
                 debug('.gitignore already has our rule')
     if not skipga:

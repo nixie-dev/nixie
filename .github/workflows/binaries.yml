@@ -44,6 +44,7 @@ jobs:
         with:
           name: nix-wrap
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          pushFilter: "(-source|-man)$"
       - name: Install QEMU for AArch64 builds
         run: |
           sudo apt-get -q -y update
