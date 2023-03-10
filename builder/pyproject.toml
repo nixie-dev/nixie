@@ -24,3 +24,23 @@ nixie = "nixie.cli:main"
 
 [tool.setuptools.package-data]
 "nixie.output" = ["*.in"]
+
+[tool.bumpver]
+current_version = "2023.03-a8"
+version_pattern = "YYYY.0M-PYTAGNUM"
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = false
+push = true
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+]
+"nixie/__init__.py" = [
+    "__version__ = '{version}'"
+]
+"default.nix" = [
+    'nixie_ver = "{version}";'
+]
+

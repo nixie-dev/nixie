@@ -46,7 +46,7 @@ jobs:
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: Install QEMU for AArch64 builds
         run: |
-          apt-get -q -y update
-          apt-get -q -y install qemu-user-static
-          echo "extra-platforms = aarch64-linux" >> /etc/nix/nix.conf
+          sudo apt-get -q -y update
+          sudo apt-get -q -y install qemu-user-static
+          echo "extra-platforms = aarch64" | sudo tee -a /etc/nix/nix.conf
       - run: nix build .#static-bins

@@ -29,9 +29,22 @@
             libfakedir = fakedir.packages.aarch64-darwin.fakedir-universal;
             nixStatics."aarch64-linux" = nix.packages.aarch64-linux.nix-static;
           };
+
       } // (if system == "x86_64-darwin" || system == "aarch64-darwin"
       then {
         libfakedir = fakedir.packages.${system}.fakedir;
       } else {});
+
+      devShells = {
+        default = pkgs.mkShell {
+          # These dependencies aren't involved in the build process, but are
+          # nice-to-haves in the dev environment
+          packages = with pkgs; [
+            bumpver
+          ];
+
+          inputsFrom = [ self.packages."${system}".nixie ];
+        };
+      };
     });
 }
