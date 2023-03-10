@@ -10,6 +10,7 @@ from rich.console       import Console
 from rich.logging       import RichHandler
 
 from .commands import init, add_tool, for_cmd, update
+from .. import __version__
 
 '''This module specifically defines all command line options for Nixie and
 their documentation.
@@ -26,17 +27,17 @@ def _use_builder_group(fn):
                           help='Embed prebuilt binaries for Linux and macOS in the script.')
     @builder_group.option('--with-sources/--without-sources', is_flag=True, default=None,
                           help='Embed source code required to build Nix in the script.')
-    @builder_group.option('--extra-experimental-features', default='',
+    @builder_group.option('--extra-experimental-features', default=None,
                           help='Like the Nix option of the same name, a space-separated string listing the Nix experimental features to be enabled by default.')
     @builder_group.option('--extra-substituters', default='',
                           help='Like the Nix option of the same name, a space-separated string listing the Nix cache substituters to use by default. --extra-trusted-public-keys may need to be specified as well.')
     @builder_group.option('--extra-trusted-public-keys', default='',
                           help='Like the Nix option of the same name, a space-separated string listing the public keys for the extra Nix cache substituters.')
-    @builder_group.option('--source-cache', default='',
+    @builder_group.option('--source-cache', default=None,
                           help='The server from which the Nix script will download its resources. See Cachix API documentation for more information.')
-    @builder_group.option('--sources-derivation', default='',
+    @builder_group.option('--sources-derivation', default=None,
                           help='The hash or path to the Nix derivation containing .tar.gz archives for the Nix source code. See documentation for more info.')
-    @builder_group.option('--binaries-derivation', default='',
+    @builder_group.option('--binaries-derivation', default=None,
                           help='The hash or path to the Nix derivation containing prebuilt static Nix binaries. See documentation for more info.')
     @functools.wraps(fn)
     def wrapper(*args, **kwargs):
@@ -49,7 +50,7 @@ def _use_builder_group(fn):
 @_use_builder_group
 @click.option('-C', default='', type=click.types.Path(),
               help='Run in another directory instead of the current.')
-@click.version_option()
+@click.version_option(__version__)
 @click.pass_context
 def main(ctx: click.Context, **kwargs):
     '''This function serves two roles:

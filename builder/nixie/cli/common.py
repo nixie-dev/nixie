@@ -141,11 +141,11 @@ def features_from_args(args: dict, old = defaultFeatures) -> script.NixieFeature
     object reflecting them.
     '''
     feat = deepcopy(old)
-    if args['extra_experimental_features'] != '':
+    if args['extra_experimental_features'] is not None:
         feat.extra_features = args['extra_experimental_features'].split(' ')
     feat.extra_substituters += args['extra_substituters'].split(' ')
     feat.extra_trusted_public_keys += args['extra_trusted_public_keys'].split(' ')
-    if args['source_cache'] != '':
+    if args['source_cache'] is not None:
         feat.source_cache = args['source_cache']
     if args['with_sources'] is not None:
         feat.include_sources = args['with_sources']

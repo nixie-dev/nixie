@@ -1,5 +1,6 @@
 import stat
 import os
+import re
 
 from rich.console   import Console
 from logging        import debug, error, warn
@@ -57,6 +58,8 @@ def _cmd(console: Console, nocommand=False, **args):
     feats.sources_drv = srcs_eval
     feats.bins_drv = bins_eval
     feats.pinned_channels = chns
+    if args['extra_experimental_features'] is None and not re.match('nix-[a-z]*$', outn):
+        feats.extra_features += ['nix-command', 'flakes']
 
     with console.status("Downloading offline binaries...", spinner="earth") as st:
         fetchers.prefetch_resources(tdir, feats, st)
