@@ -322,6 +322,7 @@ _catch_nixie_args() {
     >&2 echo "  --nixie-print-config    Print this script's configuration"
     >&2 echo "  --nixie-extract         Unpack the resources archive in nixie/"
     >&2 echo "  --nixie-ignore-system   Do not use system-wide Nix"
+    >&2 echo "  --nixie-cleanup         Delete local Nix build files"
     exit 0
   }
 
@@ -332,6 +333,16 @@ _catch_nixie_args() {
 
   __extract() {
     mkdir -p nixie && cd nixie && _untar
+    exit 0
+  }
+
+  __cleanup() {
+    >&2 echo "Removing local Nix channels and build files..."
+    chmod -R +wx $REPO_ROOT/.nixie && rm -rf $REPO_ROOT/.nixie
+    >&2 echo "Removing user Nix store..."
+    chmod -R +wx $USER_STORE && rm -rf $USER_STORE
+    >&2 echo "Removing retrieved Nix binaries..."
+    rm -rf $USER_CACHE/nix-static $USER_CACHE/nix-lib
     exit 0
   }
 
@@ -496,6 +507,5 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹[çdÿ íÏMo‚@`Îş
-ã]³‹éÁà6İ´Ñ†]Œ=‘•¯¢€
-Z?~}±¦¶ñŞ&Mßç2“İw2™$VÛ]×Ú"Ë4?jã¶Sÿê/ïJt­M´_°«·ªjVjÿ›IÏî™-}‰a§ÌİpUªŒÚI®–qİi]2Âw„äÒ—Ìkrí«ÏéùB²Qğì;OÜÙËMLL|Ïek»ì²h_©u/Tákvè­ªô1OmÉ'ãa~·,OÆÁ*©Òõt-¨qŒJ£i­MD‹Ö˜Ï‡Å÷¡ÅÚ2ËÚZ”¾E!­û9=“½:™+›×Ùyˆ³`Ú\rëD7zÄèª>ii                  Ä;¬! „ (  [?1049l [2K[37;2m# (tarball data)[0m
+‹u@dÿ íÏMkÂ@àœıÁ»!_»Òƒ‡$néÒ¢%Ùˆ=…561FM´~üúÆJ¥H¯-…¾Ïe†á†ÉR¹İÕi£ü ½Emû£¶n«n[ôÚ_æ}bŠª+¿`×leİTş'6¾İ3G„>İ*?ôâÕr)«DÍJ¹H›nç’	B7\„‚ùmN½õ~6ŒC÷‰{Ñ#{ù>ŒCßc‘çxìrv_ËµËø5?h«z~™Ï'àãÑ ¼Ûô'ë@+"Ms>K
+b“Êj[ºIÈ²3âÓÈå£àëR±¦vÕĞBŸ“·$&Q’Ó1ÛË“İ§ù¬ÉÏKœE“ö¯sÜÔMKÓ­4Œ                 ğg½"ÒY (  [?1049l [2K[37;2m# (tarball data)[0m

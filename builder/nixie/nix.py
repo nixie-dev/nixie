@@ -78,7 +78,7 @@ def fetchCachix(host: str, path: str, dest: Path):
 def findIndex(path: str) -> list[str]:
     '''Scan nix-index for a derivation containing the given path.
     '''
-    r = subprocess.run(['nix-locate', '-1', '--at-root', '-w', path], capture_output=True)
+    r = subprocess.run(['nix-locate', '--minimal', '--at-root', '--whole-name', path], capture_output=True)
     if r.returncode != 0:
         raise RuntimeError(r.stderr.decode())
     results = [m.decode() for m in r.stdout.split(b'\n')

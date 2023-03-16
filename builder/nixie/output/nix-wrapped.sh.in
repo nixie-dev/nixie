@@ -322,6 +322,7 @@ _catch_nixie_args() {
     >&2 echo "  --nixie-print-config    Print this script's configuration"
     >&2 echo "  --nixie-extract         Unpack the resources archive in nixie/"
     >&2 echo "  --nixie-ignore-system   Do not use system-wide Nix"
+    >&2 echo "  --nixie-cleanup         Delete local Nix build files"
     exit 0
   }
 
@@ -332,6 +333,16 @@ _catch_nixie_args() {
 
   __extract() {
     mkdir -p nixie && cd nixie && _untar
+    exit 0
+  }
+
+  __cleanup() {
+    >&2 echo "Removing local Nix channels and build files..."
+    chmod -R +wx $REPO_ROOT/.nixie && rm -rf $REPO_ROOT/.nixie
+    >&2 echo "Removing user Nix store..."
+    chmod -R +wx $USER_STORE && rm -rf $USER_STORE
+    >&2 echo "Removing retrieved Nix binaries..."
+    rm -rf $USER_CACHE/nix-static $USER_CACHE/nix-lib
     exit 0
   }
 
