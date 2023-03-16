@@ -461,7 +461,7 @@ then
   then
     >&2 echo "Migrating Nix store to system-wide install..."
     nix copy --from $USER_STORE --all --no-check-sigs &&\
-    rm -rf $USER_STORE
+    chmod -R +wx $USER_STORE && rm -rf $USER_STORE
   fi
 
   exec -a "$NIXCMD" nix "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
@@ -496,6 +496,6 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-ã4„dˇ ÌœMoÇ@`Œ˛
-„]≤Ú)à€t”Xå=ë≠Ä
-Z©øæXZ”ˆﬁ&MﬂÁ2ì›w2ôd)«rYI?à4M{´çÔïhı⁄∑Ô¶N4©K§_p¨¢lVJˇùsœo®Õè˙£^±Æ˚—6œEwìLlñUØ”f¸`Ïs∆NΩ&◊}˜ÒÀΩ¿Át>„{ÊÑwÙÒK»üûCC«vniª‰TäùâhµÆÂmô^#Í±ôÕŸ‘e÷ﬁ‹ú’⁄(t°(È"~“’ó∏Põ÷ÿ«zﬁqŸ<3◊ˇ<T¶ãdUoÜz≤#ir>Wëûj3_(V≠™À£·¨π‚Wà¢ DÌ´#                 ¸%ØCB» (  [?1049l [2K[37;2m# (tarball data)[0m
+ã[Ádˇ ÌœMoÇ@`Œ˛
+„]≥ãÈ¡‡6›¥—Ü]å=ëïØ¢Ä
+Z?~}±¶∂Òﬁ&MﬂÁ2ì›w2ô$V€]◊⁄"À4?j„∂SˇÍ/ÔJt≠M¥_∞´∑™jVjˇõIœÓô-}èâaßÃ›pU™å⁄IÆñq›i]2¬wÑ‰“óÃkrÌ´œÈ˘B≤QÏ;O‹ŸÀMLL|œeÅkªÏ≤h_©u/T·kvË≠™Ù1èOm…'„a~∑,O∆¡*©“ıt-®qåJ£i≠MDã÷òœáè≈˜°≈⁄2À⁄ZêîæE!≠˚9=ìΩ:ô+õ◊Ÿyà≥`⁄\réÎD7zƒË™>ii                  ƒ;¨! Ñ (  [?1049l [2K[37;2m# (tarball data)[0m
