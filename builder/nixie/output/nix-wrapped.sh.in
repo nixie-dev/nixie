@@ -461,7 +461,7 @@ then
   then
     >&2 echo "Migrating Nix store to system-wide install..."
     nix copy --from $USER_STORE --all --no-check-sigs &&\
-    rm -rf $USER_STORE
+    chmod -R +wx $USER_STORE && rm -rf $USER_STORE
   fi
 
   exec -a "$NIXCMD" nix "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
