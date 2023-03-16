@@ -7,7 +7,7 @@ from shlex                import shlex
 from dotenv               import dotenv_values
 from importlib.resources  import files
 from functools            import reduce
-from ..                   import nix
+from ..                   import nix, __version__
 
 class NixieFeatures:
     '''An object representing the features file in a Nixie-generated script,
@@ -47,7 +47,8 @@ class NixieFeatures:
             f"EXTRA_TRUSTED_PUBLIC_KEYS=\"{' '.join(self.extra_trusted_public_keys)}\"\n"
             f"SOURCE_CACHE=\"{self.source_cache}\"\n"
             f"SOURCE_DERIVATION={nix.hashify(self.sources_drv)}\n"
-            f"NIX_BINS_DERIVATION={nix.hashify(self.bins_drv)}"
+            f"NIX_BINS_DERIVATION={nix.hashify(self.bins_drv)}\n"
+            f"NIXIE_VERSION={__version__}\n"
         )
 
 

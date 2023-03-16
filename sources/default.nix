@@ -66,8 +66,7 @@ let
       brotli_configured_src
     ];
 in stdenv.mkDerivation {
-  pname = "nixie-sources";
-  version = "0.0.1";
+  name = "nixie-sources";
 
   dontInstall = true;
 

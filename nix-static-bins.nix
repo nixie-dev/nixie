@@ -37,16 +37,18 @@ let
               system = s;
             };
           }
-          else {}))
+          else
+          { overlays =
+            [ (import ./nixpkgs-cosmopolitan.nix) ];
+          }))
     ) builtSystems;
 
   nixPackage = r: if builtins.hasAttr "${r.system}" nixStatics
                   then nixStatics."${r.system}"
-                  else r.nixStatic;
+                  else r.nixCosmo;
 in
 pkgs.stdenv.mkDerivation {
-  pname = "nix-static-binaries";
-  version = "0.0.1";
+  name = "nix-static-binaries";
   src = pkgs.emptyDirectory;
 
   installPhase =
