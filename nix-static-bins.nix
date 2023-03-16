@@ -37,12 +37,15 @@ let
               system = s;
             };
           }
-          else {}))
+          else
+          { overlays =
+            [ (import ./nixpkgs-cosmopolitan.nix) ];
+          }))
     ) builtSystems;
 
   nixPackage = r: if builtins.hasAttr "${r.system}" nixStatics
                   then nixStatics."${r.system}"
-                  else r.nixStatic;
+                  else r.nixCosmo;
 in
 pkgs.stdenv.mkDerivation {
   name = "nix-static-binaries";
