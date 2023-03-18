@@ -31,9 +31,11 @@ class NixieFeatures:
         if file is not None:
             kvs = dotenv_values(stream=StringIO(file.read().decode()))
 
-            self.extra_features            = kvs["EXTRA_FEATURES"].split(' ')
-            self.extra_substituters        = kvs["EXTRA_SUBSTITUTERS"].split(' ')
-            self.extra_trusted_public_keys = kvs["EXTRA_TRUSTED_PUBLIC_KEYS"].split(' ')
+            prune = lambda x: [m for m in x if m != '']
+
+            self.extra_features            = prune(kvs["EXTRA_FEATURES"].split(' '))
+            self.extra_substituters        = prune(kvs["EXTRA_SUBSTITUTERS"].split(' '))
+            self.extra_trusted_public_keys = prune(kvs["EXTRA_TRUSTED_PUBLIC_KEYS"].split(' '))
             self.source_cache              = kvs["SOURCE_CACHE"]
             self.sources_drv               = kvs["SOURCE_DERIVATION"]
             self.bins_drv                  = kvs["NIX_BINS_DERIVATION"]

@@ -19,7 +19,7 @@
 SYSTEM="$(uname -s).$(uname -m)"
 THIS_SCRIPT="$(readlink -f $0)"
 PWD_SAVE=$PWD
-REPO_ROOT="$(git rev-parse --show-toplevel "${THIS_SCRIPT%/*}"| head -n 1)"
+REPO_ROOT="$({ git -C "${THIS_SCRIPT%/*}" rev-parse --show-toplevel 2>/dev/null | head -n 1; } || { >&2 echo "WARNING: Failed to find current Git repository, using script parent directory."; echo "${THIS_SCRIPT%/*}"; })"
 
 if [[ "$SYSTEM" =~ Darwin ]]
 then

@@ -19,7 +19,7 @@
 SYSTEM="$(uname -s).$(uname -m)"
 THIS_SCRIPT="$(readlink -f $0)"
 PWD_SAVE=$PWD
-REPO_ROOT="$(git rev-parse --show-toplevel "${THIS_SCRIPT%/*}"| head -n 1)"
+REPO_ROOT="$({ git -C "${THIS_SCRIPT%/*}" rev-parse --show-toplevel 2>/dev/null | head -n 1; } || { >&2 echo "WARNING: Failed to find current Git repository, using script parent directory."; echo "${THIS_SCRIPT%/*}"; })"
 
 if [[ "$SYSTEM" =~ Darwin ]]
 then
@@ -507,5 +507,4 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹u@dÿ íÏMkÂ@àœıÁ»!_»Òƒ‡$néÒ¢%Ùˆ=…561FM´~üúÆJ¥H¯-…¾Ïe†á†ÉR¹İÕi£ü ½Emû£¶n«n[ôÚ_æ}bŠª+¿`×leİTş'6¾İ3G„>İ*?ôâÕr)«DÍJ¹H›nç’	B7\„‚ùmN½õ~6ŒC÷‰{Ñ#{ù>ŒCßc‘çxìrv_ËµËø5?h«z~™Ï'àãÑ ¼Ûô'ë@+"Ms>K
-b“Êj[ºIÈ²3âÓÈå£àëR±¦vÕĞBŸ“·$&Q’Ó1ÛË“İ§ù¬ÉÏKœE“ö¯sÜÔMKÓ­4Œ                 ğg½"ÒY (  [?1049l [2K[37;2m# (tarball data)[0m
+‹,dÿ íÎËn‚@`Ö<…q/á6.\ NÓIm`0vEFn´^¾¨­iºo“¦ÿ·9“sş33Y*¶»&m¥¤v,Ó¼ÔÎ÷ªömöÑ·‰¦K=Uú»v+šîIé¢3î;Ñ=uxèÓ`Ø¯‹Ã ^-—¢NzY%iÛ—¯™ tÎxÈ©ßå>»ÜNGÑsè>1/z¤/—a0	}Fã=Ğë¥ûF¬•XÄ¯ÅAY5ù-2¢>›:œMÆÃênc/NÆÁª‰Ğõ|”Ä8&µÑ­MB–ò˜Í"—ƒ¯KåÚ2ëÖ*Õœ¼%1iµŠœÙ^œLÛ*æmq^b4šv¿>ÇuU7ÕM—%                 €?ì¥… (  [?1049l [2K[37;2m# (tarball data)[0m
