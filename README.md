@@ -11,7 +11,7 @@ Nixie is a lightweight solution to ship the [Nix package manager](https://nixos.
 
 On macOS, non-root Nix store support is made possible by [fakedir](https://github.com/nixie-dev/fakedir), which is shipped with the script as a Universal library.
 
-## How do I install Nixie?
+## How do I add Nixie to my project?
 
 To "install" Nixie onto your project's Git repository, you need to be running the Nix package manager, preferably with flakes enabled.
 
@@ -60,7 +60,7 @@ Once you have acquired Nixie, simply run `nixie` to automatically configure the 
 
 </details>
 
-## How do I start using Nixie?
+## What do the generated files mean?
 
 Running the `nix` script at the root of your repository will automatically determine if you have Nix installed or not. If Nix is installed, it will just redirect the call to your system-wide Nix. It's when it is _not installed_ that the magic happens.
 
