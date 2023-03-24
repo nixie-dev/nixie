@@ -310,7 +310,7 @@ _macos_workaround_nix () {
   DYLD_LIBRARY_PATH="$USER_CACHE/nix-lib" \
   FAKEDIR_PATTERN=/nix \
   FAKEDIR_TARGET=$USER_STORE/nix \
-    exec -a "$CMDNAME" "$@"
+    exec -a "$CMDNAME" "$USER_CACHE/nix-static" "$@"
 }
 
 _catch_nixie_args() {
@@ -488,7 +488,7 @@ else
     if [[ "$SYSTEM" =~ Darwin ]]
     then
       # wow apple thanks
-      _macos_workaround_nix "$0" "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
+      _macos_workaround_nix "$NIXCMD" "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
     else
       # Workaround for ascendant symlinks
       mkdir -p $HOME/.local/share/nix/root

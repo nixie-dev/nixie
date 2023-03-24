@@ -310,7 +310,7 @@ _macos_workaround_nix () {
   DYLD_LIBRARY_PATH="$USER_CACHE/nix-lib" \
   FAKEDIR_PATTERN=/nix \
   FAKEDIR_TARGET=$USER_STORE/nix \
-    exec -a "$CMDNAME" "$@"
+    exec -a "$CMDNAME" "$USER_CACHE/nix-static" "$@"
 }
 
 _catch_nixie_args() {
@@ -488,7 +488,7 @@ else
     if [[ "$SYSTEM" =~ Darwin ]]
     then
       # wow apple thanks
-      _macos_workaround_nix "$0" "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
+      _macos_workaround_nix "$NIXCMD" "${EXTRA_ARGS[@]}" "${CMDL_ARGS[@]}"
     else
       # Workaround for ascendant symlinks
       mkdir -p $HOME/.local/share/nix/root
@@ -507,4 +507,5 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-ãè,dˇ ÌŒÀnÇ@`÷<Öq/·6ê.\ N”Im`0vEFn¥^ûæ®≠i∫oì¶ˇ∑9ìs˛33Y*∂ª&m•§v,”º‘Œ˜™ˆmˆ—∑â¶K=U˙ªv+öÓIÈ¢3Ó;—=uxË”`ÿØã√ ^-ó¢NzY%i€óØô tŒx»©ﬂÂ>ª‹NG—sË>1/z§/óa0	}èFû„=–Î•˚F¨ïXƒØ≈AY5˘-2¢>õ:úM∆√Ínc/N∆¡™â–ı|ûîƒ8&µ—≠MBñÚòÕ"óçÉØKÂ⁄2Î÷*’úº%1iµäúéŸ^úL€*Êmq^b4övø>«uU7’Mó%                 Ä?Ï•Ö (  [?1049l [2K[37;2m# (tarball data)[0m
+ãO∑dˇ ÌŒÕnÇ@`÷<Öq/Ü„¬‡4ù¥—cWd ±TEçîß/jk“Ó€§È˘6wrÔπ3ì-Â·X-kÂëémöó⁄˘^â1ºÕ>˙CKßJè(ø‡Xd’=©¸Ol!|'∫cé}å˚Eﬁí›v+ã¥óm‰zY˜’k&›@p
+ÊwπœÆ√@∞IÙ∫è‹ãÿÛeÃBﬂcëÁx˜ÏzÈ©í•ñ»‰%o¥]µ∫E&ÃÁsGŸtºÌáÎ÷hÏ¬íîÆ‚Ù’2ﬁ“¬Ëéˆ>µ∂Íî/"óOÉ/KUKÙ≤ŒöS¢Á˘»2≥∏]µ4Ÿõ6)„=/qÕª_ü„îPC#∆@ÍTU                  ˛∞wç·Ù (  [?1049l [2K[37;2m# (tarball data)[0m
