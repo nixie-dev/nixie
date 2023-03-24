@@ -274,8 +274,15 @@ _get_nix() {
 
   __teardown() { tput rmcup; echo -ne "\033]0;\007"; }
 
-  # And we set a trap to exist alt-buffer on ^C cause we're no savages.
+  # And we set a trap to exit alt-buffer on ^C cause we're no savages.
   trap "__teardown; exit 1" SIGKILL SIGTERM SIGINT SIGABRT
+
+  if [[ $SYSTEM =~ Darwin ]]
+  then
+    # Retrieve fakedir
+    mkdir -p "$USER_CACHE/nix-lib"
+    _pull_nix_bin "libfakedir.dylib" "$USER_CACHE/nix-lib/libfakedir.dylib"
+  fi
 
   # Check if the binary already exists
   [[ -f "$USER_CACHE/nix-static" ]] \
@@ -302,9 +309,7 @@ _macos_workaround_nix () {
   shift 1
   mkdir -p $USER_STORE/nix
 
-  [[ -f "$USER_CACHE/nix-lib/libfakedir.dylib" ]] || \
-  _pull_nix_bin libfakedir.dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
-    || _bail "libfakedir.dylib missing, cannot proceed."
+  [[ -f "$USER_CACHE/nix-lib/libfakedir.dylib" ]] || _bail "libfakedir.dylib missing, cannot proceed."
 
   : ${NIX_SSL_CERT_FILE:=/etc/ssl/cert.pem}
   export NIX_SSL_CERT_FILE

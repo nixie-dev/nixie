@@ -274,8 +274,15 @@ _get_nix() {
 
   __teardown() { tput rmcup; echo -ne "\033]0;\007"; }
 
-  # And we set a trap to exist alt-buffer on ^C cause we're no savages.
+  # And we set a trap to exit alt-buffer on ^C cause we're no savages.
   trap "__teardown; exit 1" SIGKILL SIGTERM SIGINT SIGABRT
+
+  if [[ $SYSTEM =~ Darwin ]]
+  then
+    # Retrieve fakedir
+    mkdir -p "$USER_CACHE/nix-lib"
+    _pull_nix_bin "libfakedir.dylib" "$USER_CACHE/nix-lib/libfakedir.dylib"
+  fi
 
   # Check if the binary already exists
   [[ -f "$USER_CACHE/nix-static" ]] \
@@ -302,9 +309,7 @@ _macos_workaround_nix () {
   shift 1
   mkdir -p $USER_STORE/nix
 
-  [[ -f "$USER_CACHE/nix-lib/libfakedir.dylib" ]] || \
-  _pull_nix_bin libfakedir.dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
-    || _bail "libfakedir.dylib missing, cannot proceed."
+  [[ -f "$USER_CACHE/nix-lib/libfakedir.dylib" ]] || _bail "libfakedir.dylib missing, cannot proceed."
 
   : ${NIX_SSL_CERT_FILE:=/etc/ssl/cert.pem}
   export NIX_SSL_CERT_FILE
@@ -510,6 +515,5 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹V dÿ íÎËNÂ@à®y
-Â2Ìô,JãDSL;%¸j¦.–)¶€‚OO%Æ½&ÆÿÛœÉ9ÿ™™Y®¶»:ß?ˆ4lÓ<×Æ÷J˜s}ô«O61~Án³Uuó¤ñ?ñ©Üø–»2
-x8è”Ë}7]k­Ê¬=[©"ßtZ—LC)d$yĞä>»2ˆBÉGñc4|^|ÏŸÎÃp=×»ã—KßjõÒKUºXî{ëz~Œx &®c°º©œâííÒR”Î“ìÙb‡¬dÍÑ®2K·|1‡Â¿.½T½JR/-UÌtF”¶Í„é„%„,*zZ<4¿>Å)¡¬GXWõiË                  øÃ7Ş~E (  [?1049l [2K[37;2m# (tarball data)[0m
+‹ dÿ íÎOOÂ0ğ÷)wHYÙ¶Qc£ÓuOK÷&tÈ ?=”ïšŸßåmŞ÷yÛ¹Úîê|cü Òpúısm|¯„º×ÙGßµ{–Ñ"Æ/Øm¶ªn4ş'6•Â‹o™'#ÁÂA»*÷t¥µª²V±T‹|Ó6/™0òCÉe$™hrŸ])¢P²aüù<ˆïÙÓy#°8ğ‚;v¹ô­V/İT¥órß]Õ³kdÈŸx’GƒåÍÚ]¼Ó½SÙÊ²fIölÓCVÑæè¬3[›#>}>
+¿.½T½LİJ—¶Z:#J;ı„ê„&„Ì×Öi‰³xÒüú·ˆE»„vTš                 ÀvŞÂ³` (  [?1049l [2K[37;2m# (tarball data)[0m
