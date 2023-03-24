@@ -306,6 +306,9 @@ _macos_workaround_nix () {
   _pull_nix_bin libfakedir.dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
     || _bail "libfakedir.dylib missing, cannot proceed."
 
+  : ${NIX_SSL_CERT_FILE:=/etc/ssl/cert.pem}
+  export NIX_SSL_CERT_FILE
+
   DYLD_INSERT_LIBRARIES="$USER_CACHE/nix-lib/libfakedir.dylib" \
   DYLD_LIBRARY_PATH="$USER_CACHE/nix-lib" \
   FAKEDIR_PATTERN=/nix \

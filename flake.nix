@@ -24,7 +24,7 @@
       { default = nixie;
         nixie = pkgs.callPackage ./builder {};
         sources = pkgs.callPackage ./sources {};
-        static-bins = import ./nix-static-bins.nix
+        static-bins = import ./static-bins
           { inherit nixpkgs fakedir pkgs;
             libfakedir = fakedir.packages.aarch64-darwin.fakedir-universal;
             nixStatics."aarch64-linux" = nix.packages.aarch64-linux.nix-static;
