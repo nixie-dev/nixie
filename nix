@@ -306,6 +306,9 @@ _macos_workaround_nix () {
   _pull_nix_bin libfakedir.dylib "$USER_CACHE/nix-lib/libfakedir.dylib" \
     || _bail "libfakedir.dylib missing, cannot proceed."
 
+  : ${NIX_SSL_CERT_FILE:=/etc/ssl/cert.pem}
+  export NIX_SSL_CERT_FILE
+
   DYLD_INSERT_LIBRARIES="$USER_CACHE/nix-lib/libfakedir.dylib" \
   DYLD_LIBRARY_PATH="$USER_CACHE/nix-lib" \
   FAKEDIR_PATTERN=/nix \
@@ -507,5 +510,6 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹O·dÿ íÎÍn‚@`Ö<…q/†ãÂà4´ÑcWd ±TE”§/jkÒîÛ¤éù6wrï¹3“-åáX-kå‘mš—Úù^‰1¼Í>úCK§J(¿àXdÕ=©üOl!|'ºc}ŒûEŞ’İv+‹´—mäzY÷Õk&İ@p
-æw¹Ï®ğÃ@°IôºÜ‹ØóeÌBßc‘çx÷ìzé©’¥–Èä%o´]µºE&ÌçsGğÙt¼í‡ëÖhìÂ’”®âôÕ2ŞÒÂèö>µ¶ê”/"—Oƒ/KUKô²ÎšS¢çùÈ2³¸]µ4Ù›6)ã=/qÍ»_Ÿã”PC#Æ@êTU                  ş°wáô (  [?1049l [2K[37;2m# (tarball data)[0m
+‹V dÿ íÎËNÂ@à®y
+Â2Ìô,JãDSL;%¸j¦.–)¶€‚OO%Æ½&ÆÿÛœÉ9ÿ™™Y®¶»:ß?ˆ4lÓ<×Æ÷J˜s}ô«O61~Án³Uuó¤ñ?ñ©Üø–»2
+x8è”Ë}7]k­Ê¬=[©"ßtZ—LC)d$yĞä>»2ˆBÉGñc4|^|ÏŸÎÃp=×»ã—KßjõÒKUºXî{ëz~Œx &®c°º©œâííÒR”Î“ìÙb‡¬dÍÑ®2K·|1‡Â¿.½T½JR/-UÌtF”¶Í„é„%„,*zZ<4¿>Å)¡¬GXWõiË                  øÃ7Ş~E (  [?1049l [2K[37;2m# (tarball data)[0m
