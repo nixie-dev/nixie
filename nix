@@ -408,8 +408,8 @@ then
   if (( $(stat -c %W "$REPO_ROOT/.nixie/channels" 2>/dev/null || echo 0) < $(stat -c %W "$THIS_SCRIPT" ) ))
   then
     (cd $REPO_ROOT/.nixie; _untar "channels" 2>/dev/null)
-    export NIX_PATH="$REPO_ROOT/.nixie/channels:$NIX_PATH"
   fi
+  export NIX_PATH="$REPO_ROOT/.nixie/channels:$NIX_PATH"
 fi
 
 
@@ -518,6 +518,4 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹ßdÿ íÎÍn‚@`Ö<…q¯Áá¯]¸ œ¦“6ØÀ`ìŠŒ€VQTĞ:øô¢¶¦é¾Mšos'÷;3ÓLìöeV)?HkX†q©ïUÓíÛì£o›=¢´4åì«(›'•ÿ‰yàÄÔáQ@Ã~»˜ËN²^­D‘¶¦K‘gU[½fÂÈ9ã§A“ûìò 
-9Ä/‘ûÌ¼ø‰¾^†á0
-<{÷H¯—J±é&"y›Ëîºœİ"°‘ÃÙĞï/ï·v~Ô¥U˜‚Ù$]˜zzs´¶©¹R}6]æ‡_—$©ìÂ\2·êIi/ÇÌk›Ü¥2­æûy‰ÑxÔüú'Ñ»šŞ=CU                  ş°û ¾p (  [?1049l [2K[37;2m# (tarball data)[0m
+‹`(dÿ íÎÁn‚@`Î<…ñ.¤=x@Ü¦›6ØÀbì‰, `TĞ(>}Q[ÓôŞ&Mÿï2›™v7]ˆİ¾^4ÒR;CÃ¸ÔÎ÷ªë6ûè[¦¦K=Uúûf'êîIé¢sîÙáµyàQÔ¯–ÇA¼.KQ%½t%ŠEÓ—¯?ûœñ€S¯Ë}v¹øœNÂ—`üÌœğ‰¾^†ş4ğ:¶óH¯—j±QbçË£²®³[dB=6³9›º£ÕıÖ*Nä8¬L¡ëY”¼™¤M*Ò‡ÛÄ,e—ÍÃ1sı¯KQNî6)!QÖ¶‡|#Š¼Ò"­“ÈÊ¦5ÎKŒ†³î×ç¸®êDQÉ@h†,                 üaïö7 (  [?1049l [2K[37;2m# (tarball data)[0m

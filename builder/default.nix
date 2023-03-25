@@ -1,4 +1,4 @@
-{ lib, python3Packages, fetchPypi, nix-index, ... }:
+{ lib, python3Packages, fetchPypi, nix-index, nix, ... }:
 
 let
   nixie_ver = "2023.03-a14";
@@ -38,5 +38,6 @@ in python3Packages.buildPythonApplication {
       pzp
       gitpython
       nix-index
+      nix
     ];
 }

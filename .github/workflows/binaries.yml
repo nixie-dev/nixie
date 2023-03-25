@@ -5,8 +5,7 @@ on:
     paths:
       - flake.nix
       - flake.lock
-      - nix-static-bins.nix
-      - nixpkgs-darwin-static.nix
+      - 'static-bins/**'
 
 jobs:
   precompile-bitrise:
