@@ -277,7 +277,7 @@ _get_nix() {
   # And we set a trap to exit alt-buffer on ^C cause we're no savages.
   trap "__teardown; exit 1" SIGKILL SIGTERM SIGINT SIGABRT
 
-  if [[ $SYSTEM =~ Darwin ]]
+  if [[ $SYSTEM =~ Darwin ]] && ! [[ -f $USER_CACHE/nix-lib/libfakedir.dylib ]]
   then
     # Retrieve fakedir
     mkdir -p "$USER_CACHE/nix-lib"
@@ -314,6 +314,9 @@ _macos_workaround_nix () {
   : ${NIX_SSL_CERT_FILE:=/etc/ssl/cert.pem}
   export NIX_SSL_CERT_FILE
 
+  # We must ensure fakedir gets propagated into spawned executables as well
+  # so we unfortunately need to disengage the sandbox entirely.
+  _NIX_TEST_NO_SANDBOX=1 \
   DYLD_INSERT_LIBRARIES="$USER_CACHE/nix-lib/libfakedir.dylib" \
   DYLD_LIBRARY_PATH="$USER_CACHE/nix-lib" \
   FAKEDIR_PATTERN=/nix \
@@ -515,5 +518,6 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-ã dˇ ÌŒOO¬0ù˜)wHYŸ∂Qc£”uOK˜&t» ?=îÔöüﬂÂmﬁ˜y€π⁄ÓÍ|c¸ “p˙˝sm|ØÑ∫◊ŸGﬂµ{ñ—"∆/ÿm∂™nû4˛'6ï¬ãoô'#¡¬Aª*˜ùt•µ™≤V±Tã|”6/ô0ÚC…e$ôhrü])¢P≤a¸˘<àÔŸ”yé#∞8Ç;vπÙ≠V/›T•Ûrﬂ]’≥kd»üxíèGÉÂÕ⁄]º”ΩSŸ ≤fIˆl”CV—ÊË¨3[õ#>ç}>
-ø.ΩTΩL›Jó∂Z:#J;˝ÑÍÑ&ÑÃ◊÷iâ≥x“¸˙∑àEªÑvTèö                 ¿vﬁ¬≥` (  [?1049l [2K[37;2m# (tarball data)[0m
+ãﬂdˇ ÌŒÕnÇ@`÷<ÖqØ¡·Ø]∏ ú¶ì6ÿ¿`ÏäåÄVQT–:¯Ù¢∂¶ÈæMöûos'˜û;3”LÏˆeV)?HkXÜq©çÔU”Ì€Ï£oõ=¢¥4ÂÏ´ù(õ'ïˇâéy‡ƒ‘·Q@√~ªòÀN≤^≠Dë∂¶KëgU[Ωf¬»9„ßAì˚ÏÚ 
+9ƒ/ë˚Ãº¯âæ^Ü·0
+<{é˜HØóJ±È&"yõÀÓ∫ú›"∞ë√Ÿ–Ô/Ô∑v~‘•UòÇêŸ$]òzùzs¥∂©πR}6é]Êá_ó$©Ï¬\2∑ÍIi/«çÃkõ‹•2≠Ê˚yâ—x‘¸˙'—ªöﬁ=CU                  ˛∞˚ æp (  [?1049l [2K[37;2m# (tarball data)[0m

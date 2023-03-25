@@ -277,7 +277,7 @@ _get_nix() {
   # And we set a trap to exit alt-buffer on ^C cause we're no savages.
   trap "__teardown; exit 1" SIGKILL SIGTERM SIGINT SIGABRT
 
-  if [[ $SYSTEM =~ Darwin ]]
+  if [[ $SYSTEM =~ Darwin ]] && ! [[ -f $USER_CACHE/nix-lib/libfakedir.dylib ]]
   then
     # Retrieve fakedir
     mkdir -p "$USER_CACHE/nix-lib"
@@ -314,6 +314,9 @@ _macos_workaround_nix () {
   : ${NIX_SSL_CERT_FILE:=/etc/ssl/cert.pem}
   export NIX_SSL_CERT_FILE
 
+  # We must ensure fakedir gets propagated into spawned executables as well
+  # so we unfortunately need to disengage the sandbox entirely.
+  _NIX_TEST_NO_SANDBOX=1 \
   DYLD_INSERT_LIBRARIES="$USER_CACHE/nix-lib/libfakedir.dylib" \
   DYLD_LIBRARY_PATH="$USER_CACHE/nix-lib" \
   FAKEDIR_PATTERN=/nix \
