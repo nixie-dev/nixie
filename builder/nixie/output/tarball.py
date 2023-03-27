@@ -91,13 +91,13 @@ class ResourceTarball:
             for name, tgt in self.features.pinned_channels.items():
                 self._push_channel(m, name, tgt)
             if self.features.include_sources:
-                srcs = [ f for f in tmpdir.joinpath(self.features.sources_drv).iterdir()
+                srcs = [ f for f in tmpdir.joinpath(nix.hashify(self.features.sources_drv)).iterdir()
                             if f.name != 'filelist' ]
                 for f in srcs:
                     with tf.open(f, mode='r:*') as fm:
                         self.transplant(m, fm, 'sources')
             if self.features.include_bins:
-                bins = [ f for f in tmpdir.joinpath(self.features.bins_drv).iterdir()
+                bins = [ f for f in tmpdir.joinpath(nix.hashify(self.features.bins_drv)).iterdir()
                             if f.name != 'filelist' ]
                 for f in bins:
                     m.add(f, path.basename(f))
