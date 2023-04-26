@@ -10,11 +10,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1679760256,
-        "narHash": "sha256-C06Uwpyi5b1IRNDLqEsvVhjCJpg1K3hqX7/5pZU9XDI=",
+        "lastModified": 1679922866,
+        "narHash": "sha256-pg73g4+EYQM7jHeWj+VxB9u2lADANpGjO7QW11HscRM=",
         "owner": "nixie-dev",
         "repo": "fakedir",
-        "rev": "b73c31333ebf1e9fe7295797d3cc0c2d151399f7",
+        "rev": "11fd3a3ebb8fe8c3d905d970d827da5579d84385",
         "type": "github"
       },
       "original": {
