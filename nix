@@ -263,7 +263,7 @@ _try_build_nix() {
   && make
 
   #TODO: determine binary output path and copy to nix-static
-  mv nix "$USER_CACHE/nix-static"
+  mv src/nix/nix "$USER_CACHE/nix-static"
 }
 
 # Try a set of strategies to obtain a statically built Nix binary
@@ -407,6 +407,7 @@ if [[ "$0" =~ nix-(shell|build|env)$ ]]
 then
   if (( $(stat -c %W "$REPO_ROOT/.nixie/channels" 2>/dev/null || echo 0) < $(stat -c %W "$THIS_SCRIPT" ) ))
   then
+    >&2 echo "Unpacking Nix channels, hang tight..."
     (cd $REPO_ROOT/.nixie; _untar "channels" 2>/dev/null)
   fi
   export NIX_PATH="$REPO_ROOT/.nixie/channels:$NIX_PATH"
@@ -455,6 +456,10 @@ then
   NIXCMD="nix-shell"
   CMDL_ARGS=("$REPO_ROOT/shell.nix" "--command" "${0##*/}$(printf ' %q' "$@")")
 fi
+
+# Check for alternate OpenSSL/LibreSSL certificate paths (fixes #6)
+[[ -f "/etc/pki/tls/certs/ca-bundle.crt" ]] && : ${NIX_SSL_CERT_FILE:="/etc/pki/tls/certs/ca-bundle.crt"}
+[[ "$NIX_SSL_CERT_FILE" != "" ]] && export NIX_SSL_CERT_FILE
 
 
 # Apply experimental features if listed
@@ -518,4 +523,5 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹`(dÿ íÎÁn‚@`Î<…ñ.¤=x@Ü¦›6ØÀbì‰, `TĞ(>}Q[ÓôŞ&Mÿï2›™v7]ˆİ¾^4ÒR;CÃ¸ÔÎ÷ªë6ûè[¦¦K=Uúûf'êîIé¢sîÙáµyàQÔ¯–ÇA¼.KQ%½t%ŠEÓ—¯?ûœñ€S¯Ë}v¹øœNÂ—`üÌœğ‰¾^†ş4ğ:¶óH¯—j±QbçË£²®³[dB=6³9›º£ÕıÖ*Nä8¬L¡ëY”¼™¤M*Ò‡ÛÄ,e—ÍÃ1sı¯KQNî6)!QÖ¶‡|#Š¼Ò"­“ÈÊ¦5ÎKŒ†³î×ç¸®êDQÉ@h†,                 üaïö7 (  [?1049l [2K[37;2m# (tarball data)[0m
+‹|İHdÿ íÎÍn‚@`Ö>…q/¤]¸ œ¦“6ØÀ`ìŠ?‚EPA£øôEmMÓ}›4=ßæNî=wf©Øíë´‘~Òéú¥v¾W…˜·ÙGß4TMê+Ò/Ø7;QwOJÿsÏ
+¨ÅúãAµ<ãuYŠ*é/V¢H›AïšñÛçŒœz]î³Ë½Àçt¾ö3sÂ'úzúÓÀshèXÎ#½^z¨ÅFEœ/òºÎn‘	õØÌâlêW÷[³8‘ã¨2„¦eQòf6©Hwm£ì¹lÚÌõ¿.E9¹Û,‰²¶=äQä•©u¬ŸDV6­~^b4œu¿>Ç5E#²B†B5z                 Àö“× (  [?1049l [2K[37;2m# (tarball data)[0m

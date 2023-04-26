@@ -263,7 +263,7 @@ _try_build_nix() {
   && make
 
   #TODO: determine binary output path and copy to nix-static
-  mv nix "$USER_CACHE/nix-static"
+  mv src/nix/nix "$USER_CACHE/nix-static"
 }
 
 # Try a set of strategies to obtain a statically built Nix binary
@@ -407,6 +407,7 @@ if [[ "$0" =~ nix-(shell|build|env)$ ]]
 then
   if (( $(stat -c %W "$REPO_ROOT/.nixie/channels" 2>/dev/null || echo 0) < $(stat -c %W "$THIS_SCRIPT" ) ))
   then
+    >&2 echo "Unpacking Nix channels, hang tight..."
     (cd $REPO_ROOT/.nixie; _untar "channels" 2>/dev/null)
   fi
   export NIX_PATH="$REPO_ROOT/.nixie/channels:$NIX_PATH"
@@ -455,6 +456,10 @@ then
   NIXCMD="nix-shell"
   CMDL_ARGS=("$REPO_ROOT/shell.nix" "--command" "${0##*/}$(printf ' %q' "$@")")
 fi
+
+# Check for alternate OpenSSL/LibreSSL certificate paths (fixes #6)
+[[ -f "/etc/pki/tls/certs/ca-bundle.crt" ]] && : ${NIX_SSL_CERT_FILE:="/etc/pki/tls/certs/ca-bundle.crt"}
+[[ "$NIX_SSL_CERT_FILE" != "" ]] && export NIX_SSL_CERT_FILE
 
 
 # Apply experimental features if listed
