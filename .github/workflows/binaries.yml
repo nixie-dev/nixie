@@ -51,4 +51,8 @@ jobs:
           sudo apt-get -q -y update
           sudo apt-get -q -y install qemu-user-static
           echo "extra-platforms = aarch64" | sudo tee -a /etc/nix/nix.conf
-      - run: nix build .#static-bins
+      - name: Build and pin final output
+        run: |
+          nix build .#static-bins
+          cachix push nix-wrap $(nix eval --raw .#static-bins)
+          cachix pin nix-wrap binaries $(nix eval --raw .#static-bins) --keep-forever
