@@ -3,8 +3,6 @@
 , automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config, ... }:
 
 let
-
-
   mkConfiguredSrc = { pkg, confScript, dest?pkg.pname }:
     stdenv.mkDerivation {
       inherit (pkg) version src;
@@ -32,25 +30,25 @@ let
       '';
     };
 
-    nix_configured_src = mkConfiguredSrc
-      { pkg = nix;
-        confScript = ''
-          sed -i configure.ac -e "s/.*gtest.*//g"
-          sed -i configure.ac -e "s/.*jq.*//g"
-          rm -f src/libutil/tests/*.cc
-          ./bootstrap.sh
-        '';
-      };
-    editline_configured_src = mkConfiguredSrc
-      { pkg = editline;
-        confScript = "./autogen.sh";
-        dest = "libeditline";
-      };
-    brotli_configured_src = mkConfiguredSrc
-      { pkg = brotli;
-        confScript = "./bootstrap";
-        dest = "libbrotlicommon";
-      };
+  nix_configured_src = mkConfiguredSrc
+    { pkg = nix;
+      confScript = ''
+        sed -i configure.ac -e "s/.*gtest.*//g"
+        sed -i configure.ac -e "s/.*jq.*//g"
+        rm -f src/libutil/tests/*.cc
+        ./bootstrap.sh
+      '';
+    };
+  editline_configured_src = mkConfiguredSrc
+    { pkg = editline;
+      confScript = "./autogen.sh";
+      dest = "libeditline";
+    };
+  brotli_configured_src = mkConfiguredSrc
+    { pkg = brotli;
+      confScript = "./bootstrap";
+      dest = "libbrotlicommon";
+    };
 
   srcs_simple =
     [ openssl
