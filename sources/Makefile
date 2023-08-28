@@ -1,5 +1,5 @@
 #
-# Nix-wrap archive generators (c) Karim Vergnes <me@thesola.io>
+# Nixie archive generators (c) Karim Vergnes <me@thesola.io>
 # Licensed under GNU GPLv2
 #
 
