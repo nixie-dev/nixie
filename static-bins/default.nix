@@ -25,9 +25,8 @@ let
   ];
   systemsPkgs =
     map (s:
-      let parsedSystem = pkgs.lib.systems.parse.mkSystemFromString s;
-      in import nixpkgs ({ localSystem = s; }
-      // (if parsedSystem.kernel.name == "darwin"
+      import nixpkgs ({ localSystem = s; }
+      // (if s == "x86_64-darwin"
           then
           { overlays =
             [ (import ./nixpkgs-darwin-static.nix) ];
