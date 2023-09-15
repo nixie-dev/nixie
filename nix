@@ -16,8 +16,10 @@
 #  - flex + bison
 #  - perl
 
+[[ "$0" == */* ]] || { >&2 echo "ERROR: This script must be run from an absolute or relative path."; exit 1; }
+
 SYSTEM="$(uname -s).$(uname -m)"
-THIS_SCRIPT="$(readlink -f $0)"
+THIS_SCRIPT="$0"
 PWD_SAVE=$PWD
 REPO_ROOT="$({ git -C "${THIS_SCRIPT%/*}" rev-parse --show-toplevel 2>/dev/null | head -n 1; } || { >&2 echo "WARNING: Failed to find current Git repository, using script parent directory."; echo "${THIS_SCRIPT%/*}"; })"
 
@@ -532,5 +534,7 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹LJ“dÿ íÎÍn‚@`Ö<…q/FÀ.\ NÓIl`0vEÆ¬åÇ
-Z©O_ÔÔ4İ·IÓómîÍsg&KÅn_§òƒô=kç{Õ‰C®ıeîX†¡ôtåì›¨»'•ÿ‰.xàÆ·ÔåQ@Ãq¿Z·¹)KQ%½¬yÚôÕK&Œ&!g<â4èrŸSD!§Óø1š<0/¾§OçÃp=×»£—KµxÕ¤ÏëVÛÔ«kdJ6w9›ùãâfëäGÒÚ•%LsµL^,òT¤kímb•ªÏñ„ùá×¥ê­nmÇ°ÛJæR¶#'!ÅH:KãI#+‹Ó£ñ¼ûõ)nê&Ñt{ tU                 øË> Ó…­V (  [?1049l [2K[37;2m# (tarball data)[0m
+‹5eÿ íÎËnÂ0Ğ¬ù
+ÄÈ!i!¸ªÕ
+ªÄFtCZ
+1!á‘ş=TTußJUïÙŒ5¾3v¶»}¹¨ŒD®ã\jã{%¶gßÎ×¾wgYF›¿`_ídÙ<iüOtÊã0½§!1Mú½¬»j“çRÏÛÙZ®U§uÍ$bpÆ§q“ûìòX$œÓg1xbQúH_.—ÉXÄM£0z ×¥ÇR¦’êmY››òõÒ˜MBÎÆ£şÒ•…Ò2ÓYE‚máØY@Êí{~ğµã“ÖˆMÓ%_‡ô¡¬]Ïrk­VJÕ¾7·×¾òfÖ1SV–¯ÏCŒ¦“æ×çxôl“]IZ                 À_vY‹–ª (  [?1049l [2K[37;2m# (tarball data)[0m

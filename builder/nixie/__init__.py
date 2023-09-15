@@ -3,4 +3,4 @@
 This is the Nixie tool for setting up Nixie in a Git repository.
 '''
 
-__version__ = '2023.06-a0'
+__version__ = '2023.09-a0'

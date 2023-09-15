@@ -1,7 +1,7 @@
 { lib, python3Packages, fetchPypi, nix-index, nix, ... }:
 
 let
-  nixie_ver = "2023.06-a0";
+  nixie_ver = "2023.09-a0";
   pzp = python3Packages.buildPythonPackage rec {
     pname = "pzp";
     version = "0.0.22";
