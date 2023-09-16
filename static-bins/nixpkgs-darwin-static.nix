@@ -1,6 +1,10 @@
 self: super:
 { libcCross = super.buildPackages.darwin.Libsystem;
 
+  darwin = super.darwin // {
+    apple_sdk = super.buildPackages.darwin.apple_sdk;
+  };
+
   #targetPackages = super.targetPackages // {
   #  libcCross = self.libcCross;
   #  darwin = self.darwin;
@@ -11,12 +15,6 @@ self: super:
   # Setting this prevents static libc++ from being used
   targetPackages = self;
 
-  # Workaround for nixos/nixpkgs#127345
-  boost = super.boost.overrideAttrs(o: {
-    buildPhase = builtins.replaceStrings ["binary-format=macho"] ["binary-format=mach-o"] o.buildPhase;
-    installPhase = builtins.replaceStrings ["binary-format=macho"] ["binary-format=mach-o"] o.installPhase;
-  });
-
   nixStatic = self.nix.overrideAttrs (o: rec {
     nix_LDFLAGS = "-nodefaultlibs -nostdlib ${super.pkgsBuildBuild.libcxx}/lib/libc++.a ${super.pkgsBuildBuild.libcxx}/lib/libc++experimental.a ${super.pkgsBuildBuild.libcxxabi}/lib/libc++abi.a -lSystem";
     postConfigure = ''
@@ -24,4 +22,5 @@ self: super:
       sed -e 's,nix_LDFLAGS =,nix_LDFLAGS = ${nix_LDFLAGS},' src/nix/local.mk -i
     '';
   });
+
 }
