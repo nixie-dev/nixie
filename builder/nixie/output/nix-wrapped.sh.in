@@ -19,7 +19,12 @@
 [[ "$0" == */* ]] || { >&2 echo "ERROR: This script must be run from an absolute or relative path."; exit 1; }
 
 SYSTEM="$(uname -s).$(uname -m)"
-THIS_SCRIPT="$0"
+if [[ "$0" == /* ]]
+then
+  THIS_SCRIPT="$0"
+else
+  THIS_SCRIPT="$PWD/$0"
+fi
 PWD_SAVE=$PWD
 REPO_ROOT="$({ git -C "${THIS_SCRIPT%/*}" rev-parse --show-toplevel 2>/dev/null | head -n 1; } || { >&2 echo "WARNING: Failed to find current Git repository, using script parent directory."; echo "${THIS_SCRIPT%/*}"; })"
 
