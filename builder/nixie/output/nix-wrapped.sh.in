@@ -22,11 +22,20 @@ SYSTEM="$(uname -s).$(uname -m)"
 if [[ "$0" == /* ]]
 then
   THIS_SCRIPT="$0"
+elif readlink "$0" >&/dev/null
+then
+  RL=$(readlink "$0")
+  if [[ "$RL" == /* ]]
+  then
+    THIS_SCRIPT="$RL"
+  else
+    THIS_SCRIPT="$PWD/$RL"
+  fi
 else
   THIS_SCRIPT="$PWD/$0"
 fi
 PWD_SAVE=$PWD
-REPO_ROOT="$({ git -C "${THIS_SCRIPT%/*}" rev-parse --show-toplevel 2>/dev/null | head -n 1; } || { >&2 echo "WARNING: Failed to find current Git repository, using script parent directory."; echo "${THIS_SCRIPT%/*}"; })"
+REPO_ROOT="$(git -C "${THIS_SCRIPT%/*}" rev-parse --show-toplevel 2>/dev/null || { >&2 echo "WARNING: Failed to find current Git repository, using script parent directory."; echo "${THIS_SCRIPT%/*}"; })"
 
 if [[ "$SYSTEM" =~ Darwin ]]
 then
@@ -458,7 +467,7 @@ then
 fi
 
 # Command substitution feature
-if [[ "$0" =~ nix$ ]] || [[ "$0" =~ nix-(shell|build|env|channel|hash|instantiate|store)$ ]]
+if [[ "$0" =~ nix$ ]] || [[ "$0" =~ nix-(shell|build|env|channel|hash|instantiate|store|collect-garbage)$ ]]
 then
   NIXCMD="$0"
 elif [[ -f "$REPO_ROOT/flake.nix" ]]
