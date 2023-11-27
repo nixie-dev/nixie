@@ -1,5 +1,5 @@
 { stdenv, boost, openssl, lowdown, nlohmann_json, brotli, libsodium, editline
-, gnutar, coreutils, findutils, python3, nix
+, gnutar, coreutils, findutils, python3, nix, cmake
 , automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config, ... }:
 
 let
@@ -19,6 +19,7 @@ let
         bc
         libtool
         pkg-config
+        cmake
       ];
 
       dontBuild = true;
@@ -46,7 +47,7 @@ let
     };
   brotli_configured_src = mkConfiguredSrc
     { pkg = brotli;
-      confScript = "./bootstrap";
+      confScript = "cmake .";
       dest = "libbrotlicommon";
     };
 
