@@ -89,17 +89,18 @@ _untar() {
 # Check that a command is available, and if not, add it to the list of missing
 # commands to print at the end
 declare -a MISSING_CMDS
+MISSING_TRIG=0
 _avail() {
-  which -p $1 >&/dev/null || MISSING_CMDS+="$1"
+  which -p $1 >&/dev/null ||{ MISSING_TRIG=1; MISSING_CMDS+="$1"; }
 }
 
 # Print the list of missing commands and return 1, if any commands are missing
 _avail_end() {
-  if ((${#MISSING_CMDS[@]}))
+  if ((MISSING_TRIG))
   then
     tput rmcup
     >&2 echo "ERROR: The following commands are missing:"
-    >&2 echo "$MISSING_CMDS"
+    >&2 echo "${MISSING_CMDS[@]}"
     >&2 echo "Use your distribution's package manager to install them, then try again."
     return 1
   else
@@ -440,7 +441,6 @@ _catch_nixie_args() {
 _avail tar
 _avail gzip
 _avail uname
-_avail kill
 _avail_end || exit 1
 
 # Load feature attributes of our resource tarball
@@ -584,4 +584,6 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹¤î;eÿ íÎËn‚@`Ö>…q/á".§é¤6Ã`ìŠL©·"hgÑ§—bjšîÛ¤éÿmÎäÌÎÌb.ö9WÚ2î`ĞÖÆ÷jØ};_ûcšZ×Ğ~ÁAí…lÔş'2ã,HïHÀFâa¯\×ıl[¢|í.6"Ÿ«^çš‰“QÌ)O8aMî³ËYs2NŸ’Ñ#ÓòÜ^Æ“„…$ƒğ\—¥Øé™ÈVëZßÊå-2&ŒNN'ÑĞ¯äû©°¥p¥ªMóX8oşª\¸Ò\•“[ˆÎÒâ¯CVoÜ—³“yV¹ô×§b jÿ¬²lSí”)!JÒióë6nX¶nø}au4                 €¿ìF«ÚÏ (  [?1049l [2K[37;2m# (tarball data)[0m
+‹nrdeÿ íÎAo‚0pÎ~
+ã]SŒyğ ØeÍ\ w"‚
+O?ÔÌ,»oÉ²ÿïòš×ÿ{mÉÃ±ˆJå‘Ö¦]jë{%ª¡ŞÎ×¾¡‡J—(¿àXdÑ>©üOl.\3x`¦ğ]æ{ÙúÔwi*³e7ŞÊMTö:×Œç[àÂÌmsŸ]áú`“àÅ·¹<±×Ë¥7õ]›¶i?²ëÒºûA(ÃÕú4ØÉ-2a.Ÿ™‚Oq³‘´ÊVä^kÔŠÒ¼$U]¤ïõÒÈŒÆ yÇáóÀâ÷uH+ãTêYœW²^hI¼j’ıH'2¤ÛMj,ÎCœ³ö×ç8%TQ_Ò                 ğ—} õz (  [?1049l [2K[37;2m# (tarball data)[0m
