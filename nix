@@ -86,6 +86,27 @@ _untar() {
   } | tar -x "$@"
 }
 
+# Check that a command is available, and if not, add it to the list of missing
+# commands to print at the end
+declare -a MISSING_CMDS
+_avail() {
+  which -p $1 >&/dev/null || MISSING_CMDS+="$1"
+}
+
+# Print the list of missing commands and return 1, if any commands are missing
+_avail_end() {
+  if ((${#MISSING_CMDS[@]}))
+  then
+    tput rmcup
+    >&2 echo "ERROR: The following commands are missing:"
+    >&2 echo "$MISSING_CMDS"
+    >&2 echo "Use your distribution's package manager to install them, then try again."
+    return 1
+  else
+    return 0
+  fi
+}
+
 # Best-attempt script for downloading files. We first try wget, then cURL,
 # then Python 3.
 _dl() {
@@ -239,6 +260,14 @@ _find_or_build_boost () {
 _try_build_nix() {
   source_root="$REPO_ROOT/.nixie/sources"
   mkdir -p $source_root
+
+  _avail cc
+  _avail pkg-config
+  _avail make
+  _avail flex
+  _avail bison
+  _avail perl
+  _avail_end || return 1;
 
   _find_or_build_openssl
   _find_or_build_boost
@@ -407,6 +436,13 @@ _catch_nixie_args() {
 
 ##### ENTRY POINT #####
 
+# Check for required commands
+_avail tar
+_avail gzip
+_avail uname
+_avail kill
+_avail_end || exit 1
+
 # Load feature attributes of our resource tarball
 eval "$(_untar -O features || _bail "The resource archive is missing or malformed.")"
 
@@ -548,5 +584,4 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹ŠXeÿ íÎÉnÂ0àœy
-Ä(Î†rà‚«Z­B•8ˆ"7ek¨ÍxzÒ ¢ª÷Vªú—±ÆÿŒ½˜‹İ^Î•öƒŒ†kÛmm|¯†5°nçkà¢uíìÕNÈæIí¢3ùéõyÑxØ«Öu?Û”¥¨^»‹BäsÕë\3q2Š9ã	§Q“ûìò(‰9§OÉè‘é}n/ãI4üà^—¥Øê™ÈVëZßÈå-2¦›úœMÂ¡wï§Ò’Â•ª&äX:oŞªZ¸’,Ëƒ“›ÍÒã¯CfîËÙÉfµôÖ§ÒVµwVYV¶ŠHçcˆÑtÚüº¦¥^_                 ğ—] G¿~ (  [?1049l [2K[37;2m# (tarball data)[0m
+‹¤î;eÿ íÎËn‚@`Ö>…q/á".§é¤6Ã`ìŠL©·"hgÑ§—bjšîÛ¤éÿmÎäÌÎÌb.ö9WÚ2î`ĞÖÆ÷jØ};_ûcšZ×Ğ~ÁAí…lÔş'2ã,HïHÀFâa¯\×ıl[¢|í.6"Ÿ«^çš‰“QÌ)O8aMî³ËYs2NŸ’Ñ#ÓòÜ^Æ“„…$ƒğ\—¥Øé™ÈVëZßÊå-2&ŒNN'ÑĞ¯äû©°¥p¥ªMóX8oşª\¸Ò\•“[ˆÎÒâ¯CVoÜ—³“yV¹ô×§b jÿ¬²lSí”)!JÒióë6nX¶nø}au4                 €¿ìF«ÚÏ (  [?1049l [2K[37;2m# (tarball data)[0m
