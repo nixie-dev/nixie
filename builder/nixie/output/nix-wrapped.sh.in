@@ -91,16 +91,19 @@ _untar() {
 declare -a MISSING_CMDS
 MISSING_TRIG=0
 _avail() {
-  which -p $1 >&/dev/null ||{ MISSING_TRIG=1; MISSING_CMDS+="$1"; }
+  which -p $1 >&/dev/null || { MISSING_TRIG=1; MISSING_CMDS+="$1"; }
 }
 
 # Print the list of missing commands and return 1, if any commands are missing
 _avail_end() {
-  if ((MISSING_TRIG))
+  if [[ $MISSING_TRIG == 1 ]]
   then
     tput rmcup
     >&2 echo "ERROR: The following commands are missing:"
-    >&2 echo "${MISSING_CMDS[@]}"
+    for cmd in "${MISSING_CMDS[@]}"
+    do
+      >&2 echo "$cmd"
+    done
     >&2 echo "Use your distribution's package manager to install them, then try again."
     return 1
   else
