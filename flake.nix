@@ -33,9 +33,7 @@
         default = pkgs.mkShell {
           # These dependencies aren't involved in the build process, but are
           # nice-to-haves in the dev environment
-          packages = with pkgs; [
-            bumpver
-          ];
+          packages = with pkgs; [ bumpver ];
 
           inputsFrom = [ self.packages."${system}".nixie ];
         };
