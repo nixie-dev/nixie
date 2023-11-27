@@ -91,7 +91,7 @@ _untar() {
 declare -a MISSING_CMDS
 MISSING_TRIG=0
 _avail() {
-  which -p $1 >&/dev/null || { MISSING_TRIG=1; MISSING_CMDS+="$1"; }
+  which $1 >&/dev/null || { MISSING_TRIG=1; MISSING_CMDS+="$1"; }
 }
 
 # Print the list of missing commands and return 1, if any commands are missing

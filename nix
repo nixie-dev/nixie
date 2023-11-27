@@ -91,7 +91,7 @@ _untar() {
 declare -a MISSING_CMDS
 MISSING_TRIG=0
 _avail() {
-  which -p $1 >&/dev/null || { MISSING_TRIG=1; MISSING_CMDS+="$1"; }
+  which $1 >&/dev/null || { MISSING_TRIG=1; MISSING_CMDS+="$1"; }
 }
 
 # Print the list of missing commands and return 1, if any commands are missing
@@ -587,6 +587,6 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹Ttdeÿ íÎAo‚0pÎ~
+‹Útdeÿ íÎAo‚0pÎ~
 ã]SŒyğ ØeÍ\ w"‚
 O?ÔÌ,»oÉ²ÿïòš×ÿ{mÉÃ±ˆJå‘Ö¦]jë{%ª¡ŞÎ×¾¡‡J—(¿àXdÑ>©üOl.\3x`¦ğ]æ{ÙúÔwi*³e7ŞÊMTö:×Œç[àÂÌmsŸ]áú`“àÅ·¹<±×Ë¥7õ]›¶i?²ëÒºûA(ÃÕú4ØÉ-2a.Ÿ™‚Oq³‘´ÊVä^kÔŠÒ¼$U]¤ïõÒÈŒÆ yÇáóÀâ÷uH+ãTêYœW²^hI¼j’ıH'2¤ÛMj,ÎCœ³ö×ç8%TQ_Ò                 ğ—} õz (  [?1049l [2K[37;2m# (tarball data)[0m
