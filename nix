@@ -91,7 +91,7 @@ _untar() {
 declare -a MISSING_CMDS
 MISSING_TRIG=0
 _avail() {
-  which $1 >&/dev/null || { MISSING_TRIG=1; MISSING_CMDS+="$1"; }
+  which $1 >&/dev/null || { MISSING_TRIG=1; MISSING_CMDS=($MISSING_CMDS "$1"); }
 }
 
 # Print the list of missing commands and return 1, if any commands are missing
@@ -102,7 +102,7 @@ _avail_end() {
     >&2 echo "ERROR: The following commands are missing:"
     for cmd in "${MISSING_CMDS[@]}"
     do
-      >&2 echo "$cmd"
+      >&2 echo "- $cmd"
     done
     >&2 echo "Use your distribution's package manager to install them, then try again."
     return 1
@@ -587,4 +587,4 @@ exit 1
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-‹R¨yeÿ íÎËn‚@`Ö>…q¯ä¦ˆÓtÒŒ]‘¤rµ‚"õéK15M÷mÒôÿ6græ?g&ÚŠã©ÜVÒ"-]U»Úú^‰b(·óµoh²,õ‰ôNÕQ”í“ÒÿD×Ü1ı;jrÏ¡îlPÄÍ0Øç¹(Â~”‰t[z×ŒëÍ]Î¸Ç©Óæ>»Üñ\Nş“7d–ÿ@Ÿ»Kwé9õ-Óº§×¥çR¼ìâf´/_n‘uØÊäliÏ.uÈ	Iw5HµX3’¤¸¼U².‡Ùts>ôl¶öçÌv¿åd7™4É&ÓƒQ‡åENëX›"‹ò,­»!FıUûëø˜Œ•™Å¸'                 üeïûÜâ (  [?1049l [2K[37;2m# (tarball data)[0m
+‹4«yeÿ íÎËn‚@`Ö>…q¯ä¦ˆÓtÒŒ]‘¤rµ‚"õéK15M÷mÒôÿ6græ?g&ÚŠã©ÜVÒ"-]U»Úú^‰b(·óµoh²,õ‰ôNÕQ”í“ÒÿD×Ü1ı;jrÏ¡îlPÄÍ0Øç¹(Â~”‰t[z×ŒëÍ]Î¸Ç©Óæ>»Üñ\Nş“7d–ÿ@Ÿ»Kwé9õ-Óº§×¥çR¼ìâf´/_n‘uØÊäliÏ.uÈ	Iw5HµX3’¤¸¼U².‡Ùts>ôl¶öçÌv¿åd7™4É&ÓƒQ‡åENëX›"‹ò,­»!FıUûëø˜Œ•™Å¸'                 üeïûÜâ (  [?1049l [2K[37;2m# (tarball data)[0m
