@@ -165,6 +165,6 @@ def setup_git_root(nixname: str, skipgi, skipga):
         with open('.gitattributes', 'a+') as ga:
             ga.seek(0, 0)
             if not re.search(nixname, ga.read(), flags=re.MULTILINE):
-                ga.write(f'\n{nixname}  linguist-generated=true\n')
+                ga.write(f'\n{nixname}  linguist-generated=true -diff\n')
             else:
                 debug('.gitattributes already has our rule')
