@@ -74,3 +74,6 @@ Nixie can also build Nix and its dependencies locally from source code, as a fal
 
 Subsequent calls to the `nix` script will be redirected to that local binary. The name of the repository script determines which Nix command to run: `nix`, `nix-shell`, `nix-env` (unsupported), etc.
 
+---
+
+Tell everyone your project is [![built with Nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
