@@ -17,14 +17,8 @@ in python3Packages.buildPythonApplication {
   pname = "nixie";
   version = nixie_ver;
 
-  src = ./.;
+  src = "${../.}/builder";
   format = "pyproject";
-
-  preConfigure = ''
-    rm README.md LICENSE
-    cp ${../README.md} README.md
-    cp ${../LICENSE}   LICENSE
-  '';
 
   nativeBuildInputs = with python3Packages;
     [ setuptools

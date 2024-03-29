@@ -2,8 +2,8 @@
 name = "nixie"
 description = "Portable Nix script builder"
 authors = [ { "name" = "Karim Vergnes", "email" = "me@thesola.io" } ]
-license = { "file" = "LICENSE" }
-readme = "README.md"
+license = { "file" = "../LICENSE" }
+readme = "../README.md"
 urls = { "Source" = "https://github.com/nixie-dev/nixie" }
 dependencies = [
     "click",
