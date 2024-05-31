@@ -1,12 +1,12 @@
 { stdenv, boost, openssl, lowdown, nlohmann_json, brotli, libsodium, editline
-, gnutar, coreutils, findutils, python3, nix, cmake
+, gnutar, coreutils, findutils, python3, nix
 , automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config, ... }:
 
 let
-  mkConfiguredSrc = { pkg, confScript, dest?pkg.pname }:
+  mkConfiguredSrc = { pkg, confScript, patches ? [], dest?pkg.pname }:
     stdenv.mkDerivation {
       inherit (pkg) version src;
-      inherit dest;
+      inherit dest patches;
       pname = "${pkg.pname}-configured-sources";
 
       configurePhase = confScript;
@@ -19,7 +19,6 @@ let
         bc
         libtool
         pkg-config
-        cmake
       ];
 
       dontBuild = true;
@@ -47,7 +46,8 @@ let
     };
   brotli_configured_src = mkConfiguredSrc
     { pkg = brotli;
-      confScript = "cmake .";
+      patches = [ ./00-brotli-add-automake.patch ];
+      confScript = "true";
       dest = "libbrotlicommon";
     };
 

@@ -1,0 +1,509 @@
+diff --git a/Makefile b/Makefile
+new file mode 100644
+index 0000000..4890940
+--- /dev/null
++++ b/Makefile
+@@ -0,0 +1,55 @@
++OS := $(shell uname)
++LIBSOURCES = $(wildcard c/common/*.c) $(wildcard c/dec/*.c) \
++             $(wildcard c/enc/*.c)
++SOURCES = $(LIBSOURCES) c/tools/brotli.c
++BINDIR = bin
++OBJDIR = $(BINDIR)/obj
++LIBOBJECTS = $(addprefix $(OBJDIR)/, $(LIBSOURCES:.c=.o))
++OBJECTS = $(addprefix $(OBJDIR)/, $(SOURCES:.c=.o))
++LIB_A = libbrotli.a
++EXECUTABLE = brotli
++DIRS = $(OBJDIR)/c/common $(OBJDIR)/c/dec $(OBJDIR)/c/enc \
++       $(OBJDIR)/c/tools $(BINDIR)/tmp
++CFLAGS += -O2
++ifeq ($(os), Darwin)
++  CPPFLAGS += -DOS_MACOSX
++endif
++
++ifneq ($(strip $(CROSS_COMPILE)), )
++	CC=$(CROSS_COMPILE)-gcc
++	ARCH=$(firstword $(subst -, ,$(CROSS_COMPILE)))
++	BROTLI_WRAPPER="qemu-$(ARCH) -L /usr/$(CROSS_COMPILE)"
++endif
++
++# The arm-linux-gnueabi compiler defaults to Armv5. Since we only support Armv7
++# and beyond, we need to select Armv7 explicitly with march.
++ifeq ($(ARCH), arm)
++	CFLAGS += -march=armv7-a -mfloat-abi=hard -mfpu=neon
++endif
++
++all: test
++	@:
++
++.PHONY: all clean test
++
++$(DIRS):
++	mkdir -p $@
++
++$(EXECUTABLE): $(OBJECTS)
++	$(CC) $(LDFLAGS) $(OBJECTS) -lm -o $(BINDIR)/$(EXECUTABLE)
++
++lib: $(LIBOBJECTS)
++	rm -f $(LIB_A)
++	ar -crs $(LIB_A) $(LIBOBJECTS)
++
++test: $(EXECUTABLE)
++	tests/compatibility_test.sh $(BROTLI_WRAPPER)
++	tests/roundtrip_test.sh $(BROTLI_WRAPPER)
++
++clean:
++	rm -rf $(BINDIR) $(LIB_A)
++
++.SECONDEXPANSION:
++$(OBJECTS): $$(patsubst %.o,%.c,$$(patsubst $$(OBJDIR)/%,%,$$@)) | $(DIRS)
++	$(CC) $(CFLAGS) $(CPPFLAGS) -Ic/include \
++        -c $(patsubst %.o,%.c,$(patsubst $(OBJDIR)/%,%,$@)) -o $@
+diff --git a/Makefile.am b/Makefile.am
+new file mode 100644
+index 0000000..ace7a85
+--- /dev/null
++++ b/Makefile.am
+@@ -0,0 +1,38 @@
++AUTOMAKE_OPTIONS = foreign nostdinc subdir-objects
++
++ACLOCAL_AMFLAGS = -I m4
++
++# Actual ABI version is substituted by bootstrap
++LIBBROTLI_VERSION_INFO = -version-info 0:0:0
++
++bin_PROGRAMS = brotli
++lib_LTLIBRARIES = libbrotlicommon.la libbrotlidec.la libbrotlienc.la
++
++include scripts/sources.lst
++
++brotliincludedir = $(includedir)/brotli
++brotliinclude_HEADERS = $(BROTLI_INCLUDE)
++
++AM_CFLAGS = -I$(top_srcdir)/c/include
++
++brotli_SOURCES = $(BROTLI_CLI_C)
++brotli_LDADD = libbrotlidec.la libbrotlienc.la libbrotlicommon.la -lm
++#brotli_LDFLAGS = -static
++
++libbrotlicommon_la_SOURCES = $(BROTLI_COMMON_C) $(BROTLI_COMMON_H)
++libbrotlicommon_la_LDFLAGS = $(AM_LDFLAGS) $(LIBBROTLI_VERSION_INFO) $(LDFLAGS)
++libbrotlidec_la_SOURCES = $(BROTLI_DEC_C) $(BROTLI_DEC_H)
++libbrotlidec_la_LDFLAGS = $(AM_LDFLAGS) $(LIBBROTLI_VERSION_INFO) $(LDFLAGS)
++libbrotlidec_la_LIBADD = libbrotlicommon.la -lm
++libbrotlienc_la_SOURCES = $(BROTLI_ENC_C) $(BROTLI_ENC_H)
++libbrotlienc_la_LDFLAGS = $(AM_LDFLAGS) $(LIBBROTLI_VERSION_INFO) $(LDFLAGS)
++libbrotlienc_la_LIBADD = libbrotlicommon.la -lm
++
++pkgconfigdir = $(libdir)/pkgconfig
++pkgconfig_DATA = \
++  scripts/libbrotlicommon.pc \
++  scripts/libbrotlidec.pc \
++  scripts/libbrotlienc.pc
++pkgincludedir= $(brotliincludedir)
++
++dist_doc_DATA = README
+diff --git a/bootstrap b/bootstrap
+new file mode 100755
+index 0000000..d4325b2
+--- /dev/null
++++ b/bootstrap
+@@ -0,0 +1,36 @@
++#!/bin/sh -e
++
++REQUIRED='is required, but not installed.'
++bc -v >/dev/null 2>&1 || { echo >&2 "'bc' $REQUIRED"; exit 1; }
++[ "x`echo hello | sed s/hello/world/ 2>/dev/null`" = "xworld" ] || { echo >&2 "'sed' $REQUIRED"; exit 1; }
++autoreconf --version >/dev/null 2>&1 || { echo >&2 "'autoconf' $REQUIRED"; exit 1; }
++
++# Determine which flag sed uses for extended regular expressions.
++# -E is POSIX. -r is for GNU sed older than 4.2.
++echo hello | sed -E s/hello/world/ >/dev/null 2>&1 && SED_ERE=-E || SED_ERE=-r
++
++# If libtool is not installed ->
++# "error: Libtool library used but 'LIBTOOL' is undefined"
++
++if [ ! -e "./m4" ]; then
++mkdir m4 2>/dev/null
++fi
++
++BROTLI_ABI_HEX=`sed -n 's/#define BROTLI_ABI_VERSION 0x//p' c/common/version.h`
++BROTLI_ABI_INT=`echo "ibase=16;$BROTLI_ABI_HEX" | bc`
++BROTLI_ABI_CURRENT=`echo "scale=0;$BROTLI_ABI_INT / 16777216" | bc`
++BROTLI_ABI_REVISION=`echo "scale=0;$BROTLI_ABI_INT / 4096 % 4096" | bc`
++BROTLI_ABI_AGE=`echo "scale=0;$BROTLI_ABI_INT % 4096" | bc`
++BROTLI_ABI_INFO="$BROTLI_ABI_CURRENT:$BROTLI_ABI_REVISION:$BROTLI_ABI_AGE"
++
++BROTLI_VERSION_HEX=`sed -n 's/#define BROTLI_VERSION 0x//p' c/common/version.h`
++BROTLI_VERSION_INT=`echo "ibase=16;$BROTLI_VERSION_HEX" | bc`
++BROTLI_VERSION_MAJOR=`echo "scale=0;$BROTLI_VERSION_INT / 16777216" | bc`
++BROTLI_VERSION_MINOR=`echo "scale=0;$BROTLI_VERSION_INT / 4096 % 4096" | bc`
++BROTLI_VERSION_PATCH=`echo "scale=0;$BROTLI_VERSION_INT % 4096" | bc`
++BROTLI_VERSION="$BROTLI_VERSION_MAJOR.$BROTLI_VERSION_MINOR.$BROTLI_VERSION_PATCH"
++
++sed -i.bak "$SED_ERE" "s/[0-9]+:[0-9]+:[0-9]+/$BROTLI_ABI_INFO/" Makefile.am
++sed -i.bak "$SED_ERE" "s/\[[0-9]+\.[0-9]+\.[0-9]+\]/[$BROTLI_VERSION]/" configure.ac
++
++autoreconf --install --force --symlink || exit $?
+diff --git a/configure b/configure
+new file mode 100755
+index 0000000..d96129a
+--- /dev/null
++++ b/configure
+@@ -0,0 +1,8 @@
++#!/usr/bin/env bash
++echo "Use Autotools, Bazel, CMake or Premake5 to generate projects / build files."
++echo "  Bazel: http://www.bazel.build/"
++echo "  CMake: https://cmake.org/"
++echo "  Premake5: https://premake.github.io/"
++echo "To generate Autotools 'configure' file run './bootstrap'."
++echo "Run './configure-cmake' for Autotools-like CMake configuration."
++echo "Or simply run 'make' to build and test command line tool."
+diff --git a/configure-cmake b/configure-cmake
+new file mode 100755
+index 0000000..929300b
+--- /dev/null
++++ b/configure-cmake
+@@ -0,0 +1,322 @@
++#!/usr/bin/env bash
++
++# Autotools-style (./configure) wrapper for CMake
++# <https://github.com/nemequ/configure-cmake>
++#
++#   *** IMPORTANT ***
++#
++#   You must include the GNUInstallDirs module (which comes with
++#   CMake) in your project.  Just put "include (GNUInstallDirs)" in
++#   you CMakeLists.txt and you should be good.
++#
++# This script was originally written for Squash
++# <https://quixdb.github.io/squash/> by Evan Nemerson
++# <evan@nemerson.com>, but has been spun off into a separate
++# repository.  Please feel free to copy it into your own repository,
++# though I would appreciate it if you would post improvements, bugs,
++# feature requests, etc. to the issue tracker at
++# <https://github.com/nemequ/configure-cmake/issues>.
++#
++# To the extent possible under law, the author(s) hereby waive all
++# copyright and related or neighboring rights to this work.  For
++# details, see <https://creativecommons.org/publicdomain/zero/1.0/>
++
++TOP_SRCDIR="$(dirname $0)"
++
++if [ "${CMAKE_CMD}" = "" ]; then
++    CMAKE_CMD="cmake"
++fi
++
++BUILD_TYPE="Debug"
++PREFIX=/usr/local
++LIBDIR=
++CMAKE_ARGS=
++
++if [ -e "${TOP_SRCDIR}/scripts/.configure-custom.sh" ]; then
++    . "${TOP_SRCDIR}/scripts/.configure-custom.sh"
++fi
++
++quote() {
++    echo "$1" | sed -e "s|'|'\\\\''|g; 1s/^/'/; \$s/\$/'/"
++}
++
++extract_var_string() {
++    VAR_NAME=$1
++    VAR_NAME=$(echo $1 | sed -e 's/[ \t]*$//')
++    if [ "x$2" != "x" ]; then
++        VAR_VALUE=$2
++    else
++        VAR_VALUE=yes
++    fi
++
++    if [ "x$3" != "x" ]; then
++        VAR_UC_NAME=$3
++    else
++        VAR_UC_NAME=$(echo "$1" | tr '[:lower:]' '[:upper:]' | tr -c '[:alnum:]' '_' | sed 's/_$//g')
++    fi
++}
++
++set_config_var() {
++    is_with=n
++    case "$1" in
++        "--enable-"*)
++            name="${1#--enable-}"
++            cfg="${ENABLE_VARS}"
++            ;;
++        "--disable-"*)
++            name="${1#--disable-}";
++            cfg="${DISABLE_VARS}";
++            ;;
++        "--with-"*)
++            # IFS="=" read -ra WITHARGS <<< "${1}"
++            name="${1#--with-}"
++            cfg="${WITH_VARS}"
++            is_with=y
++            ;;
++    esac
++
++    found=n
++    for varstring in $cfg; do
++        extract_var_string $(echo "${varstring}" | tr '|' ' ')
++        if [ "x$VAR_NAME" = "x$name" ]; then
++            found=y
++            break;
++        fi
++    done
++
++    if [ "$found" = "y" ]; then
++        if [ "x$is_with" = "xy" ]; then
++            CMAKE_ARGS="$CMAKE_ARGS -D${VAR_UC_NAME}=$(quote "$2")"
++        else
++            CMAKE_ARGS="$CMAKE_ARGS -D${VAR_UC_NAME}=$(quote "${VAR_VALUE}")"
++        fi
++    else
++        echo "Unknown parameter: ${1}"
++        exit 1
++    fi
++}
++
++prefix_to_offset() {
++    expr $(echo "${1}" | awk '{ print length }') + 1
++}
++
++print_help() {
++    cat <<EOF >&2
++  -h, --help              display this help and exit
++  --disable-debug         disable debugging mode
++  --pass-thru             pass remaining arguments through to CMake
++
++  --prefix=PREFIX         install architecture-independent files in PREFIX
++                          [$PREFIX]
++  --bindir=DIR            user executables [PREFIX/bin]
++  --sbindir=DIR           system admin executables [PREFIX/sbin]
++  --libexecdir=DIR        program executables [PREFIX/libexec]
++  --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
++  --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
++  --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
++  --libdir=DIR            object code libraries [PREFIX/lib]
++  --includedir=DIR        C header files [PREFIX/include]
++  --oldincludedir=DIR     C header files for non-gcc [/usr/include]
++  --datarootdir=DIR       read-only arch.-independent data root [PREFIX/share]
++  --datadir=DIR           read-only architecture-independent data [DATAROOTDIR]
++  --infodir=DIR           info documentation [DATAROOTDIR/info]
++  --localedir=DIR         locale-dependent data [DATAROOTDIR/locale]
++  --mandir=DIR            man documentation [DATAROOTDIR/man]
++  --docdir=DIR            documentation root [DATAROOTDIR/doc/PROJECT_NAME]
++EOF
++
++    first=y
++    for varstring in ${ENABLE_VARS}; do
++        if [ $first = 'y' ]; then
++            echo ""
++            first=n
++        fi
++        extract_var_string $(echo "${varstring}" | tr '|' ' ')
++        var_doc_name="ENABLE_${VAR_UC_NAME}_DOC"
++        eval "docstring=\$$var_doc_name"
++        if [ "x${docstring}" = "x" ]; then
++            printf "  --enable-%-14s enable %s support\n" "${VAR_NAME}" "$(echo -n "${VAR_NAME}" | tr '-' ' ')"
++        else
++            printf "  --enable-%-14s %s\n" "${VAR_NAME}" "$docstring"
++        fi
++    done
++
++    first=y
++    for varstring in ${DISABLE_VARS}; do
++        if [ $first = 'y' ]; then
++            echo ""
++            first=n
++        fi
++        extract_var_string $(echo "${varstring}" | tr '|' ' ')
++        var_doc_name="DISABLE_${VAR_UC_NAME}_DOC"
++        eval "docstring=\$$var_doc_name"
++        if [ "x${docstring}" = "x" ]; then
++            printf "  --disable-%-13s disable %s support\n" "${VAR_NAME}" "$(echo -n "${VAR_NAME}" | tr '-' ' ')"
++        else
++            printf "  --disable-%-13s %s\n" "${VAR_NAME}" "$docstring"
++        fi
++    done
++
++    first=y
++    for varstring in ${WITH_VARS}; do
++        if [ $first = 'y' ]; then
++            echo ""
++            first=n
++        fi
++        extract_var_string $(echo "${varstring}" | tr '|' ' ')
++        var_doc_name="WITH_${VAR_UC_NAME}_DOC"
++        eval "docstring=\$$var_doc_name"
++        paraminfo="${VAR_NAME}=${VAR_VALUE}"
++        if [ "x${docstring}" = "x" ]; then
++            printf "  --with-%-16s enable %s support\n" "$paraminfo" "$(echo -n "${VAR_NAME}" | tr '-' ' ')"
++        else
++            printf "  --with-%-16s %s\n" "$paraminfo" "$docstring"
++        fi
++    done
++
++    exit 0
++}
++
++while [ $# != 0 ]; do
++    case "$1" in
++        "--prefix="*)
++            PREFIX="${1#*=}";;
++        "--prefix")
++            PREFIX="${2}"; shift;;
++        "--bindir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_BINDIR=$(quote "${1#*=}")";;
++        "--bindir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_BINDIR=$(quote "$2")"; shift;;
++        "--sbindir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_SBINDIR=$(quote "${1#*=}")";;
++        "--sbindir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_SBINDIR=$(quote "$2")"; shift;;
++        "--libexecdir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_LIBEXECDIR=$(quote "${1#*=}")";;
++        "--libexecdir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_LIBEXECDIR=$(quote "$2")"; shift;;
++        "--sysconfdir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_SYSCONFDIR=$(quote "${1#*=}")";;
++        "--sysconfdir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_SYSCONFDIR=$(quote "$2")"; shift;;
++        "--sharedstatedir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_SHAREDSTATEDIR=$(quote "${1#*=}")";;
++        "--sharedstatedir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_SHAREDSTATEDIR=$(quote "$2")"; shift;;
++        "--localstatedir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_LOCALSTATEDIR=$(quote "${1#*=}")";;
++        "--localstatedir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_LOCALSTATEDIR=$(quote "$2")"; shift;;
++        "--libdir="*)
++            LIBDIR="${1#*=}";;
++        "--libdir")
++            LIBDIR="${2}"; shift;;
++        "--includedir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_INCLUDEDIR=$(quote "${1#*=}")";;
++        "--includedir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_INCLUDEDIR=$(quote "$2")"; shift;;
++        "--oldincludedir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_OLDINCLUDEDIR=$(quote "${1#*=}")";;
++        "--oldincludedir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_OLDINCLUDEDIR=$(quote "$2")"; shift;;
++        "--datarootdir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_DATAROOTDIR=$(quote "${1#*=}")";;
++        "--datarootdir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_DATAROOTDIR=$(quote "$2")"; shift;;
++        "--datadir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_DATADIR=$(quote "${1#*=}")";;
++        "--datadir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_DATADIR=$(quote "$2")"; shift;;
++        "--infodir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_INFODIR=$(quote "${1#*=}")";;
++        "--infodir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_INFODIR=$(quote "$2")"; shift;;
++        "--localedir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_LOCALEDIR=$(quote "${1#*=}")";;
++        "--localedir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_LOCALEDIR=$(quote "$2")"; shift;;
++        "--mandir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_MANDIR=$(quote "${1#*=}")";;
++        "--mandir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_MANDIR=$(quote "$2")"; shift;;
++        "--docdir="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_DOCDIR=$(quote "${1#*=}")";;
++        "--docdir")
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_DOCDIR=$(quote "$2")"; shift;;
++
++        "CC="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_C_COMPILER=$(quote "${1#*=}")";;
++        "CXX="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_CXX_COMPILER=$(quote "${1#*=}")";;
++        "CFLAGS="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_C_FLAGS=$(quote "${1#*=}")";;
++        "CXXFLAGS="*)
++            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_CXX_FLAGS=$(quote "${1#*=}")";;
++        "LDFLAGS="*)
++            LDFLAGS="$LDFLAGS ${1#*=}";;
++
++        "--help")
++            print_help;;
++        "-h")
++            print_help;;
++
++        # This flag is the only one which may be a bit surprising to
++        # people.  Autotools always builds with debugging symbols enabled
++        # (AFAIK), but for cmake you have to do -DCMAKE_BUILD_TYPE=Debug.
++        # Unfortunately this can change other things as well, so although
++        # I realize there is no --disable-debug flag I thought it would be
++        # prudent to support one here.
++        "--disable-debug")
++            BUILD_TYPE="Release";;
++
++        "--pass-thru")
++            shift;
++            while [ $# != 0 ]; do
++                CMAKE_ARGS="$CMAKE_ARGS $(quote "${1}")";
++                shift;
++            done;;
++
++        "--enable-"*)
++            set_config_var "$1"
++            ;;
++
++        "--disable-"*)
++            set_config_var "$1"
++            ;;
++
++        "--with-"*)
++            name=$(echo "${1#--with-}" | awk '{split($1,v,"="); print v[1]}')
++            case "${1}" in
++                "--with-${name}="*)
++                    set_config_var "--with-${name}" "${1#--with-${name}=}";;
++                "--with-${name}")
++                    set_config_var "$1" "$2";
++                    shift;;
++            esac
++            ;;
++
++        *)
++            echo "$0: error: unrecognized option: \`$1'" >&2
++            echo "Try \`$0 --help' for more information" >&2
++            exit -1
++    esac;
++    shift
++done
++
++if [ "x${LIBDIR}" = "x" ]; then
++    LIBDIR="${PREFIX}/lib"
++fi
++
++# Unlike CFLAGS/CXXFLAGS/CC/CXX, LDFLAGS isn't handled by CMake, so we
++# need to parse it here.
++if [ "x${LDFLAGS}" != "x" ]; then
++    for varname in EXE MODULE SHARED STATIC; do
++        CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_${varname}_LINKER_FLAGS=$(quote "$LDFLAGS")"
++    done
++fi
++
++eval "${CMAKE_CMD}" "${TOP_SRCDIR}" \
++    -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
++    -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
++    -DCMAKE_INSTALL_LIBDIR="${LIBDIR}" \
++    ${CMAKE_ARGS}
+diff --git a/configure.ac b/configure.ac
+new file mode 100644
+index 0000000..9a3b285
+--- /dev/null
++++ b/configure.ac
+@@ -0,0 +1,14 @@
++AC_PREREQ(2.57)
++
++dnl Actual version is substituted by bootstrap
++AC_INIT([brotli], [0.0.0], [https://groups.google.com/forum/#!forum/brotli])
++
++AM_INIT_AUTOMAKE()
++AC_CONFIG_MACRO_DIR([m4])
++
++AC_PROG_CC
++LT_INIT
++
++AC_CONFIG_FILES([Makefile scripts/libbrotlicommon.pc scripts/libbrotlidec.pc scripts/libbrotlienc.pc])
++
++AC_OUTPUT
