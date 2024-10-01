@@ -8,31 +8,35 @@ on:
       - 'static-bins/**'
 
 jobs:
-  precompile-bitrise:
-    name: Build macOS-specific derivations on Bitrise
-    runs-on: ubuntu-latest
+  build-macos:
+    name: Build macOS binaries
+    runs-on: macos-latest
+    environment: Cachix
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Wake up Bitrise
-        uses: llaine/hans-landa@0.5
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v20
+      - name: Set up Cachix access
+        uses: cachix/cachix-action@v12
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          bitrise_app_slug: fa692dd0b84f09a9
-          bitrise_build_trigger_token: ${{ secrets.BITRISE_TOKEN }}
-          bitrise_workflow: primary
-      - name: Wait for Bitrise to complete
-        id: waitBitrise
-        uses: fountainhead/action-wait-for-check@v1.1.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Bitrise
-      - if: steps.waitBitrise.outputs.conclusion != 'success'
-        run: exit 1
+          name: nix-wrap
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          pushFilter: "(-source|-man)$"
+      - name: Build macOS binaries output
+        run: |
+          nix build .#static-bins.aarch64-darwin-nix-static
+          nix build .#static-bins.x86_64-darwin-nix-static
+          nix build .#static-bins.fakedir
+          cachix push nix-wrap $(nix eval --raw .#static-bins.aarch64-darwin-nix-static)
+          cachix push nix-wrap $(nix eval --raw .#static-bins.x86_64-darwin-nix-static)
+          cachix push nix-wrap $(nix eval --raw .#static-bins.fakedir)
 
   assemble-linux:
     name: Build Linux binaries and merge derivation
     runs-on: ubuntu-latest
-    needs: precompile-bitrise
+    needs: build-macos
     environment: Cachix
     if: github.ref == 'refs/heads/master'
     steps:
