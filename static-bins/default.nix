@@ -25,17 +25,7 @@ let
   ];
   systemsPkgs =
     map (s:
-      import nixpkgs ({ localSystem = s; }
-      // (if s == "x86_64-darwin"
-          then
-          { overlays =
-            [ (import ./nixpkgs-darwin-static.nix) ];
-            crossSystem = {
-              isStatic = true;
-              system = s;
-            };
-          }
-          else {}))
+      import nixpkgs ({ localSystem = s; })
     ) builtSystems;
 
   nixPackage = r: if builtins.hasAttr "${r.system}" nixStatics
