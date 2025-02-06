@@ -2,19 +2,23 @@
 // Licensed under GNU GPLv2
 // Entry point for script logic
 
+let SOURCE_CACHE = ""
+let SOURCE_DERIVATION = ""
+let NIX_BINS_DERIVATION = ""
+
+let EXTRA_FEATURES = ""
+let EXTRA_SUBSTITUTERS = ""
+let EXTRA_TRUSTED_PUBLIC_KEYS = ""
+
+let NIXIE_VERSION = ""
+
+let args = [Text]
+
 import { env_var_get } from "std/env"
 
 import { bail, untar, check_deps } from "./common.ab"
 
-let SOURCE_CACHE = ""
-let SOURCE_DERIVATION = ""
-let BINARIES_DERIVATION = ""
-
-let EXTRA_FEATURES = ""
-let EXTRA_SUBSTITUTERS = ""
-let EXTRA_KEYS = ""
-
-let NIXIE_VERSION = ""
+import { catch_args } from "./cli.ab"
 
 check_deps(["tar", "gzip", "uname"])
 
@@ -30,18 +34,22 @@ fun load_features(): Null
 
     SOURCE_CACHE = trust env_var_get("SOURCE_CACHE")
     SOURCE_DERIVATION = trust env_var_get("SOURCE_DERIVATION")
-    BINARIES_DERIVATION = trust env_var_get("NIX_BINS_DERIVATION")
+    NIX_BINS_DERIVATION = trust env_var_get("NIX_BINS_DERIVATION")
 
     EXTRA_FEATURES = trust env_var_get("EXTRA_FEATURES")
     EXTRA_SUBSTITUTERS = trust env_var_get("EXTRA_SUBSTITUTERS")
-    EXTRA_KEYS = trust env_var_get("EXTRA_TRUSTED_PUBLIC_KEYS")
+    EXTRA_TRUSTED_PUBLIC_KEYS = trust env_var_get("EXTRA_TRUSTED_PUBLIC_KEYS")
 
     NIXIE_VERSION = trust env_var_get("NIXIE_VERSION")
 }
 
-main(args)
+main(cmdl)
 {
+    // In Amber, cmdl is read-only, but catch_args needs read-write
+    args = cmdl
+
     load_features()
+    catch_args(args)
     echo SOURCE_DERIVATION
     echo "Built using Nixie {NIXIE_VERSION}"
 }

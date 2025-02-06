@@ -2,9 +2,31 @@
 // Licensed under GNU GPLv2
 // Common utility functions
 
-import { echo_error } from "std/env"
+import { echo_error, env_var_get } from "std/env"
+import { starts_with, text_contains } from "std/text"
 
-let SELF = trust $echo \$0$
+let SELF = ""
+
+let me = trust $echo \$0$
+
+// Quick shenanigan to get real path without readlink -f *sideyes macOS*
+if text_contains(me, "/") {
+    if not starts_with(me, "/") {
+        let PWD = trust env_var_get("PWD")
+        let rl = $readlink {me}$ failed {
+            SELF = "{PWD}/{me}"
+        }
+
+        // This second pass check if the result of readlink is relative
+        if {
+            rl == "":                  SELF = SELF
+            not starts_with(rl, "/"):  SELF = "{PWD}/{rl}"
+            else:                      SELF = rl
+        }
+    }
+} else {
+    echo_error("This script must be run from an absolute or relative path.")
+}
 
 // Exit alt-buffer, quit script, kill ourselves. At this point something has gone
 // catastrophically wrong and the script MUST stop.
@@ -12,7 +34,7 @@ pub fun bail(message: Text): Null
 {
     trust $tput rmcup$
 
-    echo_error(message, 0)
+    echo_error(message, 1)
     echo_error("This script can be rebuilt using the nixie tool.",1)
     trust $kill -ABRT \$\$$
 }
@@ -23,14 +45,13 @@ fun dump_archive(): Text
 
     // This block seeks to the archive marker, then zcats everything afterwards
     // to the tmpfile in dest
-    //TODO: port better detection for SELF
-    $(
+    $cat {SELF} | (
         read -r M
         while ! [[ "\$M" =~ ^-----BEGIN\ ARCHIVE\ SECTION----- ]]
-        do read -r M
+        do read -r M || return 1
         done
         gzip -d -c 2>/dev/null > {dest}
-    ) < {SELF}$ failed {
+    )$ failed {
         // gzip exits with 2 IFF it sees trailing garbage, which our alt-buf
         // attempt at hiding the tarball technically is
         if status != 2 {
@@ -41,7 +62,7 @@ fun dump_archive(): Text
     return dest
 }
 
-pub fun untar(member: Text, dump: Bool): Text?
+pub fun untar(member: Text, dump: Bool = false): Text?
 {
     let archive = dump_archive()
     let tar_cmd = "tar -x {member} -f {archive}"
@@ -52,7 +73,7 @@ pub fun untar(member: Text, dump: Bool): Text?
 
     let tar_out = ${tar_cmd}$ failed {
         trust $rm {archive}$
-        fail 1
+        fail status
     }
 
     trust $rm {archive}$
@@ -70,7 +91,7 @@ pub fun check_deps(deps: []): Bool
         }
     }
 
-    if "{missing}" != "" {
+    if len(missing) > 0 {
         echo_error("The following commands are missing:", 0)
         for cmd in missing {
             echo_error("- {cmd}", 0)

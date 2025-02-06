@@ -1,0 +1,8 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Final-step Nix invocation methods
+
+fun is_ignore_system(): Bool
+{
+    return env_var_test("nosystem")
+}
