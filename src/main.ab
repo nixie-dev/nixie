@@ -10,18 +10,38 @@ let SOURCE_CACHE = ""
 let SOURCE_DERIVATION = ""
 let BINARIES_DERIVATION = ""
 
+let EXTRA_FEATURES = ""
+let EXTRA_SUBSTITUTERS = ""
+let EXTRA_KEYS = ""
+
+let NIXIE_VERSION = ""
+
 check_deps(["tar", "gzip", "uname"])
 
 fun load_features(): Null
 {
-    $eval {untar("features")}$ failed {
+    let envfile = untar("features", true) failed {
         bail("The resource archive is missing or malformed.")
+    }
+
+    $eval {envfile}$ failed {
+        bail("The environment file in the resource archive is malformed.")
     }
 
     SOURCE_CACHE = trust env_var_get("SOURCE_CACHE")
     SOURCE_DERIVATION = trust env_var_get("SOURCE_DERIVATION")
     BINARIES_DERIVATION = trust env_var_get("NIX_BINS_DERIVATION")
+
+    EXTRA_FEATURES = trust env_var_get("EXTRA_FEATURES")
+    EXTRA_SUBSTITUTERS = trust env_var_get("EXTRA_SUBSTITUTERS")
+    EXTRA_KEYS = trust env_var_get("EXTRA_TRUSTED_PUBLIC_KEYS")
+
+    NIXIE_VERSION = trust env_var_get("NIXIE_VERSION")
 }
 
-load_features()
-echo SOURCE_CACHE
+main(args)
+{
+    load_features()
+    echo SOURCE_DERIVATION
+    echo "Built using Nixie {NIXIE_VERSION}"
+}

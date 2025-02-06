@@ -6,6 +6,8 @@ import { echo_error } from "std/env"
 
 let SELF = trust $echo \$0$
 
+// Exit alt-buffer, quit script, kill ourselves. At this point something has gone
+// catastrophically wrong and the script MUST stop.
 pub fun bail(message: Text): Null
 {
     trust $tput rmcup$
@@ -15,9 +17,47 @@ pub fun bail(message: Text): Null
     trust $kill -ABRT \$\$$
 }
 
-pub fun untar(member: Text): Text
+fun dump_archive(): Text
 {
-    return "SOURCE_CACHE=xxx"
+    let dest = trust $mktemp -t nixie_XXXXXXXX.tar$
+
+    // This block seeks to the archive marker, then zcats everything afterwards
+    // to the tmpfile in dest
+    //TODO: port better detection for SELF
+    $(
+        read -r M
+        while ! [[ "\$M" =~ ^-----BEGIN\ ARCHIVE\ SECTION----- ]]
+        do read -r M
+        done
+        gzip -d -c 2>/dev/null > {dest}
+    ) < {SELF}$ failed {
+        // gzip exits with 2 IFF it sees trailing garbage, which our alt-buf
+        // attempt at hiding the tarball technically is
+        if status != 2 {
+            bail("Could not find the script's resource archive.")
+        }
+    }
+
+    return dest
+}
+
+pub fun untar(member: Text, dump: Bool): Text?
+{
+    let archive = dump_archive()
+    let tar_cmd = "tar -x {member} -f {archive}"
+
+    if dump {
+        tar_cmd = "tar -x -O {member} -f {archive}"
+    }
+
+    let tar_out = ${tar_cmd}$ failed {
+        trust $rm {archive}$
+        fail 1
+    }
+
+    trust $rm {archive}$
+
+    return tar_out
 }
 
 pub fun check_deps(deps: []): Bool
