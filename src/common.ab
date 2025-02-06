@@ -1,0 +1,43 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Common utility functions
+
+import { echo_error } from "std/env"
+
+let SELF = trust $echo \$0$
+
+pub fun bail(message: Text): Null
+{
+    trust $tput rmcup$
+
+    echo_error(message, 0)
+    echo_error("This script can be rebuilt using the nixie tool.",1)
+    trust $kill -ABRT \$\$$
+}
+
+pub fun untar(member: Text): Text
+{
+    return "SOURCE_CACHE=xxx"
+}
+
+pub fun check_deps(deps: []): Bool
+{
+    let missing = [ Text ]
+
+    for dep in deps {
+        silent $which {dep}$ failed {
+            missing += [ dep ]
+        }
+    }
+
+    if "{missing}" != "" {
+        echo_error("The following commands are missing:", 0)
+        for cmd in missing {
+            echo_error("- {cmd}", 0)
+        }
+        echo_error("Use your distribution's package manager to install them, then try again.", 0)
+        return false
+    }
+
+    return true
+}

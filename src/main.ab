@@ -1,0 +1,27 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Entry point for script logic
+
+import { env_var_get } from "std/env"
+
+import { bail, untar, check_deps } from "./common.ab"
+
+let SOURCE_CACHE = ""
+let SOURCE_DERIVATION = ""
+let BINARIES_DERIVATION = ""
+
+check_deps(["tar", "gzip", "uname"])
+
+fun load_features(): Null
+{
+    $eval {untar("features")}$ failed {
+        bail("The resource archive is missing or malformed.")
+    }
+
+    SOURCE_CACHE = trust env_var_get("SOURCE_CACHE")
+    SOURCE_DERIVATION = trust env_var_get("SOURCE_DERIVATION")
+    BINARIES_DERIVATION = trust env_var_get("NIX_BINS_DERIVATION")
+}
+
+load_features()
+echo SOURCE_CACHE

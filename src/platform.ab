@@ -1,0 +1,46 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Environment-specific data retrieval utilities
+
+import { env_var_get } from "std/env"
+
+pub fun get_osname(): Text {
+    return trust $uname -s$
+}
+
+pub fun get_machine(): Text {
+    return trust $uanme -m$
+}
+
+pub fun get_system(): Text {
+    let osname = get_osname()
+    let machine = get_machine()
+
+    return "{osname}.{machine}"
+}
+
+pub fun get_dll_ext(): Text {
+    let osname = get_osname()
+    if {
+        osname == "Darwin": return "dylib"
+        else:               return "so"
+    }
+}
+
+pub fun get_nix_root(): Text {
+    let userhome = trust env_var_get("HOME")
+    let osname = get_osname()
+    if {
+        osname == "Darwin": return "{userhome}/Library/Nix"
+        else:               return "{userhome}/.local/share/nix/root"
+    }
+}
+
+pub fun get_cache_root(): Text {
+    let userhome = trust env_var_get("HOME")
+    let osname = get_osname()
+    if {
+        osname == "Darwin": return "{userhome}/Library/Caches"
+        else:               return "{userhome}/.cache"
+    }
+}
