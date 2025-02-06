@@ -1,7 +1,7 @@
 { description = "Put Nix in everything!";
 
-  inputs.nixpkgs.url = github:nixos/nixpkgs/staging;
-  inputs.nix.url = github:nixos/nix/2.17.1;
+  inputs.nixpkgs.url = github:nixos/nixpkgs;
+  inputs.nix.url = github:nixos/nix/2.24.0;
   inputs.fakedir =
     { url = github:nixie-dev/fakedir;
       inputs.nixpkgs.follows = "nixpkgs";
