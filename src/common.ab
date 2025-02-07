@@ -39,6 +39,11 @@ pub fun bail(message: Text): Null
     trust $kill -ABRT \$\$$
 }
 
+pub fun get_self(): Text
+{
+    return SELF
+}
+
 fun dump_archive(): Text
 {
     let dest = trust $mktemp -t nixie_XXXXXXXX.tar$

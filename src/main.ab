@@ -18,6 +18,8 @@ import { env_var_get } from "std/env"
 
 import { bail, untar, check_deps } from "./common.ab"
 
+import { get_repo_root } from "./platform.ab"
+
 import { catch_args } from "./cli.ab"
 
 check_deps(["tar", "gzip", "uname"])

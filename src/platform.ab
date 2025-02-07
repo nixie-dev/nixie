@@ -2,7 +2,11 @@
 // Licensed under GNU GPLv2
 // Environment-specific data retrieval utilities
 
-import { env_var_get } from "std/env"
+import { env_var_get, echo_warning } from "std/env"
+import { split, join } from "std/text"
+import { array_pop } from "std/array"
+
+import { get_self } from "./common.ab"
 
 pub fun get_osname(): Text {
     return trust $uname -s$
@@ -42,5 +46,18 @@ pub fun get_cache_root(): Text {
     if {
         osname == "Darwin": return "{userhome}/Library/Caches"
         else:               return "{userhome}/.cache"
+    }
+}
+
+pub fun get_repo_root(): Text
+{
+    let self_a = split(get_self(), "/")
+    array_pop(self_a)
+
+    let self_dir = "/{join(self_a, "/")}"
+
+    return $git -C {self_dir} rev-parse --show-toplevel$ failed {
+        echo_warning("Failed to find current Git repository, using script parent directory.")
+        return self_dir
     }
 }

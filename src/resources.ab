@@ -16,10 +16,12 @@ pub fun pull_source_file(member: Text, dest: Text): Null?
     let where = untar("sources/{member}") failed {
         let tmpf = trust $mktemp -t nixie_src_XXXXXXXX.tgz$
         let tmpd = trust $mktemp -t -d nixie_{member}_XXXXXXXX$
+
         file_download(cachix_url(SOURCE_DERIVATION, "{member}.tar.gz"), tmpf)?
         trust $rm -f {tmpf}$
         return tmpd
     }
+
     mv where dest
 }
 
@@ -27,8 +29,10 @@ pub fun pull_binary(member: Text, dest: Text): Null?
 {
     let where = untar(member) failed {
         let tmpf = trust $mktemp -t nixie_{member}_XXXXXXXX$
+
         file_download(cachix_url(BINARIES_DERIVATION, member), tmpf)?
         return tmpf
     }
+
     mv where dest
 }
