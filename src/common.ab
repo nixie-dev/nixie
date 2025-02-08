@@ -2,8 +2,10 @@
 // Licensed under GNU GPLv2
 // Common utility functions
 
-import { echo_error, env_var_get } from "std/env"
+import { echo_error, env_var_get, is_command } from "std/env"
 import { starts_with, text_contains } from "std/text"
+
+import { exit_alt_buffer, set_title } from "./term.ab"
 
 let SELF = ""
 
@@ -32,10 +34,12 @@ if text_contains(me, "/") {
 // catastrophically wrong and the script MUST stop.
 pub fun bail(message: Text): Null
 {
-    trust $tput rmcup$
+    exit_alt_buffer()
+    set_title()         // Clear terminal title back to default
 
     echo_error(message, 1)
     echo_error("This script can be rebuilt using the nixie tool.",1)
+
     trust $kill -ABRT \$\$$
 }
 
@@ -91,7 +95,7 @@ pub fun check_deps(deps: []): Bool
     let missing = [ Text ]
 
     for dep in deps {
-        silent $which {dep}$ failed {
+        if not is_command(dep) {
             missing += [ dep ]
         }
     }

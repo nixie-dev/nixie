@@ -2,7 +2,24 @@
 // Licensed under GNU GPLv2
 // Final-step Nix invocation methods
 
+import { build_nix } from "./builder.ab"
+
 fun is_ignore_system(): Bool
 {
     return env_var_test("nosystem")
+}
+
+fun get_nix()
+{
+
+}
+
+fun launch_darwin_workaround()
+{
+
+}
+
+pub fun launch_nix(name: Text, extras: [Text], args: [Text]): Null
+{
+
 }
