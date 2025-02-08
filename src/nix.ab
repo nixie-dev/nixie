@@ -19,6 +19,15 @@ fun launch_darwin_workaround()
 
 }
 
+/// Launch Nix with options pulled from a file's contents.
+/// This allows our script to be used as an interpreter, the same way
+/// Nix proper would.
+pub fun launch_nix_shebang(name: Text, file: Text, args: [Text]): Null
+{
+
+}
+
+/// Launch Nix as a regular CLI.
 pub fun launch_nix(name: Text, extras: [Text], args: [Text]): Null
 {
 

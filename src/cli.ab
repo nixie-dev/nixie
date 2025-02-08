@@ -2,15 +2,13 @@
 // Licensed under GNU GPLv2
 // Command line options parser
 
-import { array_remove_at } from "std/array"
-import { starts_with, slice } from "std/text"
+import { array_remove_at }      from "std/array"
+import { starts_with, slice }   from "std/text"
 import { echo_error, echo_warning, env_var_get, env_var_set } from "std/env"
-import { dir_create } from "std/fs"
+import { dir_create }           from "std/fs"
 
-import { untar } from "./common.ab"
-import { get_nix_root, get_cache_root, get_repo_root } from "./platform.ab"
-
-let NIXIE_VERSION = trust env_var_get("NIXIE_VERSION")
+import { untar }                                        from "./common.ab"
+import { get_nix_root, get_cache_root, get_repo_root }  from "./platform.ab"
 
 fun cmd_help()
 {

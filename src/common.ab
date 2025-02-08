@@ -2,14 +2,14 @@
 // Licensed under GNU GPLv2
 // Common utility functions
 
-import { echo_error, env_var_get, is_command } from "std/env"
-import { starts_with, text_contains } from "std/text"
+import { echo_error, env_var_get, is_command }  from "std/env"
+import { starts_with, text_contains }           from "std/text"
 
-import { exit_alt_buffer, set_title } from "./term.ab"
+import { exit_alt_buffer, set_title }           from "./term.ab"
 
 let SELF = ""
 
-let me = trust $echo \$0$
+let me = trust env_var_get("0")
 
 // Quick shenanigan to get real path without readlink -f *sideyes macOS*
 if text_contains(me, "/") {
@@ -90,7 +90,7 @@ pub fun untar(member: Text, dump: Bool = false): Text?
     return tar_out
 }
 
-pub fun check_deps(deps: []): Bool
+pub fun check_deps(deps: []): Null?
 {
     let missing = [ Text ]
 
@@ -106,8 +106,6 @@ pub fun check_deps(deps: []): Bool
             echo_error("- {cmd}", 0)
         }
         echo_error("Use your distribution's package manager to install them, then try again.", 0)
-        return false
+        fail 1
     }
-
-    return true
 }

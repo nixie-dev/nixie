@@ -2,26 +2,28 @@
 // Licensed under GNU GPLv2
 // Entry point for script logic
 
-let SOURCE_CACHE = ""
-let SOURCE_DERIVATION = ""
+let SOURCE_CACHE        = ""
+let SOURCE_DERIVATION   = ""
 let NIX_BINS_DERIVATION = ""
 
-let EXTRA_FEATURES = ""
-let EXTRA_SUBSTITUTERS = ""
-let EXTRA_TRUSTED_PUBLIC_KEYS = ""
+let EXTRA_FEATURES              = ""
+let EXTRA_SUBSTITUTERS          = ""
+let EXTRA_TRUSTED_PUBLIC_KEYS   = ""
 
 let NIXIE_VERSION = ""
 
 let args = [Text]
 
-import { env_var_get } from "std/env"
+import { env_var_get }              from "std/env"
 
-import { bail, untar, check_deps } from "./common.ab"
-import { get_repo_root } from "./platform.ab"
-import { catch_args } from "./cli.ab"
-import { launch_nix } from "./nix.ab"
+import { bail, untar, check_deps }  from "./common.ab"
+import { get_repo_root }            from "./platform.ab"
+import { catch_args }               from "./cli.ab"
+import { launch_nix }               from "./nix.ab"
 
-check_deps(["tar", "gzip", "uname"])
+check_deps(["tar", "gzip", "uname"]) failed {
+    exit 1
+}
 
 fun load_features(): Null
 {
@@ -33,13 +35,13 @@ fun load_features(): Null
         bail("The environment file in the resource archive is malformed.")
     }
 
-    SOURCE_CACHE = trust env_var_get("SOURCE_CACHE")
-    SOURCE_DERIVATION = trust env_var_get("SOURCE_DERIVATION")
+    SOURCE_CACHE        = trust env_var_get("SOURCE_CACHE")
+    SOURCE_DERIVATION   = trust env_var_get("SOURCE_DERIVATION")
     NIX_BINS_DERIVATION = trust env_var_get("NIX_BINS_DERIVATION")
 
-    EXTRA_FEATURES = trust env_var_get("EXTRA_FEATURES")
-    EXTRA_SUBSTITUTERS = trust env_var_get("EXTRA_SUBSTITUTERS")
-    EXTRA_TRUSTED_PUBLIC_KEYS = trust env_var_get("EXTRA_TRUSTED_PUBLIC_KEYS")
+    EXTRA_FEATURES              = trust env_var_get("EXTRA_FEATURES")
+    EXTRA_SUBSTITUTERS          = trust env_var_get("EXTRA_SUBSTITUTERS")
+    EXTRA_TRUSTED_PUBLIC_KEYS   = trust env_var_get("EXTRA_TRUSTED_PUBLIC_KEYS")
 
     NIXIE_VERSION = trust env_var_get("NIXIE_VERSION")
 }
