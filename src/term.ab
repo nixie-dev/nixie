@@ -9,7 +9,7 @@ let rmcup = trust $tput rmcup$
 
 pub fun set_title(title: Text = ""): Null
 {
-    echo "{tsl}{title}{fsl}"
+    echo "{tsl}{title} {fsl}"
 }
 
 pub fun enter_alt_buffer(): Null
@@ -20,4 +20,11 @@ pub fun enter_alt_buffer(): Null
 pub fun exit_alt_buffer(): Null
 {
     echo rmcup
+}
+
+/// Shorthand to exit alt-buffer and clear terminal title.
+pub fun teardown(): Null
+{
+    set_title()
+    exit_alt_buffer()
 }

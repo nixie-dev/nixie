@@ -3,6 +3,8 @@
 // Final-step Nix invocation methods
 
 import { build_nix } from "./builder.ab"
+import { pull_binary } from "./resources.ab"
+import { enter_alt_buffer, set_title, teardown } from "./term.ab"
 
 fun is_ignore_system(): Bool
 {
@@ -11,7 +13,20 @@ fun is_ignore_system(): Bool
 
 fun get_nix()
 {
+    enter_alt_buffer()
+    set_title("Building Nix...")
 
+    // Cleanly exit alt-buffer if hit with ^C
+    // Right now amber-lang/amber#673 makes this impossible
+    //trust $trap "{nameof teardown}; exit 1" SIGKILL SIGTERM SIGINT SIGABRT$
+
+    //TODO: ✨MAGIC✨
+    echo "Pretend we're doing something here..."
+    trust $sleep 1$
+
+    // By this point every attempt at fetching Nix failed.
+    teardown()
+    fail 1
 }
 
 fun launch_darwin_workaround()
@@ -19,7 +34,7 @@ fun launch_darwin_workaround()
 
 }
 
-/// Launch Nix with options pulled from a file's contents.
+/// Launch Nix with options pulled from a file's contents.  
 /// This allows our script to be used as an interpreter, the same way
 /// Nix proper would.
 pub fun launch_nix_shebang(name: Text, file: Text, args: [Text]): Null
@@ -30,5 +45,12 @@ pub fun launch_nix_shebang(name: Text, file: Text, args: [Text]): Null
 /// Launch Nix as a regular CLI.
 pub fun launch_nix(name: Text, extras: [Text], args: [Text]): Null
 {
+    trust get_nix()
 
+    echo "Would launch Nix as {name}"
+    echo "Internal options: {extras}"
+    echo "Command line options: {args}"
+    echo ""
+    echo "That's all we have for now, thanks for playing!"
+    exit 0
 }

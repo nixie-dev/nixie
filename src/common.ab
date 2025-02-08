@@ -30,24 +30,35 @@ if text_contains(me, "/") {
     echo_error("This script must be run from an absolute or relative path.")
 }
 
-// Exit alt-buffer, quit script, kill ourselves. At this point something has gone
-// catastrophically wrong and the script MUST stop.
-pub fun bail(message: Text): Null
+/// Exit alt-buffer, quit script, kill ourselves. At this point something has gone
+/// catastrophically wrong and the script MUST stop.
+///
+/// ### Arguments:
+/// - `message`: Message to print as we error out
+/// - `archive`: `true` if the issue is related to the attached archive.
+///   Default is `false`.
+pub fun bail(message: Text, archive: Bool = false): Null
 {
     exit_alt_buffer()
     set_title()         // Clear terminal title back to default
 
-    echo_error(message, 1)
-    echo_error("This script can be rebuilt using the nixie tool.",1)
+    echo_error(message, 0)
+    if archive {
+        echo_error("This script can be rebuilt using the nixie tool.", 0)
+    }
 
+    exit 1
     trust $kill -ABRT \$\$$
 }
 
+/// Retrieve the resolved, absolute path to the wrapper script.
 pub fun get_self(): Text
 {
     return SELF
 }
 
+/// Reads and uncompresses to a temporary file, the attached resource archive
+/// at the end of the script.
 fun dump_archive(): Text
 {
     let dest = trust $mktemp -t nixie_XXXXXXXX.tar$
@@ -64,13 +75,21 @@ fun dump_archive(): Text
         // gzip exits with 2 IFF it sees trailing garbage, which our alt-buf
         // attempt at hiding the tarball technically is
         if status != 2 {
-            bail("Could not find the script's resource archive.")
+            bail("Could not find the script's resource archive.", true)
         }
     }
 
     return dest
 }
 
+/// Extract a file or directory from the attached resource archive at the end
+/// of the script.
+///
+/// ### Arguments
+/// - `member`: The plaintext path to the file or folder to be extracted, relative
+///   to the archive root. Passed as-is to `tar`.
+/// - `dump`: If `true`, output the contents of the extracted file to standard
+///   output. Adds the `-O` option to `tar`.
 pub fun untar(member: Text, dump: Bool = false): Text?
 {
     let archive = dump_archive()
@@ -90,6 +109,10 @@ pub fun untar(member: Text, dump: Bool = false): Text?
     return tar_out
 }
 
+/// Checks that a list of commands are available at runtime.
+///
+/// This function prints out the list of missing commands, and a message to
+/// instruct the user to install them.
 pub fun check_deps(deps: []): Null?
 {
     let missing = [ Text ]

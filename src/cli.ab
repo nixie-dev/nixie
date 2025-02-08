@@ -88,6 +88,8 @@ fun eval_cmd(cmd)
     }
 }
 
+/// Parse and remove options in the form `--nixie-[option]` from the arguments
+/// list.
 pub fun catch_args(ref args: []): Null
 {
     let newargs = [Text]

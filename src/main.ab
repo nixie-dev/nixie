@@ -25,14 +25,20 @@ check_deps(["tar", "gzip", "uname"]) failed {
     exit 1
 }
 
+/// Populate environment variables from the features file in the archive.
+/// Also sets variables local to this module, which is not much use until
+/// [amber-lang/amber#671](https://github.com/amber-lang/amber/issues/671) is
+/// implemented. Checks that the variables exist, I guess.
+///
+/// Could be moved to `common.ab`
 fun load_features(): Null
 {
     let envfile = untar("features", true) failed {
-        bail("The resource archive is missing or malformed.")
+        bail("The resource archive is missing or malformed.", true)
     }
 
     $eval {envfile}$ failed {
-        bail("The environment file in the resource archive is malformed.")
+        bail("The environment file in the resource archive is malformed.", true)
     }
 
     SOURCE_CACHE        = trust env_var_get("SOURCE_CACHE")
@@ -53,6 +59,6 @@ main(cmdl)
 
     load_features()
     catch_args(args)
-    echo SOURCE_DERIVATION
-    echo "Built using Nixie {NIXIE_VERSION}"
+
+    launch_nix("nix", ["lol"], ["lol"])
 }

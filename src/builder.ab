@@ -2,8 +2,9 @@
 // Licensed under GNU GPLv2
 // Functions to build Nix and its dependencies from source
 
-import { check_deps } from "./common.ab"
+import { check_deps, bail }              from "./common.ab"
 import { pull_source_file, pull_binary } from "./resources.ab"
+import { set_title }                     from "./term.ab"
 
 fun build_openssl()
 {
@@ -54,4 +55,5 @@ fun darwin_export_sdk()
 pub fun build_nix()
 {
     check_deps(["cc", "c++", "pkg-config", "make", "flex", "bison", "perl"])
+        failed { bail("Failed to build Nix from source") }
 }
