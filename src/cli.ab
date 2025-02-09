@@ -92,17 +92,17 @@ fun eval_cmd(cmd)
 /// list.
 pub fun catch_args(ref args: []): Null
 {
-    let newargs = [Text]
+    let local_args = args
 
-    for arg in args {
+    args = [Text]
+
+    for arg in local_args {
         let cmd = ""
         if starts_with(arg, "--nixie-") {
             cmd = slice(arg, len("--nixie-"))
             eval_cmd(cmd)
         } else {
-            newargs += [arg]
+            args += [arg]
         }
     }
-
-    args = newargs
 }
