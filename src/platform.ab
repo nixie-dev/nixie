@@ -3,27 +3,37 @@
 // Environment-specific data retrieval utilities
 
 import { env_var_get, echo_warning } from "std/env"
-import { split, join } from "std/text"
-import { array_pop } from "std/array"
+import { split, join }               from "std/text"
+import { array_pop }                 from "std/array"
 
 import { get_self } from "./common.ab"
 
-pub fun get_osname(): Text {
+/// Return the current operating system, as reported by `uname -s`.
+pub fun get_osname(): Text
+{
     return trust $uname -s$
 }
 
-pub fun get_machine(): Text {
-    return trust $uanme -m$
+/// Return the current machine architecture, as reported by `uname -s`.
+pub fun get_machine(): Text
+{
+    return trust $uname -m$
 }
 
-pub fun get_system(): Text {
+/// Return the combined system-string, in the format `osname.machine`.
+///
+/// See [`get_osname()`](#get_osname) and [`get_machine()`](#get_machine) above.
+pub fun get_system(): Text
+{
     let osname = get_osname()
     let machine = get_machine()
 
     return "{osname}.{machine}"
 }
 
-pub fun get_dll_ext(): Text {
+/// Return the extension for dynamic libraries on the current system.
+pub fun get_dll_ext(): Text
+{
     let osname = get_osname()
     if {
         osname == "Darwin": return "dylib"
@@ -31,7 +41,9 @@ pub fun get_dll_ext(): Text {
     }
 }
 
-pub fun get_nix_root(): Text {
+/// Return the path to the user-mode root for the Nix store.
+pub fun get_nix_root(): Text
+{
     let userhome = trust env_var_get("HOME")
     let osname = get_osname()
     if {
@@ -40,7 +52,9 @@ pub fun get_nix_root(): Text {
     }
 }
 
-pub fun get_cache_root(): Text {
+/// Return the path to the user's cache directory on the current system.
+pub fun get_cache_root(): Text
+{
     let userhome = trust env_var_get("HOME")
     let osname = get_osname()
     if {
@@ -49,12 +63,16 @@ pub fun get_cache_root(): Text {
     }
 }
 
+/// Return the path to the root of the Git repository the script is located in.
+///
+/// Falls back to returning the script's parent directory if not in a repository,
+/// or if `git` is unavailable.
 pub fun get_repo_root(): Text
 {
     let self_a = split(get_self(), "/")
     array_pop(self_a)
 
-    let self_dir = "/{join(self_a, "/")}"
+    let self_dir = "/" + join(self_a, "/")
 
     return $git -C {self_dir} rev-parse --show-toplevel$ failed {
         echo_warning("Failed to find current Git repository, using script parent directory.")

@@ -2,9 +2,9 @@
 // Licensed under GNU GPLv2
 // Functions to build Nix and its dependencies from source
 
+import { set_title }                     from "./term.ab"
 import { check_deps, bail }              from "./common.ab"
 import { pull_source_file, pull_binary } from "./resources.ab"
-import { set_title }                     from "./term.ab"
 
 fun build_openssl()
 {
