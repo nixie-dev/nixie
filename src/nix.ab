@@ -2,24 +2,63 @@
 // Licensed under GNU GPLv2
 // Final-step Nix invocation methods
 
-import { build_nix } from "./builder.ab"
-import { pull_binary } from "./resources.ab"
-import { enter_alt_buffer, set_title, teardown } from "./term.ab"
+import { file_exists, dir_exists, dir_create } from "std/fs"
 
-fun is_ignore_system(): Bool
+import { enter_alt_buffer, set_title, teardown }  from "./term.ab"
+import { bail }                                   from "./common.ab"
+import { get_osname, get_system, get_cache_root } from "./platform.ab"
+import { pull_binary }                            from "./resources.ab"
+import { build_nix }                              from "./builder.ab"
+
+/// Determine whether Nix is installed system-wide. Nixie can launch the
+/// system-wide Nix when it is available, using the script's bundled options.
+///
+/// This is the predicate for that behavior.
+fun is_nix_installed(): Bool
 {
-    return env_var_test("nosystem")
+    // --nixie-ignore-system flag set
+    if env_var_test("nosystem"): return false
+
+    // Simple enough heuristic. In the future, might also check for the `nix`
+    // command, but that would create a ternary situation where Nixie's static
+    // Nix would need to use the system store.
+    if dir_exists("/nix/store"): return true
+
+    return false
 }
 
+/// Attempt to retrieve the static Nix binary by all known methods.
+///
+/// This function will first try to extract or download a static executable
+/// for the current system, and if it fails, a local build from source will be
+/// attempted.
+///
+/// **NOTE**: On macOS, this function is also responsible for downloading
+/// `libfakedir.dylib`.
 fun get_nix()
 {
+    let cache_root = get_cache_root()
+    let osname = get_osname()
+    let system = get_system()
+
+    let nix_path = "{cache_root}/nix-static"
+    let fakedir_path = "{cache_root}/nix-lib/libfakedir.dylib"
+
     enter_alt_buffer()
     set_title("Building Nix...")
 
     // Cleanly exit alt-buffer if hit with ^C
     trust $trap "{nameof teardown}; exit 1" SIGKILL SIGTERM SIGINT SIGABRT$
 
-    //TODO: ✨MAGIC✨
+    if osname == "Darwin" and not file_exists(fakedir_path) {
+        dir_create("{cache_root}/nix-lib")
+        trust pull_binary("libfakedir.dylib", fakedir_path)
+    }
+
+    if not file_exists(nix_path) {
+        trust pull_binary("nix.{system}", nix_path)
+    }
+
     echo "Pretend we're doing something here..."
     trust $sleep 1$
 
@@ -28,7 +67,12 @@ fun get_nix()
     fail 1
 }
 
-fun launch_darwin_workaround()
+/// Launch Nix with the proper environment variables for fakedir and OpenSSL.
+///
+/// This is required because macOS has no namespacing facility, and Nix will
+/// not attempt to use the system-wide CA bundle by default. This function
+/// addresses both issues.
+fun launch_darwin_workaround(name: Text, args: [Text]): Null
 {
 
 }

@@ -100,8 +100,9 @@ pub fun untar(member: Text, dump: Bool = false): Text?
     }
 
     let tar_out = ${tar_cmd}$ failed {
+        let tar_status = status
         trust $rm {archive}$
-        fail status
+        fail tar_status
     }
 
     trust $rm {archive}$
