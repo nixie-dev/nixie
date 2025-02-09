@@ -8,15 +8,16 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1734811072,
-        "narHash": "sha256-N9G/2G8+vrpr1/K7XLwgW+X2oAyAaz4qvN+EbLOCU1Q=",
-        "owner": "amber-lang",
+        "lastModified": 1739091767,
+        "narHash": "sha256-6z1+TMi9lUdIWGz/RDyhCR69lCrl/tyJ0Ezfp2c18aI=",
+        "owner": "thesola10",
         "repo": "amber",
-        "rev": "d3ceda317fc053ae9645e9f3c8f166657eba24e9",
+        "rev": "7ba5ae7b20f0b08b504c2b9e8b96b0094ef39485",
         "type": "github"
       },
       "original": {
-        "owner": "amber-lang",
+        "owner": "thesola10",
+        "ref": "nameof-function",
         "repo": "amber",
         "type": "github"
       }

@@ -17,8 +17,7 @@ fun get_nix()
     set_title("Building Nix...")
 
     // Cleanly exit alt-buffer if hit with ^C
-    // Right now amber-lang/amber#673 makes this impossible
-    //trust $trap "{nameof teardown}; exit 1" SIGKILL SIGTERM SIGINT SIGABRT$
+    trust $trap "{nameof teardown}; exit 1" SIGKILL SIGTERM SIGINT SIGABRT$
 
     //TODO: ✨MAGIC✨
     echo "Pretend we're doing something here..."
