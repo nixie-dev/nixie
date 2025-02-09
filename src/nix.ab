@@ -3,6 +3,7 @@
 // Final-step Nix invocation methods
 
 import { file_exists, dir_exists, dir_create } from "std/fs"
+import { env_var_test } from "std/env"
 
 import { enter_alt_buffer, set_title, teardown }  from "./term.ab"
 import { bail }                                   from "./common.ab"
@@ -55,16 +56,26 @@ fun get_nix()
         trust pull_binary("libfakedir.dylib", fakedir_path)
     }
 
-    if not file_exists(nix_path) {
-        trust pull_binary("nix.{system}", nix_path)
+    if is_nix_installed() {
+        teardown()
+        return 0
     }
 
-    echo "Pretend we're doing something here..."
-    trust $sleep 1$
+    // We already have static Nix
+    if file_exists(nix_path) {
+        teardown()
+        return 0
+    }
 
-    // By this point every attempt at fetching Nix failed.
+    // Try to extract or download Nix
+    pull_binary("nix.{system}", nix_path) failed {
+        trust build_nix()
+        teardown()
+        fail status
+    }
+
     teardown()
-    fail 1
+    return 0
 }
 
 /// Launch Nix with the proper environment variables for fakedir and OpenSSL.
@@ -88,7 +99,7 @@ pub fun launch_nix_shebang(name: Text, file: Text, args: [Text]): Null
 /// Launch Nix as a regular CLI.
 pub fun launch_nix(name: Text, extras: [Text], args: [Text]): Null
 {
-    trust get_nix()
+    get_nix() failed { echo "oh nyo" }
 
     echo "Would launch Nix as {name}"
     echo "Internal options: {extras}"
