@@ -69,6 +69,15 @@ fun opt_ignore_system()
     trust env_var_set("nosystem", "1")
 }
 
+//TODO: debug function, remove!
+fun no_precompiled()
+{
+    echo_warning("Ignoring precompiled binaries for testing purposes.")
+    echo_warning("This implies --nixie-ignore-system.")
+    trust env_var_set("nobins", "1")
+    trust env_var_set("nosystem", "1")
+}
+
 fun notfound(cmd)
 {
     let self = trust env_var_get("0")
@@ -84,6 +93,7 @@ fun eval_cmd(cmd)
         cmd == "extract":       cmd_extract()
         cmd == "cleanup":       cmd_cleanup()
         cmd == "ignore-system": opt_ignore_system()
+        cmd == "no-precompiled":no_precompiled()
         else: notfound(cmd)
     }
 }

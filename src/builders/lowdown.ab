@@ -1,0 +1,18 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Builder for the lowdown Markdown library
+
+import { pkg_exists, step_title } from "./common.ab"
+
+fun macos_build_post()
+{
+    $cc -shared -o liblowdown.1.dylib *.o$?
+}
+
+pub fun build_lowdown()
+{
+    step_title("lowdown")
+
+    if pkg_exists("lowdown"):
+        return 0
+}

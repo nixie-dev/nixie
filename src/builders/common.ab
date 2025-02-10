@@ -1,0 +1,28 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Common functions for source-based builders
+
+import { env_var_get } from "std/env"
+
+import { set_title } from "../term.ab"
+
+let step_current = 1
+
+/// Invoke `pkg-config` to assert that a given dependency exists on the system.
+pub fun pkg_exists(package: Text): Bool
+{
+    $pkg-config {package}$ failed {
+        return false
+    }
+
+    return true
+}
+
+pub fun step_title(name: Text): Null
+{
+    let step_total = trust env_var_get("step_total")
+
+    set_title("Building Nix: {name} ({step_current}/{step_total})")
+
+    step_current += 1
+}

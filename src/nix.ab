@@ -9,7 +9,7 @@ import { enter_alt_buffer, set_title, teardown }  from "./term.ab"
 import { bail }                                   from "./common.ab"
 import { get_osname, get_system, get_cache_root, get_nix_root } from "./platform.ab"
 import { pull_binary }                            from "./resources.ab"
-import { build_nix }                              from "./builder.ab"
+import { try_build_nix }                          from "./builders.ab"
 
 /// Determine whether Nix is installed system-wide. Nixie can launch the
 /// system-wide Nix when it is available, using the script's bundled options.
@@ -67,9 +67,16 @@ fun get_nix()
         return 0
     }
 
+    //TODO: Debug! Remove before release!
+    if env_var_test("nobins") {
+        trust try_build_nix()
+        teardown()
+        fail status
+    }
+
     // Try to extract or download Nix
     pull_binary("nix.{system}", nix_path) failed {
-        trust build_nix()
+        trust try_build_nix()
         teardown()
         fail status
     }
