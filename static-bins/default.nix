@@ -1,6 +1,9 @@
 { nixpkgs     ? <nixpkgs>
   # Nixpkgs import (from flake)
 
+, nix-source   ? builtins.fetchGit "https://github.com/nixos/nix"
+  # Nix packages flake
+
 , fakedir     ? builtins.fetchGit "https://github.com/thesola10/fakedir"
   # libfakedir import (from flake)
 
@@ -9,9 +12,6 @@
 
 , libfakedir  ? pkgs.callPackage fakedir
   # libfakedir evaluated package
-
-, nixStatics  ? {}
-  # Per-architecture set of static Nix binaries (non-exhaustive)
 
 , ... }:
 
@@ -25,12 +25,36 @@ let
   ];
   systemsPkgs =
     map (s:
-      import nixpkgs ({ localSystem = s; })
+      import nixpkgs { localSystem = s; }
     ) builtSystems;
 
-  nixPackage = r: if builtins.hasAttr "${r.system}" nixStatics
-                  then nixStatics."${r.system}"
-                  else r.nixStatic;
+  patchesForSystem = {
+    "x86_64-darwin"   = [
+      ./0000-darwin-disable-prelink.patch
+      ./0001-darwin-add-cmake.patch
+      ./0002-darwin-disable-embedded-shell.patch
+    ];
+    "aarch64-darwin"  = [
+      ./0000-darwin-disable-prelink.patch
+      ./0001-darwin-add-cmake.patch
+      ./0002-darwin-disable-embedded-shell.patch
+    ];
+
+    "x86_64-linux"    = [];
+    "aarch64-linux"   = [];
+  };
+
+  # The reason we do this is two-fold: first, the Nix build system isn't
+  # a simple callPackage, so using the regular 'patches' attribute wouldn't
+  # propagate to dependent modules.
+  # Second, we also need to modify the Nix 
+  nixPatched = s: pkgs.runCommand "nix-source-patched" {} ''
+    cp -r ${nix-source} $out
+    chmod +w -R $out
+    cat ${builtins.foldl' (l: r: "${l} ${r}") "" patchesForSystem.${s}} \
+      | ${pkgs.patch}/bin/patch -p1 -u -d $out
+  '';
+  nixPackage = r: (import (nixPatched r.system)).packages.${r.system}.nix-cli-static;
 in
 pkgs.stdenv.mkDerivation {
   name = "nix-static-binaries";

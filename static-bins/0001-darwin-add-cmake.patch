@@ -1,0 +1,12 @@
+diff --git a/packaging/dependencies.nix b/packaging/dependencies.nix
+index afbc31fc6..505486dd3 100644
+--- a/packaging/dependencies.nix
++++ b/packaging/dependencies.nix
+@@ -100,6 +100,7 @@ let
+     nativeBuildInputs = [
+       pkgs.buildPackages.meson
+       pkgs.buildPackages.ninja
++      pkgs.buildPackages.cmake
+     ] ++ prevAttrs.nativeBuildInputs or [ ];
+     mesonCheckFlags = prevAttrs.mesonCheckFlags or [ ] ++ [
+       "--print-errorlogs"
