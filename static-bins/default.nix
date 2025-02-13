@@ -2,7 +2,7 @@
   # Nixpkgs import (from flake)
 
 , nix-source   ? builtins.fetchGit "https://github.com/nixos/nix"
-  # Nix packages flake
+  # Nix packages source
 
 , fakedir     ? builtins.fetchGit "https://github.com/thesola10/fakedir"
   # libfakedir import (from flake)
@@ -28,17 +28,18 @@ let
       import nixpkgs { localSystem = s; }
     ) builtSystems;
 
-  patchesForSystem = {
+  patchesForSystem = rec {
     "x86_64-darwin"   = [
-      ./0000-darwin-disable-prelink.patch
+      # clang does not support prelinking, which is needed for libproviders
+      ./0000-darwin-use-gcc.patch
+
+      # Darwin static builds introduce a CMake dependency
       ./0001-darwin-add-cmake.patch
+
+      # Busybox does not exist, and the embedded shell is an optional feature
       ./0002-darwin-disable-embedded-shell.patch
     ];
-    "aarch64-darwin"  = [
-      ./0000-darwin-disable-prelink.patch
-      ./0001-darwin-add-cmake.patch
-      ./0002-darwin-disable-embedded-shell.patch
-    ];
+    "aarch64-darwin"  = x86_64-darwin;
 
     "x86_64-linux"    = [];
     "aarch64-linux"   = [];
@@ -47,7 +48,8 @@ let
   # The reason we do this is two-fold: first, the Nix build system isn't
   # a simple callPackage, so using the regular 'patches' attribute wouldn't
   # propagate to dependent modules.
-  # Second, we also need to modify the Nix 
+  # Second, we also need to modify the Nix source due to the module system
+  # making overrides difficult.
   nixPatched = s: pkgs.runCommand "nix-source-patched" {} ''
     cp -r ${nix-source} $out
     chmod +w -R $out
