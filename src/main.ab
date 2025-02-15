@@ -14,10 +14,12 @@ let NIXIE_VERSION = ""
 
 let args = [Text]
 
-import { env_var_get }              from "std/env"
+import { env_var_get, env_var_set } from "std/env"
 import { array_shift }              from "std/array"
+import { file_exists }              from "std/fs"
 
 import { bail, untar, check_deps }  from "./common.ab"
+import { get_osname }               from "./platform.ab"
 import { catch_args }               from "./cli.ab"
 import { launch_nix }               from "./nix.ab"
 
@@ -61,6 +63,14 @@ main(cmdl)
     catch_args(args)
 
     let self = array_shift(args)
+
+    // Check for alternate OpenSSL/LibreSSL certificate paths (fixes #6)
+    if {
+    file_exists("/etc/pki/tls/certs/ca-bundle.crt"):
+        trust env_var_set("NIX_SSL_CERT_FILE", "/etc/pki/tls/certs/ca-bundle.crt")
+    get_osname() == "Darwin":
+        trust env_var_set("NIX_SSL_CERT_FILE", "/etc/ssl/cert.pem")
+    }
 
     launch_nix(self, args)
 }

@@ -2,10 +2,10 @@
 // Licensed under GNU GPLv2
 // Final-step Nix invocation methods
 
-import { file_exists, dir_exists, dir_create }  from "std/fs"
-import { env_var_test, env_var_set }            from "std/env"
-import { split, slice, starts_with, ends_with } from "std/text"
-import { array_last, array_shift }              from "std/array"
+import { file_exists, dir_exists, dir_create }    from "std/fs"
+import { env_var_test, env_var_set, env_var_get } from "std/env"
+import { split, slice, starts_with, ends_with }   from "std/text"
+import { array_last, array_shift }                from "std/array"
 
 import { enter_alt_buffer, set_title, teardown }  from "./term.ab"
 import { bail }                                   from "./common.ab"
@@ -90,7 +90,11 @@ fun get_nix()
 /// Nix system-wide between uses of our script.
 fun migrate_nix_store()
 {
-    let nix_root = get_nix_root()
+    let nix_root = ""
+
+    nix_root = $readlink -f {get_nix_root()}$ failed {
+        nix_root = get_nix_root()
+    }
 
     if not dir_exists("{nix_root}/nix/store"):
         return 0
@@ -100,6 +104,40 @@ fun migrate_nix_store()
     if status == 0 {
         trust $chmod -R +wx {nix_root} && rm -rf {nix_root}$
     }
+}
+
+/// Provide a list of extra arguments for bundled Nix channels, after
+/// extracting said channels from the bundled archive.
+fun unpack_channels(): [Text]
+{
+    let args = [Text]
+}
+
+/// Provide a list of extra arguments depending on the script's features
+/// and the runtime environment.
+fun populate_extras(): [Text]
+{
+    let args = [Text]
+
+    let EXTRA_FEATURES            = trust env_var_get("EXTRA_FEATURES")
+    let EXTRA_SUBSTITUTERS        = trust env_var_get("EXTRA_SUBSTITUTERS")
+    let EXTRA_TRUSTED_PUBLIC_KEYS = trust env_var_get("EXTRA_TRUSTED_PUBLIC_KEYS")
+
+    let nix_root = get_nix_root()
+
+    if EXTRA_FEATURES != "":
+        args += [ "--extra-experimental-features", EXTRA_FEATURES ]
+
+    if EXTRA_SUBSTITUTERS != "":
+        args += [ "--extra-substituters", EXTRA_SUBSTITUTERS ]
+
+    if EXTRA_TRUSTED_PUBLIC_KEYS != "":
+        args += [ "--extra-trusted-public-keys", EXTRA_TRUSTED_PUBLIC_KEYS ]
+
+    if get_osname() != "Darwin" and not is_nix_installed():
+        args += [ "--store", trust $readlink -f {nix_root}$ ]
+
+    return args
 }
 
 /// Launch Nix with the proper environment variables for fakedir and OpenSSL.
@@ -126,7 +164,7 @@ fun launch_darwin_workaround(name: Text, nix_path: Text, args: [Text]): Null
     trust $ _NIX_TEST_NO_SANDBOX=1 \
             DYLD_INSERT_LIBRARIES="{fakedir_path}" \
             DYLD_LIBRARY_PATH="{cache_root}/nix-lib" \
-                exec -a {name} {nix_path} {args}$
+                exec -a {name} {nix_path} "{args}"$
 }
 
 /// Launch Nix with options pulled from a file's contents.
@@ -139,7 +177,7 @@ fun launch_darwin_workaround(name: Text, nix_path: Text, args: [Text]): Null
 /// - `file`: The filename to interpret with Nix
 /// - `extras`: Internal options to append to the Nix command line
 /// - `args`: Command line options to pass to the interpreted file
-pub fun launch_nix_shebang(nix_path: Text, file: Text, extras: [Text], args: [Text]): Null
+fun launch_nix_shebang(nix_path: Text, file: Text, extras: [Text], args: [Text]): Null
 {
     let shebang = ""
     for i, line in lines(file) {
@@ -163,7 +201,11 @@ pub fun launch_nix_shebang(nix_path: Text, file: Text, extras: [Text], args: [Te
             break
         }
     }
-    trust $exec -a {name} {nix_path} "{extras}" "{bang_args}"$
+
+    if get_osname() == "Darwin" and not is_nix_installed():
+        launch_darwin_workaround(name, nix_path, extras + bang_args)
+    else:
+        trust $exec -a {name} {nix_path} "{extras}" "{bang_args}"$
 }
 
 /// Launch Nix as a regular CLI.
@@ -173,12 +215,14 @@ pub fun launch_nix(self: Text, args: [Text]): Null
 {
     let cache_root = get_cache_root()
     let nix_root = get_nix_root()
-    let osname = get_osname()
 
     let nix_path = "{cache_root}/nix-static"
 
-    let extras = [Text]
+    let extras = populate_extras()
     let name = array_last(split(self, "/"))
+
+    if starts_with(name, "nix-"):
+        extras += unpack_channels()
 
     if is_nix_installed() {
         migrate_nix_store()
@@ -189,13 +233,15 @@ pub fun launch_nix(self: Text, args: [Text]): Null
         }
     }
 
+    trust $export NIX_SSL_CERT_FILE$
+
     if file_exists(args[0]) and not ends_with(args[0], ".nix") {
         let args_shebang = args
         array_shift(args_shebang)
         launch_nix_shebang(nix_path, args[0], extras, args_shebang)
     }
 
-    if osname == "Darwin" and not is_nix_installed():
+    if get_osname() == "Darwin" and not is_nix_installed():
         launch_darwin_workaround(name, nix_path, extras + args)
     else:
         trust $exec -a {name} {nix_path} "{extras}" "{args}"$
