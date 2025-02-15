@@ -1,6 +1,6 @@
 { stdenv, boost, openssl, lowdown, nlohmann_json, brotli, libsodium, editline
 , gnutar, coreutils, findutils, python3, nix
-, automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config, ... }:
+, meson, automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config, ... }:
 
 let
   mkConfiguredSrc = { pkg, confScript, patches ? [], dest?pkg.pname }:
@@ -19,6 +19,7 @@ let
         bc
         libtool
         pkg-config
+        meson
       ];
 
       dontBuild = true;
@@ -32,12 +33,7 @@ let
 
   nix_configured_src = mkConfiguredSrc
     { pkg = nix;
-      confScript = ''
-        sed -i configure.ac -e "s/.*gtest.*//g"
-        sed -i configure.ac -e "s/.*jq.*//g"
-        rm -f src/libutil/tests/*.cc
-        ./bootstrap.sh
-      '';
+      confScript = "true";
     };
   editline_configured_src = mkConfiguredSrc
     { pkg = editline;
@@ -90,4 +86,8 @@ in stdenv.mkDerivation {
   + builtins.foldl'
       (l: r: l + "\ncp -r ${r}/${r.dest} work && chmod -R u+w work/${r.dest} && tar -C work -czf $out/${r.dest}.tar.gz ${r.dest}") "" srcs_configured
   + "\nls $out > $out/filelist";
+
+  passthru = builtins.foldl'
+              (l: r: l // { "${r.pname}" = r; })
+              {} srcs_configured;
 }

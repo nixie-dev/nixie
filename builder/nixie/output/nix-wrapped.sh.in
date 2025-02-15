@@ -271,6 +271,7 @@ _try_build_nix() {
   _avail flex
   _avail bison
   _avail perl
+  _avail python3
   _avail_end || return 1;
 
   _find_or_build_openssl
@@ -303,15 +304,22 @@ _try_build_nix() {
     export OPENSSL_CFLAGS=$macos_sdk/usr/include
   fi
 
-  ./configure --disable-seccomp-sandboxing \
-              --disable-s3 \
-              --disable-doc-gen \
-              --disable-embedded-sandbox-shell \
-              --disable-gc \
-              --disable-cpuid \
-  && make
+  python3 -m venv --system-site-packages "${sources_root}/nix/venv"
+  py3="${source_root}/nix/venv/bin/python3"
+  $py3 -m pip install meson ninja
 
-  #TODO: determine binary output path and copy to nix-static
+  meson="${source_root}/nix/venv/bin/meson"
+
+  mkdir build && cd build \
+    && $meson setup -Dlibstore:seccomp-sandboxing=disabled \
+                    -Dlibcmd:readline-flavor=editline \
+                    -Dlibexpr:gc=disabled \
+                    -Dlibutil:cpuid=disabled \
+                    -Ddoc-gen=false \
+                    -Dunit-tests=false \
+                    -Dbindings=false \
+    && $py3 -m ninja
+
   mv src/nix/nix "$USER_CACHE/nix-static"
 }
 
