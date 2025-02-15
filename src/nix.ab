@@ -4,6 +4,8 @@
 
 import { file_exists, dir_exists, dir_create }  from "std/fs"
 import { env_var_test, env_var_set }            from "std/env"
+import { split, slice, starts_with, ends_with } from "std/text"
+import { array_last, array_shift }              from "std/array"
 
 import { enter_alt_buffer, set_title, teardown }  from "./term.ab"
 import { bail }                                   from "./common.ab"
@@ -53,12 +55,7 @@ fun get_nix()
 
     if osname == "Darwin" and not file_exists(fakedir_path) {
         dir_create("{cache_root}/nix-lib")
-        trust pull_binary("libfakedir.dylib", fakedir_path)
-    }
-
-    if is_nix_installed() {
-        teardown()
-        return 0
+        pull_binary("libfakedir.dylib", fakedir_path)?
     }
 
     // We already have static Nix
@@ -80,6 +77,8 @@ fun get_nix()
         teardown()
         fail status
     }
+
+    trust $chmod +x {nix_path}$
 
     teardown()
     return 0
@@ -110,12 +109,11 @@ fun migrate_nix_store()
 /// addresses both issues.
 ///
 /// **This function does not return.**
-fun launch_darwin_workaround(name: Text, args: [Text]): Null
+fun launch_darwin_workaround(name: Text, nix_path: Text, args: [Text]): Null
 {
     let cache_root = get_cache_root()
     let nix_root = get_nix_root()
 
-    let nix_path = "{cache_root}/nix-static"
     let fakedir_path = "{cache_root}/nix-lib/libfakedir.dylib"
 
     trust env_var_set("FAKEDIR_PATTERN", "/nix")
@@ -131,27 +129,74 @@ fun launch_darwin_workaround(name: Text, args: [Text]): Null
                 exec -a {name} {nix_path} {args}$
 }
 
-/// Launch Nix with options pulled from a file's contents.  
+/// Launch Nix with options pulled from a file's contents.
+///
 /// This allows our script to be used as an interpreter, the same way
 /// Nix proper would.
 ///
-/// **This function does not return.**
-pub fun launch_nix_shebang(name: Text, file: Text, args: [Text]): Null
+/// ### Arguments:
+/// - `nix_path`: Path to the Nix executable to use (local or installed)
+/// - `file`: The filename to interpret with Nix
+/// - `extras`: Internal options to append to the Nix command line
+/// - `args`: Command line options to pass to the interpreted file
+pub fun launch_nix_shebang(nix_path: Text, file: Text, extras: [Text], args: [Text]): Null
 {
+    let shebang = ""
+    for i, line in lines(file) {
+        if i == 1 {
+            shebang = line
+            break
+        }
+    }
 
+    // No second shebang, not our business.
+    if not starts_with(shebang, "#!"):
+        return null
+    let bang_args = split(slice(shebang, 2), " ")
+    let name = array_shift(bang_args)
+
+    // Find and inject script options into --command
+    for i, arg in bang_args {
+        if arg == "-i" {
+            bang_args[i] = "--command"
+            bang_args[i+1] = "{bang_args[i+1]} {file} {args}"
+            break
+        }
+    }
+    trust $exec -a {name} {nix_path} "{extras}" "{bang_args}"$
 }
 
 /// Launch Nix as a regular CLI.
 ///
 /// **This function does not return.**
-pub fun launch_nix(name: Text, extras: [Text], args: [Text]): Null
+pub fun launch_nix(self: Text, args: [Text]): Null
 {
-    get_nix() failed { echo "oh nyo" }
+    let cache_root = get_cache_root()
+    let nix_root = get_nix_root()
+    let osname = get_osname()
 
-    echo "Would launch Nix as {name}"
-    echo "Internal options: {extras}"
-    echo "Command line options: {args}"
-    echo ""
-    echo "That's all we have for now, thanks for playing!"
-    exit 0
+    let nix_path = "{cache_root}/nix-static"
+
+    let extras = [Text]
+    let name = array_last(split(self, "/"))
+
+    if is_nix_installed() {
+        migrate_nix_store()
+        nix_path = "nix"
+    } else {
+        get_nix() failed {
+            bail("Failed to obtain Nix. Check your internet connection.")
+        }
+    }
+
+    if file_exists(args[0]) and not ends_with(args[0], ".nix") {
+        let args_shebang = args
+        array_shift(args_shebang)
+        launch_nix_shebang(nix_path, args[0], extras, args_shebang)
+    }
+
+    if osname == "Darwin" and not is_nix_installed():
+        launch_darwin_workaround(name, nix_path, extras + args)
+    else:
+        trust $exec -a {name} {nix_path} "{extras}" "{args}"$
 }

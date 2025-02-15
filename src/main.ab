@@ -62,5 +62,5 @@ main(cmdl)
 
     let self = array_shift(args)
 
-    launch_nix(self, ["lol"], args)
+    launch_nix(self, args)
 }

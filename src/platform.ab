@@ -17,7 +17,12 @@ pub fun get_osname(): Text
 /// Return the current machine architecture, as reported by `uname -s`.
 pub fun get_machine(): Text
 {
-    return trust $uname -m$
+    let machine = trust $uname -m$
+
+    // Normalize to Linux 'aarch64' name
+    if machine == "arm64":
+        return "aarch64"
+    return machine
 }
 
 /// Return the combined system-string, in the format `osname.machine`.
