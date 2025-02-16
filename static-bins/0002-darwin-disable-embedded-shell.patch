@@ -1,0 +1,13 @@
+diff --git a/src/libstore/package.nix b/src/libstore/package.nix
+index c982b44f0..84106350c 100644
+--- a/src/libstore/package.nix
++++ b/src/libstore/package.nix
+@@ -20,7 +20,7 @@
+ 
+   version,
+ 
+-  embeddedSandboxShell ? stdenv.hostPlatform.isStatic,
++  embeddedSandboxShell ? stdenv.hostPlatform.isStatic && !stdenv.hostPlatform.isDarwin,
+ }:
+ 
+ let
