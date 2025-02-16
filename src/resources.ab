@@ -1,0 +1,53 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Resource retrieval from tarball or Cachix
+
+import { file_download } from "std/http"
+import { env_var_get } from "std/env"
+
+import { untar } from "./common.ab"
+
+fun cachix_url(derivation: Text, member: Text): Text
+{
+    let SOURCE_CACHE = trust env_var_get("SOURCE_CACHE")
+
+    return "https://{SOURCE_CACHE}/serve/{derivation}/{member}"
+}
+
+pub fun pull_source_file(member: Text, dest: Text): Null?
+{
+    let SOURCE_DERIVATION = trust env_var_get("SOURCE_DERIVATION")
+
+    let where = trust untar("sources/{member}")
+    if status != 0 {
+        let tmpf = trust $mktemp -t nixie_src_XXXXXXXX.tgz$
+        let tmpd = trust $mktemp -t -d nixie_{member}_XXXXXXXX$
+
+        if not file_download(cachix_url(SOURCE_DERIVATION, "{member}.tar.gz"), tmpf) {
+            fail 1
+        }
+
+        trust $rm -f {tmpf}$
+        where = tmpd
+    }
+
+    trust mv where dest
+}
+
+pub fun pull_binary(member: Text, dest: Text): Null?
+{
+    let NIX_BINS_DERIVATION = trust env_var_get("NIX_BINS_DERIVATION")
+
+    let where = trust untar(member)
+    if status != 0 {
+        let tmpf = trust $mktemp -t nixie_{member}_XXXXXXXX$
+
+        if not file_download(cachix_url(NIX_BINS_DERIVATION, member), tmpf) {
+            fail 1
+        }
+
+        where = tmpf
+    }
+
+    trust mv where dest
+}

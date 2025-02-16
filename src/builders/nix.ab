@@ -1,0 +1,12 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Builder for the Nix package manager itself
+
+import { file_exists, dir_exists } from "std/fs"
+
+import { step_title } from "./common.ab"
+
+pub fun build_nix()
+{
+    step_title("nix")
+}

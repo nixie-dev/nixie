@@ -1,6 +1,6 @@
 { pkgs ? import <nixpkgs> {} }:
 let
-  builder = pkgs.callPackage ./builder {};
+  builder = pkgs.callPackage ./. {};
 in pkgs.mkShell {
   name = "nixie";
 

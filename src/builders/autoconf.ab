@@ -1,0 +1,22 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Build script for Autoconf-based dependencies
+
+import { pkg_exists, step_title } from "./common.ab"
+
+/// Build a dependency which uses Autoconf as its build system.
+///
+/// ### Arguments:
+/// - `lib_name`: The library to check for with `pkg-config`
+/// - `var_name`: The variable to export library locations
+/// - `lib_prefix`: Where in the source tree the resulting libraries are found
+/// - `inc_prefix`: Where in the source tree the build headers are found
+pub fun build_autoconf_dep(lib_name: Text, var_name: Text,
+                           lib_prefix: Text = "",
+                           inc_prefix: Text = ""): Null
+{
+    step_title(lib_name)
+
+    if pkg_exists(lib_name):
+        return null
+}

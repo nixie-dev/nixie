@@ -1,0 +1,76 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Entry point for script logic
+
+let SOURCE_CACHE        = ""
+let SOURCE_DERIVATION   = ""
+let NIX_BINS_DERIVATION = ""
+
+let EXTRA_FEATURES              = ""
+let EXTRA_SUBSTITUTERS          = ""
+let EXTRA_TRUSTED_PUBLIC_KEYS   = ""
+
+let NIXIE_VERSION = ""
+
+let args = [Text]
+
+import { env_var_get, env_var_set } from "std/env"
+import { array_shift }              from "std/array"
+import { file_exists }              from "std/fs"
+
+import { bail, untar, check_deps }  from "./common.ab"
+import { get_osname }               from "./platform.ab"
+import { catch_args }               from "./cli.ab"
+import { launch_nix }               from "./nix.ab"
+
+check_deps(["tar", "gzip", "uname"]) failed {
+    exit 1
+}
+
+/// Populate environment variables from the features file in the archive.
+/// Also sets variables local to this module, which is not much use until
+/// [amber-lang/amber#671](https://github.com/amber-lang/amber/issues/671) is
+/// implemented. Checks that the variables exist, I guess.
+///
+/// Could be moved to `common.ab`
+fun load_features(): Null
+{
+    let envfile = untar("features", true) failed {
+        bail("The resource archive is missing or malformed.", true)
+    }
+
+    $eval {envfile}$ failed {
+        bail("The environment file in the resource archive is malformed.", true)
+    }
+
+    SOURCE_CACHE        = trust env_var_get("SOURCE_CACHE")
+    SOURCE_DERIVATION   = trust env_var_get("SOURCE_DERIVATION")
+    NIX_BINS_DERIVATION = trust env_var_get("NIX_BINS_DERIVATION")
+
+    EXTRA_FEATURES              = trust env_var_get("EXTRA_FEATURES")
+    EXTRA_SUBSTITUTERS          = trust env_var_get("EXTRA_SUBSTITUTERS")
+    EXTRA_TRUSTED_PUBLIC_KEYS   = trust env_var_get("EXTRA_TRUSTED_PUBLIC_KEYS")
+
+    NIXIE_VERSION = trust env_var_get("NIXIE_VERSION")
+}
+
+main(cmdl)
+{
+    // In Amber, cmdl is read-only, but catch_args needs read-write
+    args = cmdl
+
+    load_features()
+    catch_args(args)
+
+    let self = array_shift(args)
+
+    // Check for alternate OpenSSL/LibreSSL certificate paths (fixes #6)
+    if {
+    file_exists("/etc/pki/tls/certs/ca-bundle.crt"):
+        trust env_var_set("NIX_SSL_CERT_FILE", "/etc/pki/tls/certs/ca-bundle.crt")
+    get_osname() == "Darwin":
+        trust env_var_set("NIX_SSL_CERT_FILE", "/etc/ssl/cert.pem")
+    }
+
+    launch_nix(self, args)
+}

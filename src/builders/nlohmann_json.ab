@@ -1,0 +1,13 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Builder for NLohmann's JSON library
+
+import { pkg_exists, step_title } from "./common.ab"
+
+pub fun build_nlohmann_json()
+{
+    step_title("nlohmann_json")
+
+    if pkg_exists("nlohmann_json"):
+        return 0
+}

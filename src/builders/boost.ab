@@ -1,0 +1,37 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Builder for the Boost C++ framework
+
+import { file_exists, dir_exists } from "std/fs"
+
+import { pkg_exists, step_title } from "./common.ab"
+
+const modules = ["chrono", "container", "context", "system", "thread"]
+
+/// Check that the Boost modules we need exist on the system.
+///
+/// Boost does not provide a pkg-config package, nor a config program.
+/// This means we have to do the information-gathering the old way, by
+/// looking through /usr and /usr/local manually.
+fun find_boost_libs(libs: [Text]): Bool
+{
+    for lib in libs {
+        let libname = "libboost_{lib}*"
+        if not (   file_exists("/usr/lib/{libname}")
+                or file_exists("/usr/local/lib/{libname}")):
+            return false
+        if not (   dir_exists("/usr/include/boost/{lib}")
+                or dir_exists("/usr/local/include/boost/{lib}")):
+            return false
+    }
+
+    return true
+}
+
+pub fun build_boost()
+{
+    step_title("boost")
+
+    if find_boost_libs(["atomic"] + modules):
+        return 0
+}
