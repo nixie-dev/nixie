@@ -8,8 +8,9 @@ import { split, slice, starts_with, ends_with }   from "std/text"
 import { array_last, array_shift }                from "std/array"
 
 import { enter_alt_buffer, set_title, teardown }  from "./term.ab"
-import { bail }                                   from "./common.ab"
-import { get_osname, get_system, get_cache_root, get_nix_root } from "./platform.ab"
+import { bail, untar, exists_newer, get_self }    from "./common.ab"
+import { get_osname, get_system, get_cache_root
+       , get_nix_root, get_repo_root }            from "./platform.ab"
 import { pull_binary }                            from "./resources.ab"
 import { try_build_nix }                          from "./builders.ab"
 
@@ -53,10 +54,18 @@ fun get_nix()
     // Cleanly exit alt-buffer if hit with ^C
     trust $trap "{nameof teardown}; exit 1" SIGKILL SIGTERM SIGINT SIGABRT$
 
+    // Unpack fakedir as needed
     if osname == "Darwin" and not file_exists(fakedir_path) {
         dir_create("{cache_root}/nix-lib")
-        pull_binary("libfakedir.dylib", fakedir_path)?
+        pull_binary("libfakedir.dylib", fakedir_path) failed {
+            teardown()
+            fail 1
+        }
     }
+
+    // Update it if applicable
+    if osname == "Darwin" and not exists_newer(fakedir_path, get_self()):
+        trust pull_binary("libfakedir.dylib", fakedir_path)
 
     // We already have static Nix
     if file_exists(nix_path) {
@@ -64,18 +73,17 @@ fun get_nix()
         return 0
     }
 
-    //TODO: Debug! Remove before release!
     if env_var_test("nobins") {
         trust try_build_nix()
         teardown()
-        fail status
+        fail 1
     }
 
     // Try to extract or download Nix
     pull_binary("nix.{system}", nix_path) failed {
         trust try_build_nix()
         teardown()
-        fail status
+        fail 1
     }
 
     trust $chmod +x {nix_path}$
@@ -108,9 +116,23 @@ fun migrate_nix_store()
 
 /// Provide a list of extra arguments for bundled Nix channels, after
 /// extracting said channels from the bundled archive.
-fun unpack_channels(): [Text]
+fun unpack_channels()
 {
-    let args = [Text]
+    let repo_root = get_repo_root()
+
+    if exists_newer("{repo_root}/.nixie/channels", get_self()) {
+        let NIX_PATH = trust env_var_get("NIX_PATH")
+        trust env_var_set("NIX_PATH", "{repo_root}/.nixie/channels:{NIX_PATH}")
+        trust $export NIX_PATH$
+        return 0
+    }
+    echo "Unpacking Nix channels, hang tight..."
+
+    dir_create("{repo_root}/.nixie")
+    untar("channels -C {repo_root}/.nixie") failed {
+        // Leave an empty directory to trip the time check above
+        trust $mkdir {repo_root}/.nixie/channels$
+    }
 }
 
 /// Provide a list of extra arguments depending on the script's features
@@ -222,7 +244,7 @@ pub fun launch_nix(self: Text, args: [Text]): Null
     let name = array_last(split(self, "/"))
 
     if starts_with(name, "nix-"):
-        extras += unpack_channels()
+        trust unpack_channels()
 
     if is_nix_installed() {
         migrate_nix_store()

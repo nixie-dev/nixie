@@ -69,7 +69,6 @@ fun opt_ignore_system()
     trust env_var_set("nosystem", "1")
 }
 
-//TODO: debug function, remove!
 fun no_precompiled()
 {
     echo_warning("Ignoring precompiled binaries for testing purposes.")

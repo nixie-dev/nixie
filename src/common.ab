@@ -2,8 +2,8 @@
 // Licensed under GNU GPLv2
 // Common utility functions
 
-import { echo_error, env_var_get, is_command }  from "std/env"
-import { starts_with, text_contains }           from "std/text"
+import { echo_error, env_var_get, is_command }      from "std/env"
+import { starts_with, text_contains, parse_number } from "std/text"
 
 import { exit_alt_buffer, set_title }           from "./term.ab"
 
@@ -28,6 +28,20 @@ if text_contains(me, "/") {
     }
 } else {
     echo_error("This script must be run from an absolute or relative path.")
+}
+
+/// Checks that the left-hand path exists and is newer than the right-hand path.
+/// False otherwise.
+pub fun exists_newer(left: Text, right: Text): Bool
+{
+    let left_time = parse_number(trust $stat -c %W {left}$) failed {
+        return false    // Untrustworthy stat, assume worst
+    }
+    let right_time = parse_number(trust $stat -c %W {right}$) failed {
+        return false
+    }
+
+    return left_time >= right_time
 }
 
 /// Exit alt-buffer, quit script, kill ourselves. At this point something has gone
