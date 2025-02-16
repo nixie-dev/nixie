@@ -26,7 +26,7 @@ nixie = "nixie.cli:main"
 "nixie.output" = ["*.in"]
 
 [tool.bumpver]
-current_version = "2023.09-a2"
+current_version = "2025.02-a1"
 version_pattern = "YYYY.0M-PYTAGNUM"
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true

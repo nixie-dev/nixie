@@ -33,7 +33,11 @@ let
 
   nix_configured_src = mkConfiguredSrc
     { pkg = nix;
-      confScript = "true";
+      confScript = ''
+        mkdir -p $out
+        cp -r . $out/nix
+        rm -rf * .*
+      '';
     };
   editline_configured_src = mkConfiguredSrc
     { pkg = editline;
