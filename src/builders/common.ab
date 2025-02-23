@@ -3,8 +3,10 @@
 // Common functions for source-based builders
 
 import { env_var_get } from "std/env"
+import { dir_create } from "std/fs"
 
 import { set_title } from "../term.ab"
+import { get_repo_root } from "../platform.ab"
 
 let step_current = 1
 
@@ -22,7 +24,16 @@ pub fun step_title(name: Text): Null
 {
     let step_total = trust env_var_get("step_total")
 
+    trust $clear$
+
     set_title("Building Nix: {name} ({step_current}/{step_total})")
 
     step_current += 1
+}
+
+pub fun get_source_root(): Text
+{
+    let repo_root = get_repo_root()
+
+    return "{repo_root}/.nixie/sources"
 }

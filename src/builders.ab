@@ -2,13 +2,15 @@
 // Licensed under GNU GPLv2
 // Functions to build Nix and its dependencies from source
 
-import { dir_exists }   from "std/fs"
-import { env_var_set }  from "std/env"
+import { dir_exists, dir_create } from "std/fs"
+import { env_var_set }            from "std/env"
 
 import { set_title }                     from "./term.ab"
 import { check_deps, bail }              from "./common.ab"
 import { pull_source_file, pull_binary } from "./resources.ab"
-import { get_osname }                    from "./platform.ab"
+import { get_osname, get_cache_root }    from "./platform.ab"
+
+import { get_source_root }      from "./builders/common.ab"
 
 import { build_openssl }        from "./builders/openssl.ab"
 import { build_lowdown }        from "./builders/lowdown.ab"
@@ -48,6 +50,8 @@ fun darwin_export_sdk()
 /// which dependencies are already met and avoid building them.
 pub fun try_build_nix()
 {
+    let cache_root = get_cache_root()
+
     check_deps(["cc", "c++", "pkg-config", "make", "flex", "bison", "perl"])
         failed { bail("Missing required dependencies to build from source.") }
 
@@ -55,6 +59,9 @@ pub fun try_build_nix()
         darwin_export_sdk()
 
     trust env_var_set("step_total", "8")
+
+    dir_create(get_source_root())
+    dir_create("{cache_root}/nix-lib")
 
     build_openssl()?
     build_boost()?

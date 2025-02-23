@@ -2,17 +2,47 @@
 // Licensed under GNU GPLv2
 // Builder for the lowdown Markdown library
 
-import { pkg_exists, step_title } from "./common.ab"
+import { env_var_set } from "std/env"
+
+import { pull_source_file } from "../resources.ab"
+import { get_osname, get_cache_root } from "../platform.ab"
+
+import { pkg_exists, step_title, get_source_root } from "./common.ab"
 
 fun macos_build_post()
 {
     $cc -shared -o liblowdown.1.dylib *.o$?
 }
 
+fun build_lowdown_inner()
+{
+    $./configure$?
+    $make$?
+
+    if get_osname() == "Darwin":
+        macos_build_post()?
+}
+
 pub fun build_lowdown()
 {
+    let source_root = get_source_root()
+    let cache_root = get_cache_root()
+
     step_title("lowdown")
 
     if pkg_exists("lowdown"):
         return 0
+
+    pull_source_file("lowdown", "{source_root}/lowdown")?
+
+    $(cd {source_root}/lowdown && {nameof build_lowdown_inner})$?
+
+    trust env_var_set("LOWDOWN_LIBS", "{cache_root}/nix-lib")
+    trust env_var_set("LOWDOWN_CFLAGS", "-I{source_root}/lowdown")
+}
+
+// Quick mark-as-used workaround
+if false {
+    exit 300
+    trust build_lowdown_inner()
 }

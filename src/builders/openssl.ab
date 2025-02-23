@@ -2,9 +2,13 @@
 // Licensed under GNU GPLv2
 // Builder for OpenSSL
 
-import { env_var_test } from "std/env"
+import { env_var_test, env_var_set } from "std/env"
+import { split_lines }               from "std/text"
 
-import { pkg_exists, step_title } from "./common.ab"
+import { pull_source_file }            from "../resources.ab"
+import { get_dll_ext, get_cache_root } from "../platform.ab"
+
+import { pkg_exists, step_title, get_source_root } from "./common.ab"
 
 /// Scans through and builds generated headers required for building OpenSSL.
 ///
@@ -12,15 +16,49 @@ import { pkg_exists, step_title } from "./common.ab"
 /// targets, meaning we cannot simply `make libcrypto.so`.
 fun make_headers()
 {
+    for header in split_lines(trust $grep ".*\\.h:" ./Makefile | cut -f 1 -d :$) {
+        $make {header}$?
+    }
+}
 
+fun build_openssl_inner()
+{
+    let dll_ext = get_dll_ext()
+    let cache_root = get_cache_root()
+
+    trust $chmod +x ./config$
+
+    $./config$?
+    make_headers()?
+    $make libcrypto.{dll_ext}$?
+
+    trust $cp ./libcrypto.* {cache_root}/nix-lib/$
 }
 
 pub fun build_openssl()
 {
+    let source_root = get_source_root()
+    let cache_root = get_cache_root()
+
     step_title("libcrypto")
 
     if pkg_exists("libcrypto"):
         return 0
     if env_var_test("OPENSSL_LIBS") and env_var_test("OPENSSL_CFLAGS"):
         return 0
+
+    pull_source_file("openssl", "{source_root}/openssl")?
+
+    // Using a subshell ensures we aren't cd elsewhere on failure
+    $(cd {source_root}/openssl && {nameof build_openssl_inner})$?
+
+    trust env_var_set("OPENSSL_LIBS", "{cache_root}/nix-lib")
+    trust env_var_set("OPENSSL_CFLAGS", "-I{source_root}/openssl/include")
+    trust $export OPENSSL_LIBS OPENSSL_CFLAGS$
+}
+
+// Quick mark-as-used workaround
+if false {
+    exit 300
+    trust build_openssl_inner()
 }

@@ -2,7 +2,7 @@
 // Licensed under GNU GPLv2
 // Utilities to manipulate Xterm features
 
-import { env_var_get } from "std/env"
+import { env_var_get, env_var_test } from "std/env"
 import { starts_with } from "std/text"
 
 let tsl = trust $tput tsl$
@@ -61,7 +61,7 @@ pub fun teardown(failure: Bool = false): Null
 {
     if failure {
         echo "Press any key to continue..."
-        trust $read -k 1 -s$
+        trust $read -n 1$
     }
     set_title()
     exit_alt_buffer()

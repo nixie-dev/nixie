@@ -2,12 +2,24 @@
 // Licensed under GNU GPLv2
 // Builder for NLohmann's JSON library
 
-import { pkg_exists, step_title } from "./common.ab"
+import { env_var_set } from "std/env"
+
+import { pull_source_file } from "../resources.ab"
+
+import { pkg_exists, step_title, get_source_root } from "./common.ab"
 
 pub fun build_nlohmann_json()
 {
+    let source_root = get_source_root()
+
     step_title("nlohmann_json")
 
     if pkg_exists("nlohmann_json"):
         return 0
+
+    pull_source_file("nlohmann_json", "{source_root}/nlohmann_json")?
+
+    trust env_var_set("NLOHMANN_JSON_LIBS", "{source_root}/nlohmann_json/single_include")
+    trust env_var_set("NLOHMANN_JSON_CFLAGS", "{source_root}/nlohmann_json/single_include")
+    trust $export NLOHMANN_JSON_LIBS NLOHMANN_JSON_CFLAGS$
 }

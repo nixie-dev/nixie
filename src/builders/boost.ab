@@ -2,9 +2,12 @@
 // Licensed under GNU GPLv2
 // Builder for the Boost C++ framework
 
-import { file_exists, dir_exists } from "std/fs"
+import { file_exists, dir_exists }  from "std/fs"
+import { env_var_set }              from "std/env"
 
-import { pkg_exists, step_title } from "./common.ab"
+import { pull_source_file } from "../resources.ab"
+
+import { pkg_exists, step_title, get_source_root } from "./common.ab"
 
 const modules = ["chrono", "container", "context", "system", "thread"]
 
@@ -28,10 +31,37 @@ fun find_boost_libs(libs: [Text]): Bool
     return true
 }
 
+fun build_boost_inner()
+{
+    let args = [ "--static" ]
+
+    for mod in modules {
+        args += [ "--with-{mod}" ]
+    }
+
+    $./bootstrap.sh$?
+    $./b2 "{args}"$?
+}
+
 pub fun build_boost()
 {
+    let source_root = get_source_root()
+
     step_title("boost")
 
     if find_boost_libs(["atomic"] + modules):
         return 0
+
+    pull_source_file("boost", "{source_root}/boost")?
+
+    $(cd {source_root}/boost && {nameof build_boost_inner})$?
+
+    trust env_var_set("BOOST_ROOT", "{source_root}/boost")
+    trust $export BOOST_ROOT$
+}
+
+// Quick mark-as-used workaround
+if false {
+    exit 300
+    trust build_boost_inner()
 }

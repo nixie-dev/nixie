@@ -2,7 +2,12 @@
 // Licensed under GNU GPLv2
 // Build script for Autoconf-based dependencies
 
-import { pkg_exists, step_title } from "./common.ab"
+import { env_var_set } from "std/env"
+
+import { pull_source_file } from "../resources.ab"
+import { get_cache_root } from "../platform.ab"
+
+import { pkg_exists, step_title, get_source_root } from "./common.ab"
 
 /// Build a dependency which uses Autoconf as its build system.
 ///
@@ -13,10 +18,25 @@ import { pkg_exists, step_title } from "./common.ab"
 /// - `inc_prefix`: Where in the source tree the build headers are found
 pub fun build_autoconf_dep(lib_name: Text, var_name: Text,
                            lib_prefix: Text = "",
-                           inc_prefix: Text = ""): Null
+                           inc_prefix: Text = ""): Null?
 {
+    let source_root = get_source_root()
+    let cache_root = get_cache_root()
+
+    let my_source = "{source_root}/{lib_name}"
+
     step_title(lib_name)
 
     if pkg_exists(lib_name):
         return null
+
+    pull_source_file(lib_name, my_source)?
+
+    $(cd {my_source} && ./configure && make)$?
+
+    $cp {my_source}/{lib_prefix}/.libs/* {cache_root}/nix-lib/$?
+
+    trust env_var_set("{var_name}_LIBS", "{cache_root}/nix-lib")
+    trust env_var_set("{var_name}_CFLAGS", "-I{my_source}/{inc_prefix}/include")
+    trust $export {var_name}_LIBS {var_name}_CFLAGS$
 }

@@ -2,11 +2,54 @@
 // Licensed under GNU GPLv2
 // Builder for the Nix package manager itself
 
-import { file_exists, dir_exists } from "std/fs"
+import { file_exists, dir_exists, dir_create } from "std/fs"
 
-import { step_title } from "./common.ab"
+import { pull_source_file } from "../resources.ab"
+import { get_cache_root } from "../platform.ab"
+
+import { step_title, get_source_root } from "./common.ab"
+
+fun build_nix_inner()
+{
+    let source_root = get_source_root()
+    let venv = "{source_root}/nix/venv"
+
+    $mkdir build && cd build$?
+
+    ${venv}/bin/meson setup -Dlibstore:seccomp-sandboxing=disabled \
+                            -Dlibcmd:readline-flavor=editline \
+                            -Dlibexpr:gc=disabled \
+                            -Dlibutil:cpuid=disabled \
+                            -Ddoc-gen=false \
+                            -Dunit-tests=false \
+                            -Dbindings=false$?
+
+    ${venv}/bin/ninja$?
+}
 
 pub fun build_nix()
 {
+    let source_root = get_source_root()
+    let cache_root = get_cache_root()
+
+    let venv = "{source_root}/nix/venv"
+
     step_title("nix")
+
+    pull_source_file("nix", "{source_root}/nix")?
+
+    $python3 -m venv --system-site-packages "{venv}"$?
+
+    ${venv}/bin/pip install meson ninja$?
+
+    $(cd {source_root}/nix && {nameof build_nix_inner})$?
+
+    trust mv "{source_root}/nix/src/nix/nix" "{cache_root}/nix-static"
+}
+
+
+// Quick mark-as-used workaround
+if false {
+    exit 300
+    trust build_nix_inner()
 }
