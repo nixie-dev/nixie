@@ -57,8 +57,12 @@ pub fun exit_alt_buffer(): Null
 }
 
 /// Shorthand to exit alt-buffer and clear terminal title.
-pub fun teardown(): Null
+pub fun teardown(failure: Bool = false): Null
 {
+    if failure {
+        echo "Press any key to continue..."
+        trust $read -k 1 -s$
+    }
     set_title()
     exit_alt_buffer()
 }

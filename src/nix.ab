@@ -58,7 +58,7 @@ fun get_nix()
     if osname == "Darwin" and not file_exists(fakedir_path) {
         dir_create("{cache_root}/nix-lib")
         pull_binary("libfakedir.dylib", fakedir_path) failed {
-            teardown()
+            teardown(true)
             fail 1
         }
     }
@@ -74,16 +74,18 @@ fun get_nix()
     }
 
     if env_var_test("nobins") {
-        trust try_build_nix()
-        teardown()
-        fail 1
+        try_build_nix() failed {
+            teardown(true)
+            fail 1
+        }
     }
 
     // Try to extract or download Nix
     pull_binary("nix.{system}", nix_path) failed {
-        trust try_build_nix()
-        teardown()
-        fail 1
+        try_build_nix() failed {
+            teardown(true)
+            fail 1
+        }
     }
 
     trust $chmod +x {nix_path}$
@@ -189,6 +191,38 @@ fun launch_darwin_workaround(name: Text, nix_path: Text, args: [Text]): Null
                 exec -a {name} {nix_path} "{args}"$
 }
 
+/// Launch the command referred to by name from within a Nix shell.
+///
+/// This allows our script to be used as an alias for developer utilities.
+///
+/// ### Arguments:
+/// - `nix_path`: Path to the Nix executable to use (local or installed)
+/// - `cmd`: The name our script was called as
+/// - `extras`: Internal options to append to the Nix command line
+/// - `args`: Command line options to pass to the command
+fun launch_shell_command(nix_path: Text, cmd: Text, extras: [Text], args: [Text]): Null
+{
+    let repo_root = get_repo_root()
+    let pwd = trust env_var_get("PWD")
+    let name = "nix-shell"
+    let shell_cmd = [ "{repo_root}/shell.nix", "--command", "{cmd} {args}" ]
+
+    if file_exists("{pwd}/flake.nix") {
+        name = "nix"
+        shell_cmd = [ "develop", pwd, "-c", cmd ] + args
+    } else: if file_exists("{repo_root}/flake.nix") {
+        name = "nix"
+        shell_cmd = [ "develop", repo_root, "-c", cmd ] + args
+    } else: if file_exists("{pwd}/shell.nix") {
+        shell_cmd = [ "{pwd}/shell.nix", "--command", "{cmd} {args}" ]
+    }
+
+    if get_osname() == "Darwin" and not is_nix_installed():
+        launch_darwin_workaround(name, nix_path, extras + shell_cmd)
+    else:
+        trust $exec -a {name} {nix_path} "{extras}" "{shell_cmd}"$
+}
+
 /// Launch Nix with options pulled from a file's contents.
 ///
 /// This allows our script to be used as an interpreter, the same way
@@ -261,6 +295,10 @@ pub fun launch_nix(self: Text, args: [Text]): Null
         let args_shebang = args
         array_shift(args_shebang)
         launch_nix_shebang(nix_path, args[0], extras, args_shebang)
+    }
+
+    if not starts_with(name, "nix") {
+        launch_shell_command(nix_path, name, extras, args)
     }
 
     if get_osname() == "Darwin" and not is_nix_installed():

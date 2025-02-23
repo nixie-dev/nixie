@@ -69,7 +69,7 @@ fun opt_ignore_system()
     trust env_var_set("nosystem", "1")
 }
 
-fun no_precompiled()
+fun opt_no_precompiled()
 {
     echo_warning("Ignoring precompiled binaries for testing purposes.")
     echo_warning("This implies --nixie-ignore-system.")
@@ -87,12 +87,12 @@ fun notfound(cmd)
 fun eval_cmd(cmd)
 {
     if {
-        cmd == "help":          cmd_help()
-        cmd == "print-config":  cmd_print_config()
-        cmd == "extract":       cmd_extract()
-        cmd == "cleanup":       cmd_cleanup()
-        cmd == "ignore-system": opt_ignore_system()
-        cmd == "no-precompiled":no_precompiled()
+        cmd == "help":           cmd_help()
+        cmd == "print-config":   cmd_print_config()
+        cmd == "extract":        cmd_extract()
+        cmd == "cleanup":        cmd_cleanup()
+        cmd == "ignore-system":  opt_ignore_system()
+        cmd == "no-precompiled": opt_no_precompiled()
         else: notfound(cmd)
     }
 }
