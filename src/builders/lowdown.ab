@@ -9,11 +9,13 @@ import { get_osname, get_cache_root } from "../platform.ab"
 
 import { pkg_exists, step_title, get_source_root } from "./common.ab"
 
+/// Workaround for the default Makefile not building a shared library on macOS.
 fun macos_build_post()
 {
     $cc -shared -o liblowdown.1.dylib *.o$?
 }
 
+/// This function runs within the source directory, in a subshell.
 fun build_lowdown_inner()
 {
     $./configure$?
@@ -23,6 +25,9 @@ fun build_lowdown_inner()
         macos_build_post()?
 }
 
+/// This is the core function for the Lowdown builder.
+///
+/// It exports the `LOWDOWN_LIBS` and `LOWDOWN_CFLAGS` variables.
 pub fun build_lowdown()
 {
     let source_root = get_source_root()
@@ -44,5 +49,6 @@ pub fun build_lowdown()
 main(cmdl)
 {
     trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
+    trust env_var_set("step_total", "1")
     build_lowdown()?
 }

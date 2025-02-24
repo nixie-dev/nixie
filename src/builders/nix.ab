@@ -9,6 +9,7 @@ import { get_cache_root } from "../platform.ab"
 
 import { step_title, get_source_root } from "./common.ab"
 
+/// This function runs within the source directory, in a subshell.
 fun build_nix_inner()
 {
     let source_root = get_source_root()
@@ -22,11 +23,16 @@ fun build_nix_inner()
                             -Dlibutil:cpuid=disabled \
                             -Ddoc-gen=false \
                             -Dunit-tests=false \
-                            -Dbindings=false$?
+                            -Dbindings=false \
+                            ..$?
 
     ${venv}/bin/ninja$?
 }
 
+/// This is the core function for the final Nix builder.
+///
+/// It produces a Nix executable in the `{cache_root}/nix-static` location,
+/// where the Nix runner expects it.
 pub fun build_nix()
 {
     let source_root = get_source_root()

@@ -47,7 +47,10 @@ let
   brotli_configured_src = mkConfiguredSrc
     { pkg = brotli;
       patches = [ ./00-brotli-add-automake.patch ];
-      confScript = "true";
+      confScript = ''
+        sh ${./brotli-gen-sources-list.sh} > ./scripts/sources.lst
+        ./bootstrap
+      '';
       dest = "libbrotlicommon";
     };
 

@@ -15,12 +15,24 @@ fun cachix_url(derivation: Text, member: Text): Text
     return "https://{SOURCE_CACHE}/serve/{derivation}/{member}"
 }
 
+/// Unpack a known source code package into the requested target directory.
+///
+/// This function will try the following methods, in order:
+/// - Extract from the embedded tarball
+/// - Pull tarball from directory marked by `_NIXIE_TESTING_SOURCES_DIR`
+/// - Download tarball from known Cachix URL
+///
+/// ### Arguments:
+/// - `member`: The name of the source package to unpack
+/// - `dest`: The target directory to move the package contents into
 pub fun pull_source_file(member: Text, dest: Text): Null?
 {
     let SOURCE_DERIVATION = trust env_var_get("SOURCE_DERIVATION")
 
     let where = ""
     let my_status = 1
+
+    // This allows individual builders' entry points to not fail
     if not env_var_test("_NIXIE_TESTING_SKIP_TARBALL") {
         where = trust untar("sources/{member}")
         my_status = status
@@ -55,6 +67,15 @@ pub fun pull_source_file(member: Text, dest: Text): Null?
     trust mv where dest
 }
 
+/// Retrieve a known precompiled file and move it to the requested target.
+///
+/// This function will try the following methods, in order:
+/// - Extract from the embedded tarball
+/// - Download file from known Cachix URL
+///
+/// ### Arguments:
+/// - `member`: The filename of the file to retrieve
+/// - `dest`: The target filename to move the file into
 pub fun pull_binary(member: Text, dest: Text): Null?
 {
     let NIX_BINS_DERIVATION = trust env_var_get("NIX_BINS_DERIVATION")

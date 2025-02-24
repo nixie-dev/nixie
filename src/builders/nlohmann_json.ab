@@ -8,6 +8,9 @@ import { pull_source_file } from "../resources.ab"
 
 import { pkg_exists, step_title, get_source_root } from "./common.ab"
 
+/// This is the core function for the NLohmann JSON library.
+///
+/// It exports the `LNLOHMANN_JSON_LIBS` and `NLOHMANN_JSON_CFLAGS` variables.
 pub fun build_nlohmann_json()
 {
     let source_root = get_source_root()
@@ -27,5 +30,6 @@ pub fun build_nlohmann_json()
 main(cmdl)
 {
     trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
+    trust env_var_set("step_total", "1")
     build_nlohmann_json()?
 }

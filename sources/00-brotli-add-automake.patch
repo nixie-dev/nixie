@@ -108,7 +108,7 @@ new file mode 100755
 index 0000000..d4325b2
 --- /dev/null
 +++ b/bootstrap
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,32 @@
 +#!/bin/sh -e
 +
 +REQUIRED='is required, but not installed.'
@@ -127,18 +127,14 @@ index 0000000..d4325b2
 +mkdir m4 2>/dev/null
 +fi
 +
-+BROTLI_ABI_HEX=`sed -n 's/#define BROTLI_ABI_VERSION 0x//p' c/common/version.h`
-+BROTLI_ABI_INT=`echo "ibase=16;$BROTLI_ABI_HEX" | bc`
-+BROTLI_ABI_CURRENT=`echo "scale=0;$BROTLI_ABI_INT / 16777216" | bc`
-+BROTLI_ABI_REVISION=`echo "scale=0;$BROTLI_ABI_INT / 4096 % 4096" | bc`
-+BROTLI_ABI_AGE=`echo "scale=0;$BROTLI_ABI_INT % 4096" | bc`
++BROTLI_ABI_CURRENT=`sed -n 's/#define BROTLI_ABI_CURRENT //p' c/common/version.h`
++BROTLI_ABI_REVISION=`sed -n 's/#define BROTLI_ABI_REVISION //p' c/common/version.h`
++BROTLI_ABI_AGE=`sed -n 's/#define BROTLI_ABI_AGE //p' c/common/version.h`
 +BROTLI_ABI_INFO="$BROTLI_ABI_CURRENT:$BROTLI_ABI_REVISION:$BROTLI_ABI_AGE"
 +
-+BROTLI_VERSION_HEX=`sed -n 's/#define BROTLI_VERSION 0x//p' c/common/version.h`
-+BROTLI_VERSION_INT=`echo "ibase=16;$BROTLI_VERSION_HEX" | bc`
-+BROTLI_VERSION_MAJOR=`echo "scale=0;$BROTLI_VERSION_INT / 16777216" | bc`
-+BROTLI_VERSION_MINOR=`echo "scale=0;$BROTLI_VERSION_INT / 4096 % 4096" | bc`
-+BROTLI_VERSION_PATCH=`echo "scale=0;$BROTLI_VERSION_INT % 4096" | bc`
++BROTLI_VERSION_MAJOR=`sed -n 's/#define BROTLI_VERSION_MAJOR //p' c/common/version.h`
++BROTLI_VERSION_MINOR=`sed -n 's/#define BROTLI_VERSION_MINOR //p' c/common/version.h`
++BROTLI_VERSION_PATCH=`sed -n 's/#define BROTLI_VERSION_PATCH //p' c/common/version.h`
 +BROTLI_VERSION="$BROTLI_VERSION_MAJOR.$BROTLI_VERSION_MINOR.$BROTLI_VERSION_PATCH"
 +
 +sed -i.bak "$SED_ERE" "s/[0-9]+:[0-9]+:[0-9]+/$BROTLI_ABI_INFO/" Makefile.am

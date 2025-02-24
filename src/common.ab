@@ -19,7 +19,7 @@ if text_contains(me, "/") {
             SELF = "{PWD}/{me}"
         }
 
-        // This second pass check if the result of readlink is relative
+        // This second pass checks if the result of readlink is relative
         if {
             rl == "":                  SELF = SELF
             not starts_with(rl, "/"):  SELF = "{PWD}/{rl}"

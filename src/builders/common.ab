@@ -20,6 +20,7 @@ pub fun pkg_exists(package: Text): Bool
     return true
 }
 
+/// Change the terminal title to a build step, and increments the step counter.
 pub fun step_title(name: Text): Null
 {
     let step_total = trust env_var_get("step_total")
@@ -31,6 +32,7 @@ pub fun step_title(name: Text): Null
     step_current += 1
 }
 
+/// Obtain the base directory where source packages are extracted.
 pub fun get_source_root(): Text
 {
     let repo_root = get_repo_root()
