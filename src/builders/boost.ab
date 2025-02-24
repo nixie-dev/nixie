@@ -60,8 +60,8 @@ pub fun build_boost()
     trust $export BOOST_ROOT$
 }
 
-// Quick mark-as-used workaround
-if false {
-    exit 300
-    trust build_boost_inner()
+main(cmdl)
+{
+    trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
+    build_boost()?
 }

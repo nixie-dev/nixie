@@ -40,3 +40,21 @@ pub fun build_autoconf_dep(lib_name: Text, var_name: Text,
     trust env_var_set("{var_name}_CFLAGS", "-I{my_source}/{inc_prefix}/include")
     trust $export {var_name}_LIBS {var_name}_CFLAGS$
 }
+
+main(cmdl)
+{
+    if len(cmdl) < 5 {
+        echo "Usage: ./autoconf.sh <package> <var_name> <lib_prefix> <inc_prefix>"
+        echo ""
+        echo "See builders/autoconf.ab and builders.ab for more info"
+        exit 1
+    }
+
+    let lib_name = cmdl[1]
+    let var_name = cmdl[2]
+    let lib_prefix = cmdl[3]
+    let inc_prefix = cmdl[4]
+
+    trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
+    build_autoconf_dep(lib_name, var_name, lib_prefix, inc_prefix)?
+}

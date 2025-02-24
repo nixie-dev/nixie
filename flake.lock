@@ -8,11 +8,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1739091767,
-        "narHash": "sha256-6z1+TMi9lUdIWGz/RDyhCR69lCrl/tyJ0Ezfp2c18aI=",
+        "lastModified": 1740394272,
+        "narHash": "sha256-s/ZxG/ZB1hDhH2pTlHV0ANgQid18gnva6NnF/7G8nr0=",
         "owner": "thesola10",
         "repo": "amber",
-        "rev": "7ba5ae7b20f0b08b504c2b9e8b96b0094ef39485",
+        "rev": "d9acb8aa6a49ae77041fccc61c93e60f5aa429a6",
         "type": "github"
       },
       "original": {
@@ -178,16 +178,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1739397811,
-        "narHash": "sha256-xal/3k6gtnkaZH5VWsTexaeGa8092HoPoty+jj2QFEA=",
+        "lastModified": 1722415718,
+        "narHash": "sha256-5US0/pgxbMksF92k1+eOa8arJTJiPvsdZj9Dl+vJkM4=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "efc60b3e477818e3b5fcec5f3a7c0aea4865ae87",
+        "rev": "c3392ad349a5227f4a3464dce87bcc5046692fce",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "release-24.11",
+        "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }

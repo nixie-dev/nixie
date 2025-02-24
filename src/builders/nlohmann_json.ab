@@ -23,3 +23,9 @@ pub fun build_nlohmann_json()
     trust env_var_set("NLOHMANN_JSON_CFLAGS", "{source_root}/nlohmann_json/single_include")
     trust $export NLOHMANN_JSON_LIBS NLOHMANN_JSON_CFLAGS$
 }
+
+main(cmdl)
+{
+    trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
+    build_nlohmann_json()?
+}

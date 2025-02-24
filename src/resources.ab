@@ -3,7 +3,8 @@
 // Resource retrieval from tarball or Cachix
 
 import { file_download } from "std/http"
-import { env_var_get } from "std/env"
+import { file_exists } from "std/fs"
+import { env_var_get, env_var_test } from "std/env"
 
 import { untar } from "./common.ab"
 
@@ -18,14 +19,32 @@ pub fun pull_source_file(member: Text, dest: Text): Null?
 {
     let SOURCE_DERIVATION = trust env_var_get("SOURCE_DERIVATION")
 
-    let where = trust untar("sources/{member}")
-    if status != 0 {
+    let where = ""
+    let my_status = 1
+    if not env_var_test("_NIXIE_TESTING_SKIP_TARBALL") {
+        where = trust untar("sources/{member}")
+        my_status = status
+    }
+
+    if env_var_test("_NIXIE_TESTING_SOURCES_DIR") and my_status != 0 {
+        let srcdir = trust env_var_get("_NIXIE_TESTING_SOURCES_DIR")
+        let tmpd = trust $mktemp -t -d nixie_{member}_XXXXXXXX$
+
+        if file_exists("{srcdir}/{member}.tar.gz") {
+            trust $gzip -d -c {srcdir}/{member}.tar.gz | tar -x -C {tmpd}$
+            my_status = status
+            where = "{tmpd}/{member}"
+        } else {
+            my_status = 1
+        }
+    }
+
+    if my_status != 0 {
         let tmpf = trust $mktemp -t nixie_src_XXXXXXXX.tgz$
         let tmpd = trust $mktemp -t -d nixie_{member}_XXXXXXXX$
 
-        if not file_download(cachix_url(SOURCE_DERIVATION, "{member}.tar.gz"), tmpf) {
+        if not file_download(cachix_url(SOURCE_DERIVATION, "{member}.tar.gz"), tmpf):
             fail 1
-        }
 
         $gzip -d -c {tmpf} | tar -x -C {tmpd}$?
 

@@ -41,8 +41,8 @@ pub fun build_lowdown()
     trust env_var_set("LOWDOWN_CFLAGS", "-I{source_root}/lowdown")
 }
 
-// Quick mark-as-used workaround
-if false {
-    exit 300
-    trust build_lowdown_inner()
+main(cmdl)
+{
+    trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
+    build_lowdown()?
 }
