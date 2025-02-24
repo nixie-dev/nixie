@@ -32,13 +32,17 @@ pub fun build_autoconf_dep(lib_name: Text, var_name: Text,
 
     pull_source_file(lib_name, my_source)?
 
-    $(cd {my_source} && ./configure && make)$?
+    $(unset C_INCLUDE_PATH CPLUS_INCLUDE_PATH && cd {my_source} && ./configure && make)$?
 
     $cp {my_source}/{lib_prefix}/.libs/* {cache_root}/nix-lib/$?
+    trust $rm {cache_root}/nix-lib/*.o$
 
     trust env_var_set("{var_name}_LIBS", "{cache_root}/nix-lib")
     trust env_var_set("{var_name}_CFLAGS", "-I{my_source}/{inc_prefix}/include")
     trust $export {var_name}_LIBS {var_name}_CFLAGS$
+
+    trust $export C_INCLUDE_PATH={my_source}/{inc_prefix}:\$C_INCLUDE_PATH$
+    trust $export CPLUS_INCLUDE_PATH={my_source}/{inc_prefix}:\$CPLUS_INCLUDE_PATH$
 }
 
 main(cmdl)

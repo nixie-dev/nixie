@@ -21,7 +21,9 @@
     { packages = rec
       { default = nixie;
         nixie = pkgs.callPackage ./. { inherit amber-lang; };
-        sources = pkgs.callPackage ./sources {};
+        sources = pkgs.callPackage ./sources
+          { nix-source = nix;
+          };
         static-bins = import ./static-bins
           { inherit nixpkgs fakedir pkgs;
             nix-source = nix;

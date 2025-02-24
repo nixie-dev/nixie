@@ -25,6 +25,9 @@ pub fun build_nlohmann_json()
     trust env_var_set("NLOHMANN_JSON_LIBS", "{source_root}/nlohmann_json/single_include")
     trust env_var_set("NLOHMANN_JSON_CFLAGS", "{source_root}/nlohmann_json/single_include")
     trust $export NLOHMANN_JSON_LIBS NLOHMANN_JSON_CFLAGS$
+
+    trust $export C_INCLUDE_PATH={source_root}/nlohmann_json/single_include:\$C_INCLUDE_PATH$
+    trust $export CPLUS_INCLUDE_PATH={source_root}/nlohmann_json/single_include:\$CPLUS_INCLUDE_PATH$
 }
 
 main(cmdl)

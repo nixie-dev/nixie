@@ -46,6 +46,8 @@ pub fun build_nix()
 
     $python3 -m venv --system-site-packages "{venv}"$?
 
+    trust $export LIBRARY_PATH={cache_root}/nix-lib:\$LIBRARY_PATH$
+
     ${venv}/bin/pip install meson ninja$?
 
     $(cd {source_root}/nix && {nameof build_nix_inner})$?

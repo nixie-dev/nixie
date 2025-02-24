@@ -44,6 +44,9 @@ pub fun build_lowdown()
 
     trust env_var_set("LOWDOWN_LIBS", "{cache_root}/nix-lib")
     trust env_var_set("LOWDOWN_CFLAGS", "-I{source_root}/lowdown")
+
+    trust $export C_INCLUDE_PATH={source_root}/lowdown:\$C_INCLUDE_PATH$
+    trust $export CPLUS_INCLUDE_PATH={source_root}/lowdown:\$CPLUS_INCLUDE_PATH$
 }
 
 main(cmdl)

@@ -59,6 +59,9 @@ pub fun build_openssl()
     trust env_var_set("OPENSSL_LIBS", "{cache_root}/nix-lib")
     trust env_var_set("OPENSSL_CFLAGS", "-I{source_root}/openssl/include")
     trust $export OPENSSL_LIBS OPENSSL_CFLAGS$
+
+    trust $export C_INCLUDE_PATH={source_root}/openssl/include:\$C_INCLUDE_PATH$
+    trust $export CPLUS_INCLUDE_PATH={source_root}/openssl/include:\$CPLUS_INCLUDE_PATH$
 }
 
 main(cmdl)

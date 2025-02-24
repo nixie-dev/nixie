@@ -1,12 +1,15 @@
 { stdenv, boost, openssl, lowdown, nlohmann_json, brotli, libsodium, editline
 , gnutar, coreutils, findutils, python3, nix
-, meson, automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config, ... }:
+, automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config
+# External source for Nix
+, nix-source ? nix.src
+, ... }:
 
 let
-  mkConfiguredSrc = { pkg, confScript, patches ? [], dest?pkg.pname }:
+  mkConfiguredSrc = { pkg, confScript, src ? pkg.src, patches ? pkg.patches, dest ? pkg.pname }:
     stdenv.mkDerivation {
-      inherit (pkg) version src;
-      inherit dest patches;
+      inherit (pkg) version;
+      inherit dest patches src;
       pname = "${pkg.pname}-configured-sources";
 
       configurePhase = confScript;
@@ -19,7 +22,6 @@ let
         bc
         libtool
         pkg-config
-        meson
       ];
 
       dontBuild = true;
@@ -33,6 +35,7 @@ let
 
   nix_configured_src = mkConfiguredSrc
     { pkg = nix;
+      src = nix-source;
       confScript = ''
         mkdir -p $out
         cp -r . $out/nix

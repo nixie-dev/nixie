@@ -67,9 +67,9 @@ pub fun try_build_nix()
     build_boost()?
     build_nlohmann_json()?
     build_lowdown()?
-    //                 pkgconf name       env var      lib prefix       include prefix
-    build_autoconf_dep("libbrotlicommon", "LIBBROTLI", "",              "c")?
-    build_autoconf_dep("libsodium",       "SODIUM",    "src/libsodium", "src/libsodium")?
-    build_autoconf_dep("libeditline",     "EDITLINE",  "src")?
+    //                 pkgconf name       env var       lib prefix       include prefix
+    build_autoconf_dep("libbrotlicommon", "LIBBROTLI",  "",              "c/include")?
+    build_autoconf_dep("libsodium",       "SODIUM",     "src/libsodium", "src/libsodium/include")?
+    build_autoconf_dep("libeditline",     "EDITLINE",   "src",           "include")?
     build_nix()?
 }

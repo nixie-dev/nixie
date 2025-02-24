@@ -9,7 +9,7 @@ import { pull_source_file } from "../resources.ab"
 
 import { pkg_exists, step_title, get_source_root } from "./common.ab"
 
-const modules = ["chrono", "container", "context", "system", "thread"]
+const modules = ["predef", "chrono", "container", "context", "coroutine", "system", "thread"]
 
 /// Check that the Boost modules we need exist on the system.
 ///
@@ -34,7 +34,7 @@ fun find_boost_libs(libs: [Text]): Bool
 /// This function runs within the source directory, in a subshell.
 fun build_boost_inner()
 {
-    let args = [ "--static" ]
+    let args = [ "variant=release", "link=static", "--stagedir=." ]
 
     for mod in modules {
         args += [ "--with-{mod}" ]
