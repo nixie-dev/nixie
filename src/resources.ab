@@ -64,6 +64,9 @@ pub fun pull_source_file(member: Text, dest: Text): Null?
         where = "{tmpd}/{member}"
     }
 
+    // Our build method means source dirs accumulate state, we're better off
+    // throwing them away.
+    trust $rm -rf {dest}$
     trust mv where dest
 }
 

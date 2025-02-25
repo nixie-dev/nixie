@@ -31,9 +31,16 @@ fun build_openssl_inner()
 
     $./config$?
     make_headers()?
-    $make libcrypto.{dll_ext}$?
+    $make libcrypto.{dll_ext} libcrypto.pc$?
 
-    trust $cp ./libcrypto.* {cache_root}/nix-lib/$
+    // Building libssl is:
+    // - hard
+    // - broken
+    // - a very bad idea anyway
+    // so we're performing the install ourselves
+    trust $cp ./libcrypto.* {cache_root}/nix-deps/lib/$
+    trust $cp ./libcrypto.pc {cache_root}/nix-deps/lib/pkgconfig$
+    trust $cp -r ./include {cache_root}/nix-deps/$
 }
 
 /// This is the core function for the OpenSSL builder.
@@ -55,13 +62,6 @@ pub fun build_openssl()
 
     // Using a subshell ensures we aren't cd elsewhere on failure
     $(cd {source_root}/openssl && {nameof build_openssl_inner})$?
-
-    trust env_var_set("OPENSSL_LIBS", "{cache_root}/nix-lib")
-    trust env_var_set("OPENSSL_CFLAGS", "-I{source_root}/openssl/include")
-    trust $export OPENSSL_LIBS OPENSSL_CFLAGS$
-
-    trust $export C_INCLUDE_PATH={source_root}/openssl/include:\$C_INCLUDE_PATH$
-    trust $export CPLUS_INCLUDE_PATH={source_root}/openssl/include:\$CPLUS_INCLUDE_PATH$
 }
 
 main(cmdl)

@@ -1,5 +1,5 @@
 { stdenv, boost, openssl, lowdown, nlohmann_json, brotli, libsodium, editline
-, gnutar, coreutils, findutils, python3, nix
+, gnutar, coreutils, findutils, python3, nix, libarchive
 , automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config
 # External source for Nix
 , nix-source ? nix.src
@@ -56,6 +56,10 @@ let
       '';
       dest = "libbrotlicommon";
     };
+  libarchive_configured_src = mkConfiguredSrc
+    { pkg = libarchive;
+      confScript = "./build/autogen.sh";
+    };
 
   srcs_simple =
     [ openssl
@@ -69,6 +73,7 @@ let
     [ nix_configured_src
       editline_configured_src
       brotli_configured_src
+      libarchive_configured_src
     ];
 in stdenv.mkDerivation {
   name = "nixie-sources";

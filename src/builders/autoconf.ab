@@ -13,12 +13,8 @@ import { pkg_exists, step_title, get_source_root } from "./common.ab"
 ///
 /// ### Arguments:
 /// - `lib_name`: The library to check for with `pkg-config`
-/// - `var_name`: The variable to export library locations
-/// - `lib_prefix`: Where in the source tree the resulting libraries are found
 /// - `inc_prefix`: Where in the source tree the build headers are found
-pub fun build_autoconf_dep(lib_name: Text, var_name: Text,
-                           lib_prefix: Text = "",
-                           inc_prefix: Text = ""): Null?
+pub fun build_autoconf_dep(lib_name: Text, inc_prefix: Text = ""): Null?
 {
     let source_root = get_source_root()
     let cache_root = get_cache_root()
@@ -32,34 +28,25 @@ pub fun build_autoconf_dep(lib_name: Text, var_name: Text,
 
     pull_source_file(lib_name, my_source)?
 
-    $(unset C_INCLUDE_PATH CPLUS_INCLUDE_PATH && cd {my_source} && ./configure && make)$?
-
-    $cp {my_source}/{lib_prefix}/.libs/* {cache_root}/nix-lib/$?
-    trust $rm {cache_root}/nix-lib/*.o$
-
-    trust env_var_set("{var_name}_LIBS", "{cache_root}/nix-lib")
-    trust env_var_set("{var_name}_CFLAGS", "-I{my_source}/{inc_prefix}/include")
-    trust $export {var_name}_LIBS {var_name}_CFLAGS$
-
-    trust $export C_INCLUDE_PATH={my_source}/{inc_prefix}:\$C_INCLUDE_PATH$
-    trust $export CPLUS_INCLUDE_PATH={my_source}/{inc_prefix}:\$CPLUS_INCLUDE_PATH$
+    $( unset C_INCLUDE_PATH CPLUS_INCLUDE_PATH \
+    && cd {my_source} \
+    && ./configure --prefix={cache_root}/nix-deps \
+    && make && make install )$?
 }
 
 main(cmdl)
 {
     if len(cmdl) < 5 {
-        echo "Usage: ./autoconf.sh <package> <var_name> <lib_prefix> <inc_prefix>"
+        echo "Usage: ./autoconf.sh <package> <inc_prefix>"
         echo ""
         echo "See builders/autoconf.ab and builders.ab for more info"
         exit 1
     }
 
     let lib_name = cmdl[1]
-    let var_name = cmdl[2]
-    let lib_prefix = cmdl[3]
-    let inc_prefix = cmdl[4]
+    let inc_prefix = cmdl[2]
 
     trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
     trust env_var_set("step_total", "1")
-    build_autoconf_dep(lib_name, var_name, lib_prefix, inc_prefix)?
+    build_autoconf_dep(lib_name, inc_prefix)?
 }

@@ -46,7 +46,7 @@ fun get_nix()
     let system = get_system()
 
     let nix_path = "{cache_root}/nix-static"
-    let fakedir_path = "{cache_root}/nix-lib/libfakedir.dylib"
+    let fakedir_path = "{cache_root}/nix-deps/lib/libfakedir.dylib"
 
     enter_alt_buffer()
     set_title("Building Nix...")
@@ -56,7 +56,7 @@ fun get_nix()
 
     // Unpack fakedir as needed
     if osname == "Darwin" and not file_exists(fakedir_path) {
-        dir_create("{cache_root}/nix-lib")
+        dir_create("{cache_root}/nix-deps/lib")
         pull_binary("libfakedir.dylib", fakedir_path) failed {
             teardown(true)
             fail 1
@@ -176,7 +176,7 @@ fun launch_darwin_workaround(name: Text, nix_path: Text, args: [Text]): Null
     let cache_root = get_cache_root()
     let nix_root = get_nix_root()
 
-    let fakedir_path = "{cache_root}/nix-lib/libfakedir.dylib"
+    let fakedir_path = "{cache_root}/nix-deps/lib/libfakedir.dylib"
 
     trust env_var_set("FAKEDIR_PATTERN", "/nix")
     trust env_var_set("FAKEDIR_TARGET", "{nix_root}/nix")
@@ -187,7 +187,7 @@ fun launch_darwin_workaround(name: Text, nix_path: Text, args: [Text]): Null
     // Unfortunately, this requires us to disable the Nix sandbox entirely.
     trust $ _NIX_TEST_NO_SANDBOX=1 \
             DYLD_INSERT_LIBRARIES="{fakedir_path}" \
-            DYLD_LIBRARY_PATH="{cache_root}/nix-lib" \
+            DYLD_LIBRARY_PATH="{cache_root}/nix-deps/lib" \
                 exec -a {name} {nix_path} "{args}"$
 }
 

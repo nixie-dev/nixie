@@ -20,6 +20,8 @@ import { build_autoconf_dep }   from "./builders/autoconf.ab"
 import { build_nix }            from "./builders/nix.ab"
 
 /// Export libraries found inside the macOS SDK for building Nix
+///
+/// TODO: is this still required with Meson?
 fun darwin_export_sdk()
 {
     // Calling xcrun should prompt the user to install the macOS SDK.
@@ -46,8 +48,8 @@ fun darwin_export_sdk()
 /// Build Nix and its dependencies locally, then place it in the expected location
 /// in the user's cache directory.
 ///
-/// This process **requires**, among other things, `pkg-config` to determine
-/// which dependencies are already met and avoid building them.
+/// This process **requires**, among other things, `pkg-config` due to it being
+/// the only detection method for many dependencies in Meson.
 pub fun try_build_nix()
 {
     let cache_root = get_cache_root()
@@ -58,18 +60,19 @@ pub fun try_build_nix()
     if get_osname() == "Darwin":
         darwin_export_sdk()
 
-    trust env_var_set("step_total", "8")
+    trust env_var_set("step_total", "9")
 
     dir_create(get_source_root())
-    dir_create("{cache_root}/nix-lib")
+    dir_create("{cache_root}/nix-deps/lib/pkgconfig")
 
     build_openssl()?
     build_boost()?
     build_nlohmann_json()?
     build_lowdown()?
-    //                 pkgconf name       env var       lib prefix       include prefix
-    build_autoconf_dep("libbrotlicommon", "LIBBROTLI",  "",              "c/include")?
-    build_autoconf_dep("libsodium",       "SODIUM",     "src/libsodium", "src/libsodium/include")?
-    build_autoconf_dep("libeditline",     "EDITLINE",   "src",           "include")?
+    //                 pkgconf name       include prefix
+    build_autoconf_dep("libbrotlicommon", "c/include")?
+    build_autoconf_dep("libsodium",       "src/libsodium/include")?
+    build_autoconf_dep("libeditline",     "include")?
+    build_autoconf_dep("libarchive",      "libarchive")?
     build_nix()?
 }

@@ -56,7 +56,7 @@ fun cmd_cleanup()
     trust $rm -rf {nix_root}$
 
     echo "Removing retrieved Nix binaries..."
-    trust $rm -rf {cache_root}/nix-static {cache_root}/nix-lib$
+    trust $rm -rf {cache_root}/nix-static {cache_root}/nix-lib {cache_root}/nix-deps$
 
     exit 0
 }

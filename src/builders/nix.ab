@@ -2,6 +2,7 @@
 // Licensed under GNU GPLv2
 // Builder for the Nix package manager itself
 
+import { env_var_set } from "std/env"
 import { file_exists, dir_exists, dir_create } from "std/fs"
 
 import { pull_source_file } from "../resources.ab"
@@ -46,7 +47,8 @@ pub fun build_nix()
 
     $python3 -m venv --system-site-packages "{venv}"$?
 
-    trust $export LIBRARY_PATH={cache_root}/nix-lib:\$LIBRARY_PATH$
+    trust $export LIBRARY_PATH={cache_root}/nix-deps/lib:\$LIBRARY_PATH$
+    trust $export PKG_CONFIG_PATH={cache_root}/nix-deps/lib/pkgconfig:{cache_root}/nix-deps/share/pkgconfig:\$PKG_CONFIG_PATH$
 
     ${venv}/bin/pip install meson ninja$?
 
@@ -57,10 +59,7 @@ pub fun build_nix()
 
 main(cmdl)
 {
-    echo "This builder only makes sense in the wrapper context,"
-    echo "where all dependencies were built and/or resolved."
-    echo ""
-    echo "Use ./nix --nixie-no-precompiled to test the full build chain."
-
-    exit 1
+    trust env_var_set("_nixie_testing_skip_tarball", "1")
+    trust env_var_set("step_total", "1")
+    build_nix()?
 }
