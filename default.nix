@@ -2,7 +2,7 @@
 , libfaketime, ... }:
 
 let
-  nixie_ver = "2025.02-a1";
+  nixie_ver = "2025.02-a2";
   pzp = python3Packages.buildPythonPackage rec {
     pname = "pzp";
     version = "0.0.27";
