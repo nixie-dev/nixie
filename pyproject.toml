@@ -2,8 +2,8 @@
 name = "nixie"
 description = "Portable Nix script builder"
 authors = [ { "name" = "Karim Vergnes", "email" = "me@thesola.io" } ]
-license = { "file" = "../LICENSE" }
-readme = "../README.md"
+license = { "file" = "LICENSE" }
+readme = "README.md"
 urls = { "Source" = "https://github.com/nixie-dev/nixie" }
 dependencies = [
     "click",
@@ -16,17 +16,29 @@ dependencies = [
 dynamic = [ "version" ]
 
 [build-system]
-requires = [ "setuptools" ]
-build-backend = "setuptools.build_meta"
+requires = [ "hatchling", "hatch-build-scripts" ]
+build-backend = "hatchling.build"
 
 [project.scripts]
 nixie = "nixie.cli:main"
 
-[tool.setuptools.package-data]
-"nixie.output" = ["*.in"]
+[tool.hatch.version]
+path = "nixie/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = [ "nixie" ]
+
+[[tool.hatch.build.hooks.build-scripts.scripts]]
+out_dir = "nixie/output"
+commands = [
+    "amber build src/main.ab nix-wrapped.sh.in --minify"
+]
+artifacts = [
+    "nix-wrapped.sh.in"
+]
 
 [tool.bumpver]
-current_version = "2025.02-a1"
+current_version = "2025.02-a2"
 version_pattern = "YYYY.0M-PYTAGNUM"
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true

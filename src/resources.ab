@@ -1,0 +1,98 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Resource retrieval from tarball or Cachix
+
+import { file_download } from "std/http"
+import { file_exists } from "std/fs"
+import { env_var_get, env_var_test } from "std/env"
+
+import { untar } from "./common.ab"
+
+fun cachix_url(derivation: Text, member: Text): Text
+{
+    let SOURCE_CACHE = trust env_var_get("SOURCE_CACHE")
+
+    return "https://{SOURCE_CACHE}/serve/{derivation}/{member}"
+}
+
+/// Unpack a known source code package into the requested target directory.
+///
+/// This function will try the following methods, in order:
+/// - Extract from the embedded tarball
+/// - Pull tarball from directory marked by `_NIXIE_TESTING_SOURCES_DIR`
+/// - Download tarball from known Cachix URL
+///
+/// ### Arguments:
+/// - `member`: The name of the source package to unpack
+/// - `dest`: The target directory to move the package contents into
+pub fun pull_source_file(member: Text, dest: Text): Null?
+{
+    let SOURCE_DERIVATION = trust env_var_get("SOURCE_DERIVATION")
+
+    let where = ""
+    let my_status = 1
+
+    // This allows individual builders' entry points to not fail
+    if not env_var_test("_NIXIE_TESTING_SKIP_TARBALL") {
+        where = trust untar("sources/{member}")
+        my_status = status
+    }
+
+    if env_var_test("_NIXIE_TESTING_SOURCES_DIR") and my_status != 0 {
+        let srcdir = trust env_var_get("_NIXIE_TESTING_SOURCES_DIR")
+        let tmpd = trust $mktemp -t -d nixie_{member}_XXXXXXXX$
+
+        if file_exists("{srcdir}/{member}.tar.gz") {
+            trust $gzip -d -c {srcdir}/{member}.tar.gz | tar -x -C {tmpd}$
+            my_status = status
+            where = "{tmpd}/{member}"
+        } else {
+            my_status = 1
+        }
+    }
+
+    if my_status != 0 {
+        let tmpf = trust $mktemp -t nixie_src_XXXXXXXX.tgz$
+        let tmpd = trust $mktemp -t -d nixie_{member}_XXXXXXXX$
+
+        if not file_download(cachix_url(SOURCE_DERIVATION, "{member}.tar.gz"), tmpf):
+            fail 1
+
+        $gzip -d -c {tmpf} | tar -x -C {tmpd}$?
+
+        trust $rm -f {tmpf}$
+        where = "{tmpd}/{member}"
+    }
+
+    // Our build method means source dirs accumulate state, we're better off
+    // throwing them away.
+    trust $rm -rf {dest}$
+    trust mv where dest
+}
+
+/// Retrieve a known precompiled file and move it to the requested target.
+///
+/// This function will try the following methods, in order:
+/// - Extract from the embedded tarball
+/// - Download file from known Cachix URL
+///
+/// ### Arguments:
+/// - `member`: The filename of the file to retrieve
+/// - `dest`: The target filename to move the file into
+pub fun pull_binary(member: Text, dest: Text): Null?
+{
+    let NIX_BINS_DERIVATION = trust env_var_get("NIX_BINS_DERIVATION")
+
+    let where = trust untar(member)
+    if status != 0 {
+        let tmpf = trust $mktemp -t nixie_{member}_XXXXXXXX$
+
+        if not file_download(cachix_url(NIX_BINS_DERIVATION, member), tmpf) {
+            fail 1
+        }
+
+        where = tmpf
+    }
+
+    trust mv where dest
+}

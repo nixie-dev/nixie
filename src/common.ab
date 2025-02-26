@@ -1,0 +1,149 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Common utility functions
+
+import { echo_error, env_var_get, is_command }      from "std/env"
+import { starts_with, text_contains, parse_number } from "std/text"
+
+import { exit_alt_buffer, set_title }           from "./term.ab"
+
+let SELF = ""
+
+let me = trust env_var_get("0")
+
+// Quick shenanigan to get real path without readlink -f *sideyes macOS*
+if text_contains(me, "/") {
+    if not starts_with(me, "/") {
+        let PWD = trust env_var_get("PWD")
+        let rl = $readlink {me}$ failed {
+            SELF = "{PWD}/{me}"
+        }
+
+        // This second pass checks if the result of readlink is relative
+        if {
+            rl == "":                  SELF = SELF
+            not starts_with(rl, "/"):  SELF = "{PWD}/{rl}"
+            else:                      SELF = rl
+        }
+    }
+} else {
+    echo_error("This script must be run from an absolute or relative path.")
+}
+
+/// Checks that the left-hand path exists and is newer than the right-hand path.
+/// False otherwise.
+pub fun exists_newer(left: Text, right: Text): Bool
+{
+    let left_time = parse_number(trust $stat -c %W {left}$) failed {
+        return false    // Untrustworthy stat, assume worst
+    }
+    let right_time = parse_number(trust $stat -c %W {right}$) failed {
+        return false
+    }
+
+    return left_time >= right_time
+}
+
+/// Exit alt-buffer, quit script, kill ourselves. At this point something has gone
+/// catastrophically wrong and the script MUST stop.
+///
+/// ### Arguments:
+/// - `message`: Message to print as we error out
+/// - `archive`: `true` if the issue is related to the attached archive.
+///   Default is `false`.
+pub fun bail(message: Text, archive: Bool = false): Null
+{
+    exit_alt_buffer()
+    set_title()         // Clear terminal title back to default
+
+    echo_error(message, 0)
+    if archive {
+        echo_error("This script can be rebuilt using the nixie tool.", 0)
+    }
+
+    exit 1
+    trust $kill -ABRT \$\$$
+}
+
+/// Retrieve the resolved, absolute path to the wrapper script.
+pub fun get_self(): Text
+{
+    return SELF
+}
+
+/// Reads and uncompresses to a temporary file, the attached resource archive
+/// at the end of the script.
+fun dump_archive(): Text
+{
+    let dest = trust $mktemp -t nixie_XXXXXXXX.tar$
+
+    // This block seeks to the archive marker, then zcats everything afterwards
+    // to the tmpfile in dest
+    $cat {SELF} | (
+        read -r M
+        while ! [[ "\$M" =~ ^-----BEGIN\ ARCHIVE\ SECTION----- ]]
+        do read -r M || return 1
+        done
+        gzip -d -c 2>/dev/null > {dest}
+    )$ failed {
+        // gzip exits with 2 IFF it sees trailing garbage, which our alt-buf
+        // attempt at hiding the tarball technically is
+        if status != 2 {
+            bail("Could not find the script's resource archive.", true)
+        }
+    }
+
+    return dest
+}
+
+/// Extract a file or directory from the attached resource archive at the end
+/// of the script.
+///
+/// ### Arguments
+/// - `member`: The plaintext path to the file or folder to be extracted, relative
+///   to the archive root. Passed as-is to `tar`.
+/// - `dump`: If `true`, output the contents of the extracted file to standard
+///   output. Adds the `-O` option to `tar`.
+pub fun untar(member: Text, dump: Bool = false): Text?
+{
+    let archive = dump_archive()
+    let tar_cmd = "tar -x {member} -f {archive}"
+
+    if dump {
+        tar_cmd = "tar -x -O {member} -f {archive}"
+    }
+
+    let tar_out = ${tar_cmd}$ failed {
+        let tar_status = status
+        trust $rm {archive}$
+        fail tar_status
+    }
+
+    trust $rm {archive}$
+
+    return tar_out
+}
+
+/// Checks that a list of commands are available at runtime.
+///
+/// This function prints out the list of missing commands, and a message to
+/// instruct the user to install them.
+pub fun check_deps(deps: []): Null?
+{
+    let missing = [ Text ]
+
+    for dep in deps {
+        if not is_command(dep) {
+            missing += [ dep ]
+        }
+    }
+
+    if len(missing) > 0 {
+        echo_error("The following commands are missing:", 0)
+        for cmd in missing {
+            echo_error("- {cmd}", 0)
+        }
+        echo_error("Use your distribution's package manager to install them, then try again.", 0)
+        fail 1
+    }
+}

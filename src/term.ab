@@ -1,0 +1,68 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Utilities to manipulate Xterm features
+
+import { env_var_get, env_var_test } from "std/env"
+import { starts_with } from "std/text"
+
+let tsl = trust $tput tsl$
+let fsl = trust $tput fsl$
+let smcup = trust $tput smcup$
+let rmcup = trust $tput rmcup$
+
+let TERM = trust env_var_get("TERM")
+
+fun can_set_title(): Bool
+{
+    let has_statusline = true
+
+    $tput hs$ failed {
+        // For some reason, default xterm won't communicate statusline.
+        // We need to set TERM=xterm+sl to get the info.
+        if starts_with(TERM, "xterm") {
+            trust $TERM=xterm+sl tput hs$
+            if status == 0 {
+                tsl = trust $TERM=xterm+sl tput tsl$
+                fsl = trust $TERM=xterm+sl tput fsl$
+            } else {
+                has_statusline = false
+            }
+        } else {
+            has_statusline = false
+        }
+    }
+
+    return has_statusline
+}
+
+/// Set the title for the current window, if possible.
+///
+/// Does nothing otherwise.
+pub fun set_title(title: Text = ""): Null
+{
+    if can_set_title():
+        echo tsl + title + fsl
+}
+
+/// Create and enter an alt-buffer in the terminal.
+pub fun enter_alt_buffer(): Null
+{
+    echo smcup
+}
+
+/// Close the alt-buffer in the terminal.
+pub fun exit_alt_buffer(): Null
+{
+    echo rmcup
+}
+
+/// Shorthand to exit alt-buffer and clear terminal title.
+pub fun teardown(failure: Bool = false): Null
+{
+    if failure {
+        echo "Press any key to continue..."
+        trust $read -n 1$
+    }
+    set_title()
+    exit_alt_buffer()
+}

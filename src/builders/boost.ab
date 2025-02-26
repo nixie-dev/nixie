@@ -1,0 +1,72 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Builder for the Boost C++ framework
+
+import { file_exists, dir_exists }  from "std/fs"
+import { env_var_set }              from "std/env"
+
+import { pull_source_file } from "../resources.ab"
+
+import { pkg_exists, step_title, get_source_root } from "./common.ab"
+
+const modules = ["predef", "chrono", "container", "context", "coroutine", "system", "thread"]
+
+/// Check that the Boost modules we need exist on the system.
+///
+/// Boost does not provide a pkg-config package, nor a config program.
+/// This means we have to do the information-gathering the old way, by
+/// looking through /usr and /usr/local manually.
+fun find_boost_libs(libs: [Text]): Bool
+{
+    for lib in libs {
+        let libname = "libboost_{lib}*"
+        if not (   file_exists("/usr/lib/{libname}")
+                or file_exists("/usr/local/lib/{libname}")):
+            return false
+        if not (   dir_exists("/usr/include/boost/{lib}")
+                or dir_exists("/usr/local/include/boost/{lib}")):
+            return false
+    }
+
+    return true
+}
+
+/// This function runs within the source directory, in a subshell.
+fun build_boost_inner()
+{
+    let args = [ "variant=release", "link=static", "--stagedir=." ]
+
+    for mod in modules {
+        args += [ "--with-{mod}" ]
+    }
+
+    $./bootstrap.sh$?
+    $./b2 "{args}"$?
+}
+
+/// This is the core function for the Boost builder.
+///
+/// It exports the `BOOST_ROOT` variable.
+pub fun build_boost()
+{
+    let source_root = get_source_root()
+
+    step_title("boost")
+
+    if find_boost_libs(["atomic"] + modules):
+        return 0
+
+    pull_source_file("boost", "{source_root}/boost")?
+
+    $(cd {source_root}/boost && {nameof build_boost_inner})$?
+
+    trust env_var_set("BOOST_ROOT", "{source_root}/boost")
+    trust $export BOOST_ROOT$
+}
+
+main(cmdl)
+{
+    trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
+    trust env_var_set("step_total", "1")
+    build_boost()?
+}

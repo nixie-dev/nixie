@@ -1,0 +1,78 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Functions to build Nix and its dependencies from source
+
+import { dir_exists, dir_create } from "std/fs"
+import { env_var_set }            from "std/env"
+
+import { set_title }                     from "./term.ab"
+import { check_deps, bail }              from "./common.ab"
+import { pull_source_file, pull_binary } from "./resources.ab"
+import { get_osname, get_cache_root }    from "./platform.ab"
+
+import { get_source_root }      from "./builders/common.ab"
+
+import { build_openssl }        from "./builders/openssl.ab"
+import { build_lowdown }        from "./builders/lowdown.ab"
+import { build_nlohmann_json }  from "./builders/nlohmann_json.ab"
+import { build_boost }          from "./builders/boost.ab"
+import { build_autoconf_dep }   from "./builders/autoconf.ab"
+import { build_nix }            from "./builders/nix.ab"
+
+/// Export libraries found inside the macOS SDK for building Nix
+///
+/// TODO: is this still required with Meson?
+fun darwin_export_sdk()
+{
+    // Calling xcrun should prompt the user to install the macOS SDK.
+    let sdk_path = trust $xcrun --show-sdk-path$
+
+    if not dir_exists(sdk_path):
+        bail("The macOS SDK from Xcode or CommandLineTools is required to build Nix.")
+
+    let sdk_libs = "{sdk_path}/usr/lib"
+    let sdk_cflags = "-I{sdk_path}/usr/include"
+
+    trust env_var_set("LIBCURL_LIBS",      sdk_libs)
+    trust env_var_set("LIBCURL_CFLAGS",    sdk_cflags)
+    trust env_var_set("LIBARCHIVE_LIBS",   sdk_libs)
+    trust env_var_set("LIBARCHIVE_CFLAGS", sdk_cflags)
+    trust env_var_set("OPENSSL_LIBS",      sdk_libs)
+    trust env_var_set("OPENSSL_CFLAGS",    sdk_cflags)
+
+    trust $export LIBCURL_LIBS LIBCURL_CFLAGS \
+                  LIBARCHIVE_LIBS LIBARCHIVE_CFLAGS \
+                  OPENSSL_LIBS OPENSSL_CFLAGS$
+}
+
+/// Build Nix and its dependencies locally, then place it in the expected location
+/// in the user's cache directory.
+///
+/// This process **requires**, among other things, `pkg-config` due to it being
+/// the only detection method for many dependencies in Meson.
+pub fun try_build_nix()
+{
+    let cache_root = get_cache_root()
+
+    check_deps(["cc", "c++", "pkg-config", "make", "flex", "bison", "perl"])
+        failed { bail("Missing required dependencies to build from source.") }
+
+    if get_osname() == "Darwin":
+        darwin_export_sdk()
+
+    trust env_var_set("step_total", "9")
+
+    dir_create(get_source_root())
+    dir_create("{cache_root}/nix-deps/lib/pkgconfig")
+
+    build_openssl()?
+    build_boost()?
+    build_nlohmann_json()?
+    build_lowdown()?
+    //                 pkgconf name       include prefix
+    build_autoconf_dep("libbrotlicommon", "c/include")?
+    build_autoconf_dep("libsodium",       "src/libsodium/include")?
+    build_autoconf_dep("libeditline",     "include")?
+    build_autoconf_dep("libarchive",      "libarchive")?
+    build_nix()?
+}

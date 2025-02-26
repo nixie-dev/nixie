@@ -1,12 +1,15 @@
 { stdenv, boost, openssl, lowdown, nlohmann_json, brotli, libsodium, editline
-, gnutar, coreutils, findutils, python3, nix
-, meson, automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config, ... }:
+, gnutar, coreutils, findutils, python3, nix, libarchive
+, automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config
+# External source for Nix
+, nix-source ? nix.src
+, ... }:
 
 let
-  mkConfiguredSrc = { pkg, confScript, patches ? [], dest?pkg.pname }:
+  mkConfiguredSrc = { pkg, confScript, src ? pkg.src, patches ? pkg.patches, dest ? pkg.pname }:
     stdenv.mkDerivation {
-      inherit (pkg) version src;
-      inherit dest patches;
+      inherit (pkg) version;
+      inherit dest patches src;
       pname = "${pkg.pname}-configured-sources";
 
       configurePhase = confScript;
@@ -19,7 +22,6 @@ let
         bc
         libtool
         pkg-config
-        meson
       ];
 
       dontBuild = true;
@@ -33,6 +35,7 @@ let
 
   nix_configured_src = mkConfiguredSrc
     { pkg = nix;
+      src = nix-source;
       confScript = ''
         mkdir -p $out
         cp -r . $out/nix
@@ -47,8 +50,15 @@ let
   brotli_configured_src = mkConfiguredSrc
     { pkg = brotli;
       patches = [ ./00-brotli-add-automake.patch ];
-      confScript = "true";
+      confScript = ''
+        sh ${./brotli-gen-sources-list.sh} > ./scripts/sources.lst
+        ./bootstrap
+      '';
       dest = "libbrotlicommon";
+    };
+  libarchive_configured_src = mkConfiguredSrc
+    { pkg = libarchive;
+      confScript = "./build/autogen.sh";
     };
 
   srcs_simple =
@@ -63,6 +73,7 @@ let
     [ nix_configured_src
       editline_configured_src
       brotli_configured_src
+      libarchive_configured_src
     ];
 in stdenv.mkDerivation {
   name = "nixie-sources";

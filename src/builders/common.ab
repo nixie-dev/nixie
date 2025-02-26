@@ -1,0 +1,41 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Common functions for source-based builders
+
+import { env_var_get } from "std/env"
+import { dir_create } from "std/fs"
+
+import { set_title } from "../term.ab"
+import { get_repo_root } from "../platform.ab"
+
+let step_current = 1
+
+/// Invoke `pkg-config` to assert that a given dependency exists on the system.
+pub fun pkg_exists(package: Text): Bool
+{
+    $pkg-config {package}$ failed {
+        return false
+    }
+
+    return true
+}
+
+/// Change the terminal title to a build step, and increments the step counter.
+pub fun step_title(name: Text): Null
+{
+    let step_total = trust env_var_get("step_total")
+
+    trust $clear$
+
+    set_title("Building Nix: {name} ({step_current}/{step_total})")
+
+    step_current += 1
+}
+
+/// Obtain the base directory where source packages are extracted.
+pub fun get_source_root(): Text
+{
+    let repo_root = get_repo_root()
+
+    return "{repo_root}/.nixie/sources"
+}

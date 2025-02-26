@@ -1,0 +1,308 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Final-step Nix invocation methods
+
+import { file_exists, dir_exists, dir_create }    from "std/fs"
+import { env_var_test, env_var_set, env_var_get } from "std/env"
+import { split, slice, starts_with, ends_with }   from "std/text"
+import { array_last, array_shift }                from "std/array"
+
+import { enter_alt_buffer, set_title, teardown }  from "./term.ab"
+import { bail, untar, exists_newer, get_self }    from "./common.ab"
+import { get_osname, get_system, get_cache_root
+       , get_nix_root, get_repo_root }            from "./platform.ab"
+import { pull_binary }                            from "./resources.ab"
+import { try_build_nix }                          from "./builders.ab"
+
+/// Determine whether Nix is installed system-wide. Nixie can launch the
+/// system-wide Nix when it is available, using the script's bundled options.
+///
+/// This is the predicate for that behavior.
+fun is_nix_installed(): Bool
+{
+    // --nixie-ignore-system flag set
+    if env_var_test("nosystem"): return false
+
+    // Simple enough heuristic. In the future, might also check for the `nix`
+    // command, but that would create a ternary situation where Nixie's static
+    // Nix would need to use the system store.
+    if dir_exists("/nix/store"): return true
+
+    return false
+}
+
+/// Attempt to retrieve the static Nix binary by all known methods.
+///
+/// This function will first try to extract or download a static executable
+/// for the current system, and if it fails, a local build from source will be
+/// attempted.
+///
+/// **NOTE**: On macOS, this function is also responsible for downloading
+/// `libfakedir.dylib`.
+fun get_nix()
+{
+    let cache_root = get_cache_root()
+    let osname = get_osname()
+    let system = get_system()
+
+    let nix_path = "{cache_root}/nix-static"
+    let fakedir_path = "{cache_root}/nix-deps/lib/libfakedir.dylib"
+
+    enter_alt_buffer()
+    set_title("Building Nix...")
+
+    // Cleanly exit alt-buffer if hit with ^C
+    trust $trap "{nameof teardown}; exit 1" SIGKILL SIGTERM SIGINT SIGABRT$
+
+    // Unpack fakedir as needed
+    if osname == "Darwin" and not file_exists(fakedir_path) {
+        dir_create("{cache_root}/nix-deps/lib")
+        pull_binary("libfakedir.dylib", fakedir_path) failed {
+            teardown(true)
+            fail 1
+        }
+    }
+
+    // Update it if applicable
+    if osname == "Darwin" and not exists_newer(fakedir_path, get_self()):
+        trust pull_binary("libfakedir.dylib", fakedir_path)
+
+    // We already have static Nix
+    if file_exists(nix_path) {
+        teardown()
+        return 0
+    }
+
+    if env_var_test("nobins") {
+        try_build_nix() failed {
+            teardown(true)
+            fail 1
+        }
+    }
+
+    // Try to extract or download Nix
+    pull_binary("nix.{system}", nix_path) failed {
+        try_build_nix() failed {
+            teardown(true)
+            fail 1
+        }
+    }
+
+    trust $chmod +x {nix_path}$
+
+    teardown()
+    return 0
+}
+
+/// Move the contents of the user Nix store into the system Nix store.
+///
+/// This reduces occupied storage space in the event that the user installed
+/// Nix system-wide between uses of our script.
+fun migrate_nix_store()
+{
+    let nix_root = ""
+
+    nix_root = $readlink -f {get_nix_root()}$ failed {
+        nix_root = get_nix_root()
+    }
+
+    if not dir_exists("{nix_root}/nix/store"):
+        return 0
+
+    echo "Migrating Nix store to system-wide install..."
+    trust $nix copy --from {nix_root} --all --no-check-sigs$
+    if status == 0 {
+        trust $chmod -R +wx {nix_root} && rm -rf {nix_root}$
+    }
+}
+
+/// Provide a list of extra arguments for bundled Nix channels, after
+/// extracting said channels from the bundled archive.
+fun unpack_channels()
+{
+    let repo_root = get_repo_root()
+
+    if exists_newer("{repo_root}/.nixie/channels", get_self()) {
+        let NIX_PATH = trust env_var_get("NIX_PATH")
+        trust env_var_set("NIX_PATH", "{repo_root}/.nixie/channels:{NIX_PATH}")
+        trust $export NIX_PATH$
+        return 0
+    }
+    echo "Unpacking Nix channels, hang tight..."
+
+    dir_create("{repo_root}/.nixie")
+    untar("channels -C {repo_root}/.nixie") failed {
+        // Leave an empty directory to trip the time check above
+        trust $mkdir {repo_root}/.nixie/channels$
+    }
+}
+
+/// Provide a list of extra arguments depending on the script's features
+/// and the runtime environment.
+fun populate_extras(): [Text]
+{
+    let args = [Text]
+
+    let EXTRA_FEATURES            = trust env_var_get("EXTRA_FEATURES")
+    let EXTRA_SUBSTITUTERS        = trust env_var_get("EXTRA_SUBSTITUTERS")
+    let EXTRA_TRUSTED_PUBLIC_KEYS = trust env_var_get("EXTRA_TRUSTED_PUBLIC_KEYS")
+
+    let nix_root = get_nix_root()
+
+    if EXTRA_FEATURES != "":
+        args += [ "--extra-experimental-features", EXTRA_FEATURES ]
+
+    if EXTRA_SUBSTITUTERS != "":
+        args += [ "--extra-substituters", EXTRA_SUBSTITUTERS ]
+
+    if EXTRA_TRUSTED_PUBLIC_KEYS != "":
+        args += [ "--extra-trusted-public-keys", EXTRA_TRUSTED_PUBLIC_KEYS ]
+
+    if get_osname() != "Darwin" and not is_nix_installed():
+        args += [ "--store", trust $readlink -f {nix_root}$ ]
+
+    return args
+}
+
+/// Launch Nix with the proper environment variables for fakedir and OpenSSL.
+///
+/// This is required because macOS has no namespacing facility, and Nix will
+/// not attempt to use the system-wide CA bundle by default. This function
+/// addresses both issues.
+///
+/// **This function does not return.**
+fun launch_darwin_workaround(name: Text, nix_path: Text, args: [Text]): Null
+{
+    let cache_root = get_cache_root()
+    let nix_root = get_nix_root()
+
+    let fakedir_path = "{cache_root}/nix-deps/lib/libfakedir.dylib"
+
+    trust env_var_set("FAKEDIR_PATTERN", "/nix")
+    trust env_var_set("FAKEDIR_TARGET", "{nix_root}/nix")
+
+    trust $export FAKEDIR_PATTERN FAKEDIR_TARGET$
+
+    // We need to ensure fakedir gets propagated into child processes as well.
+    // Unfortunately, this requires us to disable the Nix sandbox entirely.
+    trust $ _NIX_TEST_NO_SANDBOX=1 \
+            DYLD_INSERT_LIBRARIES="{fakedir_path}" \
+            DYLD_LIBRARY_PATH="{cache_root}/nix-deps/lib" \
+                exec -a {name} {nix_path} "{args}"$
+}
+
+/// Launch the command referred to by name from within a Nix shell.
+///
+/// This allows our script to be used as an alias for developer utilities.
+///
+/// ### Arguments:
+/// - `nix_path`: Path to the Nix executable to use (local or installed)
+/// - `cmd`: The name our script was called as
+/// - `extras`: Internal options to append to the Nix command line
+/// - `args`: Command line options to pass to the command
+fun launch_shell_command(nix_path: Text, cmd: Text, extras: [Text], args: [Text]): Null
+{
+    let repo_root = get_repo_root()
+    let pwd = trust env_var_get("PWD")
+    let name = "nix-shell"
+    let shell_cmd = [ "{repo_root}/shell.nix", "--command", "{cmd} {args}" ]
+
+    if file_exists("{pwd}/flake.nix") {
+        name = "nix"
+        shell_cmd = [ "develop", pwd, "-c", cmd ] + args
+    } else: if file_exists("{repo_root}/flake.nix") {
+        name = "nix"
+        shell_cmd = [ "develop", repo_root, "-c", cmd ] + args
+    } else: if file_exists("{pwd}/shell.nix") {
+        shell_cmd = [ "{pwd}/shell.nix", "--command", "{cmd} {args}" ]
+    }
+
+    if get_osname() == "Darwin" and not is_nix_installed():
+        launch_darwin_workaround(name, nix_path, extras + shell_cmd)
+    else:
+        trust $exec -a {name} {nix_path} "{extras}" "{shell_cmd}"$
+}
+
+/// Launch Nix with options pulled from a file's contents.
+///
+/// This allows our script to be used as an interpreter, the same way
+/// Nix proper would.
+///
+/// ### Arguments:
+/// - `nix_path`: Path to the Nix executable to use (local or installed)
+/// - `file`: The filename to interpret with Nix
+/// - `extras`: Internal options to append to the Nix command line
+/// - `args`: Command line options to pass to the interpreted file
+fun launch_nix_shebang(nix_path: Text, file: Text, extras: [Text], args: [Text]): Null
+{
+    let shebang = ""
+    for i, line in lines(file) {
+        if i == 1 {
+            shebang = line
+            break
+        }
+    }
+
+    // No second shebang, not our business.
+    if not starts_with(shebang, "#!"):
+        return null
+    let bang_args = split(slice(shebang, 2), " ")
+    let name = array_shift(bang_args)
+
+    // Find and inject script options into --command
+    for i, arg in bang_args {
+        if arg == "-i" {
+            bang_args[i] = "--command"
+            bang_args[i+1] = "{bang_args[i+1]} {file} {args}"
+            break
+        }
+    }
+
+    if get_osname() == "Darwin" and not is_nix_installed():
+        launch_darwin_workaround(name, nix_path, extras + bang_args)
+    else:
+        trust $exec -a {name} {nix_path} "{extras}" "{bang_args}"$
+}
+
+/// Launch Nix as a regular CLI.
+///
+/// **This function does not return.**
+pub fun launch_nix(self: Text, args: [Text]): Null
+{
+    let cache_root = get_cache_root()
+    let nix_root = get_nix_root()
+
+    let nix_path = "{cache_root}/nix-static"
+
+    let extras = populate_extras()
+    let name = array_last(split(self, "/"))
+
+    if starts_with(name, "nix-"):
+        trust unpack_channels()
+
+    if is_nix_installed() {
+        migrate_nix_store()
+        nix_path = "nix"
+    } else {
+        get_nix() failed {
+            bail("Failed to obtain Nix. Check your internet connection.")
+        }
+    }
+
+    trust $export NIX_SSL_CERT_FILE$
+
+    if file_exists(args[0]) and not ends_with(args[0], ".nix") {
+        let args_shebang = args
+        array_shift(args_shebang)
+        launch_nix_shebang(nix_path, args[0], extras, args_shebang)
+    }
+
+    if not starts_with(name, "nix") {
+        launch_shell_command(nix_path, name, extras, args)
+    }
+
+    if get_osname() == "Darwin" and not is_nix_installed():
+        launch_darwin_workaround(name, nix_path, extras + args)
+    else:
+        trust $exec -a {name} {nix_path} "{extras}" "{args}"$
+}

@@ -1,0 +1,52 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Build script for Autoconf-based dependencies
+
+import { env_var_set } from "std/env"
+
+import { pull_source_file } from "../resources.ab"
+import { get_cache_root } from "../platform.ab"
+
+import { pkg_exists, step_title, get_source_root } from "./common.ab"
+
+/// Build a dependency which uses Autoconf as its build system.
+///
+/// ### Arguments:
+/// - `lib_name`: The library to check for with `pkg-config`
+/// - `inc_prefix`: Where in the source tree the build headers are found
+pub fun build_autoconf_dep(lib_name: Text, inc_prefix: Text = ""): Null?
+{
+    let source_root = get_source_root()
+    let cache_root = get_cache_root()
+
+    let my_source = "{source_root}/{lib_name}"
+
+    step_title(lib_name)
+
+    if pkg_exists(lib_name):
+        return null
+
+    pull_source_file(lib_name, my_source)?
+
+    $( unset C_INCLUDE_PATH CPLUS_INCLUDE_PATH \
+    && cd {my_source} \
+    && ./configure --prefix={cache_root}/nix-deps \
+    && make && make install )$?
+}
+
+main(cmdl)
+{
+    if len(cmdl) < 5 {
+        echo "Usage: ./autoconf.sh <package> <inc_prefix>"
+        echo ""
+        echo "See builders/autoconf.ab and builders.ab for more info"
+        exit 1
+    }
+
+    let lib_name = cmdl[1]
+    let inc_prefix = cmdl[2]
+
+    trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
+    trust env_var_set("step_total", "1")
+    build_autoconf_dep(lib_name, inc_prefix)?
+}

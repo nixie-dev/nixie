@@ -63,6 +63,10 @@ class NixieScript:
     tarball: ResourceTarball = None
     fname: Path
 
+    # Guard value to prevent overrun since Amber scripts lack a default exit
+    GUARD = b'exit 0\ncat <<DONOTPARSE\n'
+
+    # Marker used by the script for self-seeking
     DELIMITER = b'-----BEGIN ARCHIVE SECTION-----'
 
     def __init__(self, origin: NixieFeatures | Path):
@@ -91,6 +95,7 @@ class NixieScript:
 
         template = files('nixie.output').joinpath('nix-wrapped.sh.in').read_text()
         dest.write(str.encode(template))
+        dest.write(self.GUARD)
         dest.write(b'\n' + self.DELIMITER + b'\x1b[?1049h\n')
         # We need to carry over any existing tarball object, since it holds
         # the previous version of the resource tarball, to transfer channels
@@ -99,5 +104,7 @@ class NixieScript:
             self.tarball = ResourceTarball(self.features)
         self.tarball.features = self.features
         self.tarball.writeInto(dest, Path(tmpdir))
-        dest.write(b'\x1b[?1049l \r\x1b[2K\x1b[37;2m# (tarball data)\x1b[0m')
+        dest.write(b'\x1b[?1049l \r\x1b[2K\x1b[37;2m')
+        dest.write(b'# (tarball data)')
+        dest.write(b'\x1b[0m')
 

@@ -1,7 +1,7 @@
 { nixpkgs     ? <nixpkgs>
   # Nixpkgs import (from flake)
 
-, nix-source   ? builtins.fetchGit "https://github.com/nixos/nix"
+, nix-source  ? builtins.fetchGit "https://github.com/nixos/nix"
   # Nix packages source
 
 , fakedir     ? builtins.fetchGit "https://github.com/thesola10/fakedir"

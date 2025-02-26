@@ -5,3 +5,6 @@ features
 work
 __pycache__
 result
+nixie/output/nix-wrapped.sh.in
+src/docs
+src/**/*.sh

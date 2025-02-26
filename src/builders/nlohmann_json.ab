@@ -1,0 +1,40 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Builder for NLohmann's JSON library
+
+import { env_var_set } from "std/env"
+import { file_write } from "std/fs"
+
+import { pull_source_file } from "../resources.ab"
+import { get_cache_root } from "../platform.ab"
+
+import { pkg_exists, step_title, get_source_root } from "./common.ab"
+
+/// This is the core function for the NLohmann JSON library.
+pub fun build_nlohmann_json()
+{
+    let source_root = get_source_root()
+    let cache_root = get_cache_root()
+
+    step_title("nlohmann_json")
+
+    if pkg_exists("nlohmann_json"):
+        return 0
+
+    pull_source_file("nlohmann_json", "{source_root}/nlohmann_json")?
+
+    let version = trust $grep "^version:" {source_root}/nlohmann_json/wsjcpp.yml | cut -d '"' -f 2 | cut -d 'v' -f 2$
+
+    file_write("{cache_root}/nix-deps/lib/pkgconfig/nlohmann_json.pc",
+"Name: nlohmann_json
+Version: {version}
+Description: JSON for Modern C++
+Cflags: -I{source_root}/nlohmann_json/include")?
+}
+
+main(cmdl)
+{
+    trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
+    trust env_var_set("step_total", "1")
+    build_nlohmann_json()?
+}

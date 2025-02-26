@@ -1,0 +1,73 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Builder for OpenSSL
+
+import { env_var_test, env_var_set } from "std/env"
+import { split_lines }               from "std/text"
+
+import { pull_source_file }            from "../resources.ab"
+import { get_dll_ext, get_cache_root } from "../platform.ab"
+
+import { pkg_exists, step_title, get_source_root } from "./common.ab"
+
+/// Scans through and builds generated headers required for building OpenSSL.
+///
+/// For some reason the OpenSSL Makefile does not specify dependencies to those
+/// targets, meaning we cannot simply `make libcrypto.so`.
+fun make_headers()
+{
+    for header in split_lines(trust $grep ".*\\.h:" ./Makefile | cut -f 1 -d :$) {
+        $make {header}$?
+    }
+}
+
+/// This function runs within the source directory, in a subshell.
+fun build_openssl_inner()
+{
+    let dll_ext = get_dll_ext()
+    let cache_root = get_cache_root()
+
+    trust $chmod +x ./config$
+
+    $./config$?
+    make_headers()?
+    $make libcrypto.{dll_ext} libcrypto.pc$?
+
+    // Building libssl is:
+    // - hard
+    // - broken
+    // - a very bad idea anyway
+    // so we're performing the install ourselves
+    trust $cp ./libcrypto.* {cache_root}/nix-deps/lib/$
+    trust $cp ./libcrypto.pc {cache_root}/nix-deps/lib/pkgconfig$
+    trust $cp -r ./include {cache_root}/nix-deps/$
+}
+
+/// This is the core function for the OpenSSL builder.
+///
+/// It exports the `OPENSSL_LIBS` and `OPENSSL_CFLAGS` variables.
+pub fun build_openssl()
+{
+    let source_root = get_source_root()
+    let cache_root = get_cache_root()
+
+    step_title("libcrypto")
+
+    if pkg_exists("libcrypto"):
+        return 0
+    if env_var_test("OPENSSL_LIBS") and env_var_test("OPENSSL_CFLAGS"):
+        return 0
+
+    pull_source_file("openssl", "{source_root}/openssl")?
+
+    // Using a subshell ensures we aren't cd elsewhere on failure
+    $(cd {source_root}/openssl && {nameof build_openssl_inner})$?
+}
+
+main(cmdl)
+{
+    trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
+    trust env_var_set("step_total", "1")
+    build_openssl()?
+}
+
