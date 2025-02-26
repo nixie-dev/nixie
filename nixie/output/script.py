@@ -80,7 +80,7 @@ class NixieScript:
             self.fname = origin
             with open(origin, mode='rb') as f:
                 finddel = lambda b: b[:len(self.DELIMITER)] == self.DELIMITER
-                lines = f.readlines(64000)
+                lines = f.readlines(256000)
                 start = next((i for i, e in enumerate(lines) if finddel(e)))
                 off = reduce(operator.add, [len(l) for l in lines[:start+1]])
                 f.seek(off, 0)
