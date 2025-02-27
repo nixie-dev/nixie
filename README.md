@@ -1,9 +1,9 @@
 ![Nixie](https://raw.githubusercontent.com/nixie-dev/nixie/master/.github/logo.svg#gh-light-mode-only)
 ![Nixie](https://raw.githubusercontent.com/nixie-dev/nixie/master/.github/logo-dark.svg#gh-dark-mode-only)
 
-## DISCLAIMER
-
-Nixie is currently alpha software, provided as-is with no guarantee. The builder and generated scripts are subject to change, and the current feature set is not to be considered final.
+> [!WARNING]
+>
+> Nixie is currently alpha software, provided as-is with no guarantee. The builder and generated scripts are subject to change, and the current feature set is not to be considered final.
 
 ---
 
