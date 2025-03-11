@@ -1,0 +1,5 @@
+[dependencies]
+"github.com/nixie-dev/amber-nar" = "master"
+
+[dev-dependencies]
+"github.com/lens0021/testchamber" = "main"

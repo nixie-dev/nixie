@@ -8,3 +8,5 @@ result
 nixie/output/nix-wrapped.sh.in
 src/docs
 src/**/*.sh
+jurrasic_park
+**/github.com

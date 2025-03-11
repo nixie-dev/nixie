@@ -58,4 +58,5 @@ jobs:
         run: |
           nix --extra-platforms aarch64-linux build .#static-bins
           cachix push nix-wrap $(nix eval --raw .#static-bins)
-          cachix pin nix-wrap binaries $(nix eval --raw .#static-bins) --keep-forever
+          cachix pin nix-wrap binaries $(nix eval --raw .#static-bins) --keep-forever \
+            $(for f in `cat $(nix eval --raw .#static-bins)/filelist`; do echo -n "--artifact $f "; done)
