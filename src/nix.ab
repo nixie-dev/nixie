@@ -9,8 +9,8 @@ import { array_last, array_shift }                from "std/array"
 
 import { enter_alt_buffer, set_title, teardown }  from "./term.ab"
 import { bail, untar, exists_newer, get_self }    from "./common.ab"
-import { get_osname, get_system, get_cache_root
-       , get_nix_root, get_repo_root }            from "./platform.ab"
+import { get_osname, get_system, get_cache_root, get_nix_root
+       , get_repo_root, check_sandbox }           from "./platform.ab"
 import { pull_binary }                            from "./resources.ab"
 import { try_build_nix }                          from "./builders.ab"
 
@@ -286,6 +286,9 @@ pub fun launch_nix(self: Text, args: [Text]): Null
     } else {
         get_nix() failed {
             bail("Failed to obtain Nix. Check your internet connection.")
+        }
+        if not check_sandbox() {
+            bail("Issues that prevent the Nix sandbox from working have been detected.")
         }
     }
 

@@ -3,6 +3,7 @@
 // Environment-specific data retrieval utilities
 
 import { env_var_get, echo_warning } from "std/env"
+import { file_read }                 from "std/fs"
 import { split, join }               from "std/text"
 import { array_pop }                 from "std/array"
 
@@ -83,4 +84,37 @@ pub fun get_repo_root(): Text
         echo_warning("Failed to find current Git repository, using script parent directory.")
         return self_dir
     }
+}
+
+fun read_sysctl(path: Text): Text?
+{
+    return silent file_read("/proc/sys/{path}")?
+}
+
+/// Return True if the system is capable of running the unprivileged Nixie
+/// sandbox, False otherwise.
+pub fun check_sandbox(): Bool
+{
+    let osname = get_osname()
+
+    if osname == "Linux" {
+        // Recent 6.x kernels lack this control as the feature is always enabled.
+        if trust read_sysctl("kernel/unprivileged_userns_clone") == "0" {
+            echo_warning("Unprivileged sandboxes are not allowed on this system.")
+            echo_warning("Running the following command as root may fix the issue:")
+            echo "    sysctl kernel.unprivileged_userns_clone=1"
+            return false
+        }
+        // This control will only exist if AppArmor is active.
+        if trust read_sysctl("kernel/apparmor_restrict_unprivileged_userns") == "1" {
+            echo_warning("AppArmor is restricting unprivileged sandboxes on this system.")
+            echo_warning("Running the following command as root may fix the issue:")
+            echo "    sysctl kernel.apparmor_restrict_unprivileged_userns=0"
+            return false
+        }
+    } else {
+        return true
+    }
+
+    return true
 }
