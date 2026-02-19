@@ -62,7 +62,7 @@ main(cmdl)
     load_features()
     catch_args(args)
 
-    let self = array_shift(args)
+    let self = trust array_shift(args)
 
     // Check for alternate OpenSSL/LibreSSL certificate paths (fixes #6)
     if {

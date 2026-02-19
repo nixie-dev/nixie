@@ -1,7 +1,7 @@
 { description = "Put Nix in everything!";
 
   inputs.nixpkgs.url = github:nixos/nixpkgs;
-  inputs.amber.url = github:thesola10/amber/nameof-function;
+  inputs.amber.url = github:amber-lang/amber;
   inputs.nix.url = github:nixos/nix/2.26.2;
   inputs.fakedir =
     { url = github:nixie-dev/fakedir;

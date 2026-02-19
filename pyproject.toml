@@ -31,7 +31,7 @@ packages = [ "nixie" ]
 [[tool.hatch.build.hooks.build-scripts.scripts]]
 out_dir = "nixie/output"
 commands = [
-    "amber build src/main.ab nix-wrapped.sh.in --minify"
+    "AMBER_HEADER=src/AMBER_HEADER amber build src/main.ab nix-wrapped.sh.in --minify"
 ]
 artifacts = [
     "nix-wrapped.sh.in"

@@ -62,8 +62,8 @@ pub fun try_build_nix()
 
     trust env_var_set("step_total", "9")
 
-    dir_create(get_source_root())
-    dir_create("{cache_root}/nix-deps/lib/pkgconfig")
+    trust dir_create(get_source_root())
+    trust dir_create("{cache_root}/nix-deps/lib/pkgconfig")
 
     build_openssl()?
     build_boost()?
