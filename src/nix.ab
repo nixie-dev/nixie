@@ -188,7 +188,7 @@ fun launch_darwin_workaround(name: Text, nix_path: Text, args: [Text]): Null
     trust $ _NIX_TEST_NO_SANDBOX=1 \
             DYLD_INSERT_LIBRARIES="{fakedir_path}" \
             DYLD_LIBRARY_PATH="{cache_root}/nix-deps/lib" \
-                exec -a {name} {nix_path} {args}$
+                exec -a {name} "{nix_path}" "{args}"$
 }
 
 /// Launch the command referred to by name from within a Nix shell.
@@ -220,7 +220,7 @@ fun launch_shell_command(nix_path: Text, cmd: Text, extras: [Text], args: [Text]
     if get_osname() == "Darwin" and not is_nix_installed():
         launch_darwin_workaround(name, nix_path, extras + shell_cmd)
     else:
-        trust $exec -a {name} {nix_path} {extras} {shell_cmd}$
+        trust $exec -a {name} {nix_path} "{extras}" "{shell_cmd}"$
 }
 
 /// Launch Nix with options pulled from a file's contents.
@@ -261,7 +261,7 @@ fun launch_nix_shebang(nix_path: Text, file: Text, extras: [Text], args: [Text])
     if get_osname() == "Darwin" and not is_nix_installed():
         launch_darwin_workaround(name, nix_path, extras + bang_args)
     else:
-        trust $exec -a {name} {nix_path} {extras} {bang_args}$
+        trust $exec -a {name} {nix_path} "{extras}" "{bang_args}"$
 }
 
 /// Launch Nix as a regular CLI.
@@ -304,5 +304,5 @@ pub fun launch_nix(self: Text, args: [Text]): Null
     if get_osname() == "Darwin" and not is_nix_installed():
         launch_darwin_workaround(name, nix_path, extras + args)
     else:
-        trust $exec -a {name} {nix_path} {extras} {args}$
+        trust $exec -a {name} {nix_path} "{extras}" "{args}"$
 }
