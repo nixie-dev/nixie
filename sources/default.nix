@@ -1,6 +1,6 @@
 { stdenv, boost, openssl, lowdown, nlohmann_json, brotli, libsodium, editline
 , gnutar, coreutils, findutils, python3, nix, libarchive
-, automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config
+, automake, autoconf-archive, autoconf, m4, bc, libtool, pkg-config, perl
 # External source for Nix
 , nix-source ? nix.src
 , ... }:
@@ -22,6 +22,7 @@ let
         bc
         libtool
         pkg-config
+        perl
       ];
 
       dontBuild = true;
@@ -64,10 +65,10 @@ let
   srcs_simple =
     [ openssl
       lowdown
-      libsodium
     ];
   srcs_dir =
     [ nlohmann_json
+      libsodium
     ];
   srcs_configured =
     [ nix_configured_src
