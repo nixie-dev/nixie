@@ -75,7 +75,7 @@ pub fun get_cache_root(): Text
 pub fun get_repo_root(): Text
 {
     let self_a = split(get_self(), "/")
-    array_pop(self_a)
+    trust array_pop(self_a)
 
     let self_dir = "/" + join(self_a, "/")
 
