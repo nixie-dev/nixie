@@ -27,7 +27,7 @@ def _cmd(console: Console, nocommand=False, **args):
                 Path('.').rglob('*.nix').send(None)
                 outn = './nix-shell'
                 skipgen = True
-            except StopIteration:
+            except:
                 skipgen = False
                 outn = './nix'
         else:

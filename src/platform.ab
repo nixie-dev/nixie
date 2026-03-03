@@ -58,14 +58,19 @@ pub fun get_nix_root(): Text
 }
 
 /// Return the path to the user's cache directory on the current system.
+///
+/// Will create the directory in the rare case where it does not exist.
 pub fun get_cache_root(): Text
 {
     let userhome = trust env_var_get("HOME")
     let osname = get_osname()
+    let result = ""
     if {
-        osname == "Darwin": return "{userhome}/Library/Caches"
-        else:               return "{userhome}/.cache"
+        osname == "Darwin": result = "{userhome}/Library/Caches"
+        else:               result = "{userhome}/.cache"
     }
+    trust $mkdir -p {result}$
+    return result
 }
 
 /// Return the path to the root of the Git repository the script is located in.

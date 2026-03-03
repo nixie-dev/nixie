@@ -39,7 +39,7 @@ def eval_latest_sources(args: dict, st = None):
         except RuntimeError as e:
             srcs_eval = _rsrc_fallback('srcs', e)
     else:
-        srcs_eval = args['sources_derivation']
+        srcs_eval = nix.hashify(args['sources_derivation'])
     if args['binaries_derivation'] is None:
         try:
             bins_eval = nix.flake_eval(nix.EXPR_NIXIE_BINARIES)
@@ -48,17 +48,20 @@ def eval_latest_sources(args: dict, st = None):
         except RuntimeError as e:
             bins_eval = _rsrc_fallback('bins', e)
     else:
-        bins_eval = args['binaries_derivation']
+        bins_eval = nix.hashify(args['binaries_derivation'])
     debug(f"Sources derivation: {srcs_eval}")
     debug(f"Binaries derivation: {bins_eval}")
     return srcs_eval, bins_eval
 
 def _tmplink(tdir: Path, drv: str):
     locdrv = list(Path('/nix/store/').glob(f'{drv}*'))
+    target = tdir.joinpath(drv)
     if len(locdrv) == 0:
         error('Derivation could not be found locally. Check your Internet connection and supplied derivation hash then try again.')
     else:
-        tdir.joinpath('{drv}').symlink_to(locdrv[0])
+        target.rmdir() # fetchCachix may have left an empty dir
+        target.symlink_to(locdrv[0])
+        debug(f"Created symlink: {drv} -> {locdrv[0]}")
 
 def prefetch_resources(tdir: Path,
                        feats: script.NixieFeatures,

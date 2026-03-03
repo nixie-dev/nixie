@@ -35,6 +35,10 @@
         libfakedir = fakedir.packages.${system}.fakedir;
       } else {});
 
+      checks = {
+        rootless = pkgs.callPackage ./tests/rootless.nix { inherit (self.packages.${system}) nixie sources static-bins; };
+      };
+
       devShells = {
         default = pkgs.mkShell {
           # These dependencies aren't involved in the build process, but are

@@ -36,13 +36,13 @@ def get_appcache():
     cach.mkdir(exist_ok=True, parents=True)
     return cach
 
-def mktmp() -> str:
+def mktmp() -> Path:
     '''Create a temporary work directory and hook its deletion at exit.
     '''
     tdir = tempfile.mkdtemp(prefix='nixie-')
     cleanup = lambda: shutil.rmtree(tdir)
     atexit.register(cleanup)
-    return tdir
+    return Path(tdir)
 
 def pick(prompt: str, opts, open_ended = False, **ws):
     '''Pick from a selection of items, displaying a leading prompt.

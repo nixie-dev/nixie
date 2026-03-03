@@ -120,8 +120,11 @@ pub fun untar(member: Text, dump: Bool = false): Text?
     }
 
     trust $rm {archive}$
-
-    return tar_out
+    if dump {
+        return tar_out
+    } else {
+        return member
+    }
 }
 
 /// Checks that a list of commands are available at runtime.

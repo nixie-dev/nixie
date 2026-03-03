@@ -1,5 +1,5 @@
 { lib, python3Packages, fetchPypi, nix-index, nix, hatch, amber-lang
-, ... }:
+, callPackage, ... }:
 
 let
   nixie_ver = "2026.03-a1";
