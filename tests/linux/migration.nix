@@ -1,4 +1,4 @@
-{ pkgs, nixie, sources, static-bins }:
+{ pkgs, nixie, sources, static-bins, ... }:
 pkgs.testers.nixosTest {
   name = "nixie-migrates-rootless-paths";
   nodes = {

@@ -5,21 +5,10 @@
 import { env_var_test, env_var_set } from "std/env"
 import { split_lines }               from "std/text"
 
-import { pull_source_file }            from "../resources.ab"
 import { get_dll_ext, get_cache_root } from "../platform.ab"
+import { pull_source_file }            from "../resources.ab"
 
 import { pkg_exists, step_title, get_source_root } from "./common.ab"
-
-/// Scans through and builds generated headers required for building OpenSSL.
-///
-/// For some reason the OpenSSL Makefile does not specify dependencies to those
-/// targets, meaning we cannot simply `make libcrypto.so`.
-fun make_headers()
-{
-    for header in split_lines(trust $grep ".*\\.h:" ./Makefile | cut -f 1 -d :$) {
-        $make {header}$?
-    }
-}
 
 /// This function runs within the source directory, in a subshell.
 fun build_openssl_inner()
@@ -30,7 +19,15 @@ fun build_openssl_inner()
     trust $chmod +x ./config$
 
     $./config$?
-    make_headers()?
+
+    // For some reason the OpenSSL Makefile does not specify dependencies to those
+    // targets, meaning we cannot simply `make libcrypto.so`.
+    for header in split_lines(trust $grep ".*\\.h:" ./Makefile | cut -f 1 -d :$) {
+        $make {header}$?
+    }
+    for hinc in split_lines(trust $grep ".*\\.inc:" ./Makefile | cut -f 1 -d :$) {
+        $make {hinc}$?
+    }
     $make libcrypto.{dll_ext} libcrypto.pc$?
 
     // Building libssl is:
@@ -50,6 +47,9 @@ pub fun build_openssl()
 {
     let source_root = get_source_root()
     let cache_root = get_cache_root()
+    // Workaround for amber-lang/amber#1043
+    let dll_ext = get_dll_ext()
+    let _ = split_lines("hello")
 
     step_title("libcrypto")
 
