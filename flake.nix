@@ -35,9 +35,13 @@
         libfakedir = fakedir.packages.${system}.fakedir;
       } else {});
 
-      checks = {
-        rootless = pkgs.callPackage ./tests/rootless.nix { inherit (self.packages.${system}) nixie sources static-bins; };
-      };
+      checks =
+        let callTest = f: pkgs.callPackage f { inherit (self.packages.${system}) nixie sources static-bins; };
+        in {
+          generation = callTest ./tests/generation.nix;
+          rootless = callTest ./tests/rootless.nix;
+          migration = callTest ./tests/migration.nix;
+        };
 
       devShells = {
         default = pkgs.mkShell {

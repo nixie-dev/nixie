@@ -4,7 +4,7 @@
 
 import { array_remove_at }      from "std/array"
 import { starts_with, slice }   from "std/text"
-import { echo_error, echo_warning, env_var_get, env_var_set } from "std/env"
+import { echo_error, env_var_get, env_var_set } from "std/env"
 import { dir_create }           from "std/fs"
 
 import { untar }                                        from "./common.ab"
@@ -63,16 +63,16 @@ fun cmd_cleanup()
 
 fun opt_ignore_system()
 {
-    echo_warning("Ignoring system-wide Nix for testing purposes.")
-    echo_warning("Re-run without the --nixie-ignore-system flag to import the single-user")
-    echo_warning("Nix store into the system store.")
+    trust $>&2 echo "Ignoring system-wide Nix for testing purposes."$
+    trust $>&2 echo "Re-run without the --nixie-ignore-system flag to import the single-user"$
+    trust $>&2 echo "Nix store into the system store."$
     trust env_var_set("nosystem", "1")
 }
 
 fun opt_no_precompiled()
 {
-    echo_warning("Ignoring precompiled binaries for testing purposes.")
-    echo_warning("This implies --nixie-ignore-system.")
+    trust $>&2 echo "Ignoring precompiled binaries for testing purposes."$
+    trust $>&2 echo "This implies --nixie-ignore-system."$
     trust env_var_set("nobins", "1")
     trust env_var_set("nosystem", "1")
 }

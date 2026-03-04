@@ -102,15 +102,16 @@ fun migrate_nix_store()
 {
     let nix_root = ""
 
-    nix_root = $readlink -f {get_nix_root()}$ failed {
+    nix_root = trust $readlink -f {get_nix_root()}$
+    if status != 0 {
         nix_root = get_nix_root()
     }
 
     if not dir_exists("{nix_root}/nix/store"):
         return 0
 
-    echo "Migrating Nix store to system-wide install..."
-    trust $nix copy --from {nix_root} --all --no-check-sigs$
+    trust $>&2 echo "Migrating Nix store to system-wide install..."$
+    trust $nix --extra-experimental-features nix-command copy --from {nix_root} --all --no-check-sigs$
     if status == 0 {
         trust $chmod -R +wx {nix_root} && rm -rf {nix_root}$
     }

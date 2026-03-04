@@ -56,7 +56,6 @@ fun load_features(): Null
 
 main(cmdl)
 {
-    // In Amber, cmdl is read-only, but catch_args needs read-write
     args = cmdl
 
     load_features()

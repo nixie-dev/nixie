@@ -51,10 +51,13 @@ pub fun get_nix_root(): Text
 {
     let userhome = trust env_var_get("HOME")
     let osname = get_osname()
+    let result = ""
     if {
-        osname == "Darwin": return "{userhome}/Library/Nix"
-        else:               return "{userhome}/.local/share/nix/root"
+        osname == "Darwin": result = "{userhome}/Library/Nix"
+        else:               result = "{userhome}/.local/share/nix/root"
     }
+    trust $mkdir -p {result}$
+    return result
 }
 
 /// Return the path to the user's cache directory on the current system.

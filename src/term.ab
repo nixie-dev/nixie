@@ -41,19 +41,19 @@ fun can_set_title(): Bool
 pub fun set_title(title: Text = ""): Null
 {
     if can_set_title():
-        echo tsl + title + fsl
+        trust $>&2 echo {tsl + title + fsl}$
 }
 
 /// Create and enter an alt-buffer in the terminal.
 pub fun enter_alt_buffer(): Null
 {
-    echo smcup
+    trust $>&2 echo {smcup}$
 }
 
 /// Close the alt-buffer in the terminal.
 pub fun exit_alt_buffer(): Null
 {
-    echo rmcup
+    trust $>&2 echo {rmcup}$
 }
 
 /// Shorthand to exit alt-buffer and clear terminal title.

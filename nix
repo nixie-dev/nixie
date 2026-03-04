@@ -5,35 +5,35 @@
 
 [ "$EUID" -ne 0 ] && { { command -v sudo >/dev/null 2>&1 && __sudo=sudo; } || { command -v doas >/dev/null 2>&1 && __sudo=doas; }; }
 split__5_v0() {
-    local text_259="${1}"
-    local delimiter_260="${2}"
-    local result_261=()
-    IFS="${delimiter_260}" read -rd '' -a result_261 < <(printf %s "$text_259")
+    local text_253="${1}"
+    local delimiter_254="${2}"
+    local result_255=()
+    IFS="${delimiter_254}" read -rd '' -a result_255 < <(printf %s "$text_253")
     __status=$?
-    ret_split5_v0=("${result_261[@]}")
+    ret_split5_v0=("${result_255[@]}")
     return 0
 }
 
 join__8_v0() {
-    local list_267=("${!1}")
-    local delimiter_268="${2}"
+    local list_261=("${!1}")
+    local delimiter_262="${2}"
     local command_1
-    command_1="$(IFS="${delimiter_268}" ; printf "%s
-" "${list_267[*]}")"
+    command_1="$(IFS="${delimiter_262}" ; printf "%s
+" "${list_261[*]}")"
     __status=$?
     ret_join8_v0="${command_1}"
     return 0
 }
 
 parse_int__14_v0() {
-    local text_2760="${1}"
-    [ -n "${text_2760}" ] && [ "${text_2760}" -eq "${text_2760}" ] 2>/dev/null
+    local text_2802="${1}"
+    [ -n "${text_2802}" ] && [ "${text_2802}" -eq "${text_2802}" ] 2>/dev/null
     __status=$?
     if [ "${__status}" != 0 ]; then
         ret_parse_int14_v0=''
         return "${__status}"
     fi
-    ret_parse_int14_v0="${text_2760}"
+    ret_parse_int14_v0="${text_2802}"
     return 0
 }
 
@@ -56,55 +56,55 @@ starts_with__23_v0() {
 }
 
 ends_with__24_v0() {
-    local text_2842="${1}"
-    local suffix_2843="${2}"
-    [[ "${text_2842}" == *"${suffix_2843}" ]]
+    local text_2885="${1}"
+    local suffix_2886="${2}"
+    [[ "${text_2885}" == *"${suffix_2886}" ]]
     __status=$?
     ret_ends_with24_v0="$(( __status == 0 ))"
     return 0
 }
 
 slice__25_v0() {
-    local text_245="${1}"
-    local index_246="${2}"
-    local length_247="${3}"
-    local result_248=""
-    if [ "$(( length_247 == 0 ))" != 0 ]; then
-        local __length_2="${text_245}"
-        length_247="$(( ${#__length_2} - index_246 ))"
+    local text_238="${1}"
+    local index_239="${2}"
+    local length_240="${3}"
+    local result_241=""
+    if [ "$(( length_240 == 0 ))" != 0 ]; then
+        local __length_2="${text_238}"
+        length_240="$(( ${#__length_2} - index_239 ))"
     fi
-    if [ "$(( length_247 <= 0 ))" != 0 ]; then
-        ret_slice25_v0="${result_248}"
+    if [ "$(( length_240 <= 0 ))" != 0 ]; then
+        ret_slice25_v0="${result_241}"
         return 0
     fi
-    result_248="${text_245: ${index_246}: ${length_247}}"
+    result_241="${text_238: ${index_239}: ${length_240}}"
     __status=$?
-    ret_slice25_v0="${result_248}"
+    ret_slice25_v0="${result_241}"
     return 0
 }
 
 dir_exists__41_v0() {
-    local path_252="${1}"
-    [ -d "${path_252}" ]
+    local path_245="${1}"
+    [ -d "${path_245}" ]
     __status=$?
     ret_dir_exists41_v0="$(( __status == 0 ))"
     return 0
 }
 
 file_exists__42_v0() {
-    local path_284="${1}"
-    [ -f "${path_284}" ]
+    local path_278="${1}"
+    [ -f "${path_278}" ]
     __status=$?
     ret_file_exists42_v0="$(( __status == 0 ))"
     return 0
 }
 
 file_write__44_v0() {
-    local path_2830="${1}"
-    local content_2831="${2}"
+    local path_2873="${1}"
+    local content_2874="${2}"
     local command_3
     command_3="$(printf '%s
-' "${content_2831}" > "${path_2830}")"
+' "${content_2874}" > "${path_2873}")"
     __status=$?
     if [ "${__status}" != 0 ]; then
         ret_file_write44_v0=''
@@ -115,11 +115,11 @@ file_write__44_v0() {
 }
 
 dir_create__47_v0() {
-    local path_251="${1}"
-    dir_exists__41_v0 "${path_251}"
+    local path_244="${1}"
+    dir_exists__41_v0 "${path_244}"
     local ret_dir_exists41_v0__87_12="${ret_dir_exists41_v0}"
     if [ "$(( ! ret_dir_exists41_v0__87_12 ))" != 0 ]; then
-        mkdir -p "${path_251}"
+        mkdir -p "${path_244}"
         __status=$?
         if [ "${__status}" != 0 ]; then
             ret_dir_create47_v0=''
@@ -129,65 +129,65 @@ dir_create__47_v0() {
 }
 
 array_last__74_v0() {
-    local array_2754=("${!1}")
-    local __length_4=("${array_2754[@]}")
-    local index_2755="$(( ${#__length_4[@]} - 1 ))"
-    if [ "$(( index_2755 < 0 ))" != 0 ]; then
+    local array_2796=("${!1}")
+    local __length_4=("${array_2796[@]}")
+    local index_2797="$(( ${#__length_4[@]} - 1 ))"
+    if [ "$(( index_2797 < 0 ))" != 0 ]; then
         ret_array_last74_v0=''
         return 1
     fi
-    ret_array_last74_v0="${array_2754[${index_2755}]}"
+    ret_array_last74_v0="${array_2796[${index_2797}]}"
     return 0
 }
 
 array_pop__77_v0() {
-    local array_263=("${1}")
-    eval "local array_263_deref_84=(\"\${${array_263[0]}[@]}\")"
-    local __length_5=("${array_263_deref_84[@]}")
-    local length_264="${#__length_5[@]}"
-    local index_265="$(( length_264 - 1 ))"
-    if [ "$(( index_265 < 0 ))" != 0 ]; then
+    local array_257=("${1}")
+    eval "local array_257_deref_84=(\"\${${array_257[0]}[@]}\")"
+    local __length_5=("${array_257_deref_84[@]}")
+    local length_258="${#__length_5[@]}"
+    local index_259="$(( length_258 - 1 ))"
+    if [ "$(( index_259 < 0 ))" != 0 ]; then
         ret_array_pop77_v0=''
         return 1
     fi
-    eval "local array_263_deref_85=\"\${${array_263[0]}[${index_265}]}\""
-    local element_266="${array_263_deref_85}"
-    local slice_upper_6="${index_265}"
+    eval "local array_257_deref_85=\"\${${array_257[0]}[${index_259}]}\""
+    local element_260="${array_257_deref_85}"
+    local slice_upper_6="${index_259}"
     local slice_offset_7=0
     local slice_offset_7=$((${slice_offset_7} > 0 ? ${slice_offset_7} : 0))
     local slice_length_8="$(( slice_upper_6 - slice_offset_7 ))"
     local slice_length_8=$((${slice_length_8} > 0 ? ${slice_length_8} : 0))
-    eval "local array_263_deref_86=(\"\${${array_263[0]}[@]:\${slice_offset_7}:\${slice_length_8}}\")"
-    eval "${array_263}=(\"\${array_263_deref_86[@]}\")"
-    ret_array_pop77_v0="${element_266}"
+    eval "local array_257_deref_86=(\"\${${array_257[0]}[@]:\${slice_offset_7}:\${slice_length_8}}\")"
+    eval "${array_257}=(\"\${array_257_deref_86[@]}\")"
+    ret_array_pop77_v0="${element_260}"
     return 0
 }
 
 array_shift__78_v0() {
-    local array_279=("${1}")
-    eval "local array_279_deref_87=(\"\${${array_279[0]}[@]}\")"
-    local __length_9=("${array_279_deref_87[@]}")
-    local length_280="${#__length_9[@]}"
-    if [ "$(( length_280 == 0 ))" != 0 ]; then
+    local array_273=("${1}")
+    eval "local array_273_deref_87=(\"\${${array_273[0]}[@]}\")"
+    local __length_9=("${array_273_deref_87[@]}")
+    local length_274="${#__length_9[@]}"
+    if [ "$(( length_274 == 0 ))" != 0 ]; then
         ret_array_shift78_v0=''
         return 1
     fi
-    eval "local array_279_deref_88=\"\${${array_279[0]}[0]}\""
-    local element_281="${array_279_deref_88}"
-    local slice_upper_10="${length_280}"
+    eval "local array_273_deref_88=\"\${${array_273[0]}[0]}\""
+    local element_275="${array_273_deref_88}"
+    local slice_upper_10="${length_274}"
     local slice_offset_11=1
     local slice_offset_11=$((${slice_offset_11} > 0 ? ${slice_offset_11} : 0))
     local slice_length_12="$(( slice_upper_10 - slice_offset_11 ))"
     local slice_length_12=$((${slice_length_12} > 0 ? ${slice_length_12} : 0))
-    eval "local array_279_deref_89=(\"\${${array_279[0]}[@]:\${slice_offset_11}:\${slice_length_12}}\")"
-    eval "${array_279}=(\"\${array_279_deref_89[@]}\")"
-    ret_array_shift78_v0="${element_281}"
+    eval "local array_273_deref_89=(\"\${${array_273[0]}[@]:\${slice_offset_11}:\${slice_length_12}}\")"
+    eval "${array_273}=(\"\${array_273_deref_89[@]}\")"
+    ret_array_shift78_v0="${element_275}"
     return 0
 }
 
 env_var_test__119_v0() {
-    local name_2752="${1}"
-    [[ ! -z ${!name_2752+z} ]]
+    local name_2794="${1}"
+    [[ ! -z ${!name_2794+z} ]]
     __status=$?
     if [ "${__status}" != 0 ]; then
         ret_env_var_test119_v0=0
@@ -198,9 +198,9 @@ env_var_test__119_v0() {
 }
 
 env_var_set__121_v0() {
-    local name_272="${1}"
-    local val_273="${2}"
-    export $name_272="$val_273" 2> /dev/null
+    local name_266="${1}"
+    local val_267="${2}"
+    export $name_266="$val_267" 2> /dev/null
     __status=$?
     if [ "${__status}" != 0 ]; then
         ret_env_var_set121_v0=''
@@ -244,8 +244,8 @@ printf__130_v0() {
 }
 
 echo_warning__139_v0() {
-    local message_270="${1}"
-    local array_14=("${message_270}")
+    local message_264="${1}"
+    local array_14=("${message_264}")
     printf__130_v0 "\\x1b[1;3;97;43m%s\\x1b[0m
 " array_14[@]
 }
@@ -311,21 +311,24 @@ set_title__174_v0() {
     can_set_title__173_v0 
     local ret_can_set_title173_v0__43_8="${ret_can_set_title173_v0}"
     if [ "${ret_can_set_title173_v0__43_8}" != 0 ]; then
-        printf '%s\n' "${tsl_11}""${title_117}""${fsl_12}"
+        >&2 echo "${tsl_11}""${title_117}""${fsl_12}"
+        __status=$?
     fi
 }
 
 enter_alt_buffer__175_v0() {
-    printf '%s\n' "${smcup_13}"
+    >&2 echo ${smcup_13}
+    __status=$?
 }
 
 exit_alt_buffer__176_v0() {
-    printf '%s\n' "${rmcup_14}"
+    >&2 echo ${rmcup_14}
+    __status=$?
 }
 
 teardown__177_v0() {
-    local failure_348="${1}"
-    if [ "${failure_348}" != 0 ]; then
+    local failure_342="${1}"
+    if [ "${failure_342}" != 0 ]; then
         echo "Press any key to continue..."
         read -n 1
         __status=$?
@@ -367,10 +370,10 @@ else
     echo_error__140_v0 "This script must be run from an absolute or relative path." 1
 fi
 exists_newer__180_v0() {
-    local left_2758="${1}"
-    local right_2759="${2}"
+    local left_2800="${1}"
+    local right_2801="${2}"
     local command_23
-    command_23="$(stat -c %W ${left_2758})"
+    command_23="$(stat -c %W ${left_2800})"
     __status=$?
     parse_int__14_v0 "${command_23}"
     __status=$?
@@ -378,9 +381,9 @@ exists_newer__180_v0() {
         ret_exists_newer180_v0=0
         return 0
     fi
-    local left_time_2761="${ret_parse_int14_v0}"
+    local left_time_2803="${ret_parse_int14_v0}"
     local command_24
-    command_24="$(stat -c %W ${right_2759})"
+    command_24="$(stat -c %W ${right_2801})"
     __status=$?
     parse_int__14_v0 "${command_24}"
     __status=$?
@@ -388,8 +391,8 @@ exists_newer__180_v0() {
         ret_exists_newer180_v0=0
         return 0
     fi
-    local right_time_2762="${ret_parse_int14_v0}"
-    ret_exists_newer180_v0="$(( left_time_2761 >= right_time_2762 ))"
+    local right_time_2804="${ret_parse_int14_v0}"
+    ret_exists_newer180_v0="$(( left_time_2803 >= right_time_2804 ))"
     return 0
 }
 
@@ -456,8 +459,13 @@ untar__184_v0() {
     local tar_out_122="${command_26}"
     rm ${archive_119}
     __status=$?
-    ret_untar184_v0="${tar_out_122}"
-    return 0
+    if [ "${dump_113}" != 0 ]; then
+        ret_untar184_v0="${tar_out_122}"
+        return 0
+    else
+        ret_untar184_v0="${member_112}"
+        return 0
+    fi
 }
 
 check_deps__185_v0() {
@@ -465,8 +473,8 @@ check_deps__185_v0() {
     local missing_64=()
     for dep_65 in "${deps_63[@]}"; do
         is_command__124_v0 "${dep_65}"
-        local ret_is_command124_v0__136_16="${ret_is_command124_v0}"
-        if [ "$(( ! ret_is_command124_v0__136_16 ))" != 0 ]; then
+        local ret_is_command124_v0__139_16="${ret_is_command124_v0}"
+        if [ "$(( ! ret_is_command124_v0__139_16 ))" != 0 ]; then
             missing_64+=("${dep_65}")
         fi
     done
@@ -494,35 +502,35 @@ get_machine__196_v0() {
     local command_31
     command_31="$(uname -m)"
     __status=$?
-    local machine_2768="${command_31}"
-    if [ "$([ "_${machine_2768}" != "_arm64" ]; echo $?)" != 0 ]; then
+    local machine_2810="${command_31}"
+    if [ "$([ "_${machine_2810}" != "_arm64" ]; echo $?)" != 0 ]; then
         ret_get_machine196_v0="aarch64"
         return 0
     fi
-    ret_get_machine196_v0="${machine_2768}"
+    ret_get_machine196_v0="${machine_2810}"
     return 0
 }
 
 get_system__197_v0() {
     get_osname__195_v0 
-    local osname_2767="${ret_get_osname195_v0}"
+    local osname_2809="${ret_get_osname195_v0}"
     get_machine__196_v0 
-    local machine_2769="${ret_get_machine196_v0}"
-    ret_get_system197_v0="${osname_2767}.${machine_2769}"
+    local machine_2811="${ret_get_machine196_v0}"
+    ret_get_system197_v0="${osname_2809}.${machine_2811}"
     return 0
 }
 
 get_nix_root__199_v0() {
     env_var_get__122_v0 "HOME"
     __status=$?
-    local userhome_253="${ret_env_var_get122_v0}"
+    local userhome_246="${ret_env_var_get122_v0}"
     get_osname__195_v0 
-    local osname_254="${ret_get_osname195_v0}"
-    if [ "$([ "_${osname_254}" != "_Darwin" ]; echo $?)" != 0 ]; then
-        ret_get_nix_root199_v0="${userhome_253}/Library/Nix"
+    local osname_247="${ret_get_osname195_v0}"
+    if [ "$([ "_${osname_247}" != "_Darwin" ]; echo $?)" != 0 ]; then
+        ret_get_nix_root199_v0="${userhome_246}/Library/Nix"
         return 0
     else
-        ret_get_nix_root199_v0="${userhome_253}/.local/share/nix/root"
+        ret_get_nix_root199_v0="${userhome_246}/.local/share/nix/root"
         return 0
     fi
 }
@@ -530,45 +538,48 @@ get_nix_root__199_v0() {
 get_cache_root__200_v0() {
     env_var_get__122_v0 "HOME"
     __status=$?
-    local userhome_256="${ret_env_var_get122_v0}"
+    local userhome_249="${ret_env_var_get122_v0}"
     get_osname__195_v0 
-    local osname_257="${ret_get_osname195_v0}"
-    if [ "$([ "_${osname_257}" != "_Darwin" ]; echo $?)" != 0 ]; then
-        ret_get_cache_root200_v0="${userhome_256}/Library/Caches"
-        return 0
+    local osname_250="${ret_get_osname195_v0}"
+    local result_251=""
+    if [ "$([ "_${osname_250}" != "_Darwin" ]; echo $?)" != 0 ]; then
+        result_251="${userhome_249}/Library/Caches"
     else
-        ret_get_cache_root200_v0="${userhome_256}/.cache"
-        return 0
+        result_251="${userhome_249}/.cache"
     fi
+    mkdir -p ${result_251}
+    __status=$?
+    ret_get_cache_root200_v0="${result_251}"
+    return 0
 }
 
 get_repo_root__201_v0() {
     get_self__182_v0 
-    local ret_get_self182_v0__77_24="${ret_get_self182_v0}"
-    split__5_v0 "${ret_get_self182_v0__77_24}" "/"
-    local self_a_262=("${ret_split5_v0[@]}")
-    array_pop__77_v0 "self_a_262"
+    local ret_get_self182_v0__82_24="${ret_get_self182_v0}"
+    split__5_v0 "${ret_get_self182_v0__82_24}" "/"
+    local self_a_256=("${ret_split5_v0[@]}")
+    array_pop__77_v0 "self_a_256"
     __status=$?
-    join__8_v0 self_a_262[@] "/"
-    local ret_join8_v0__80_26="${ret_join8_v0}"
-    local self_dir_269="/""${ret_join8_v0__80_26}"
+    join__8_v0 self_a_256[@] "/"
+    local ret_join8_v0__85_26="${ret_join8_v0}"
+    local self_dir_263="/""${ret_join8_v0__85_26}"
     local command_32
-    command_32="$(git -C ${self_dir_269} rev-parse --show-toplevel)"
+    command_32="$(git -C ${self_dir_263} rev-parse --show-toplevel)"
     __status=$?
     if [ "${__status}" != 0 ]; then
         echo_warning__139_v0 "Failed to find current Git repository, using script parent directory."
-        ret_get_repo_root201_v0="${self_dir_269}"
+        ret_get_repo_root201_v0="${self_dir_263}"
         return 0
     fi
     ret_get_repo_root201_v0="${command_32}"
     return 0
 }
 
-cmd_help__215_v0() {
+cmd_help__214_v0() {
     env_var_get__122_v0 "NIXIE_VERSION"
     __status=$?
-    local __NIXIE_VERSION_250="${ret_env_var_get122_v0}"
-    echo "Nix wrapper script, generated by Nixie ${__NIXIE_VERSION_250}"
+    local __NIXIE_VERSION_243="${ret_env_var_get122_v0}"
+    echo "Nix wrapper script, generated by Nixie ${__NIXIE_VERSION_243}"
     printf '%s\n' ""
     echo "Available --nixie- options:"
     echo "  --nixie-help            Show this help message and exit."
@@ -579,7 +590,7 @@ cmd_help__215_v0() {
     exit 0
 }
 
-cmd_print_config__216_v0() {
+cmd_print_config__215_v0() {
     untar__184_v0 "features" 1
     __status=$?
     local ret_untar184_v0__32_16="${ret_untar184_v0}"
@@ -587,7 +598,7 @@ cmd_print_config__216_v0() {
     exit 0
 }
 
-cmd_extract__217_v0() {
+cmd_extract__216_v0() {
     dir_create__47_v0 "nixie"
     __status=$?
     cd "nixie" || exit
@@ -596,96 +607,101 @@ cmd_extract__217_v0() {
     exit 0
 }
 
-cmd_cleanup__218_v0() {
+cmd_cleanup__217_v0() {
     get_nix_root__199_v0 
-    local nix_root_255="${ret_get_nix_root199_v0}"
+    local nix_root_248="${ret_get_nix_root199_v0}"
     get_cache_root__200_v0 
-    local cache_root_258="${ret_get_cache_root200_v0}"
+    local cache_root_252="${ret_get_cache_root200_v0}"
     get_repo_root__201_v0 
-    local repo_root_271="${ret_get_repo_root201_v0}"
+    local repo_root_265="${ret_get_repo_root201_v0}"
     echo "Removing local Nix channels and build files..."
-    chmod -R +wx ${repo_root_271}/.nixie 2>/dev/null
+    chmod -R +wx ${repo_root_265}/.nixie 2>/dev/null
     __status=$?
-    rm -rf ${repo_root_271}/.nixie
+    rm -rf ${repo_root_265}/.nixie
     __status=$?
     echo "Removing user Nix store..."
-    chmod -R +wx ${nix_root_255} 2>/dev/null
+    chmod -R +wx ${nix_root_248} 2>/dev/null
     __status=$?
-    rm -rf ${nix_root_255}
+    rm -rf ${nix_root_248}
     __status=$?
     echo "Removing retrieved Nix binaries..."
-    rm -rf ${cache_root_258}/nix-static ${cache_root_258}/nix-lib ${cache_root_258}/nix-deps
+    rm -rf ${cache_root_252}/nix-static ${cache_root_252}/nix-lib ${cache_root_252}/nix-deps
     __status=$?
     exit 0
 }
 
-opt_ignore_system__219_v0() {
-    echo_warning__139_v0 "Ignoring system-wide Nix for testing purposes."
-    echo_warning__139_v0 "Re-run without the --nixie-ignore-system flag to import the single-user"
-    echo_warning__139_v0 "Nix store into the system store."
+opt_ignore_system__218_v0() {
+    >&2 echo "Ignoring system-wide Nix for testing purposes."
+    __status=$?
+    >&2 echo "Re-run without the --nixie-ignore-system flag to import the single-user"
+    __status=$?
+    >&2 echo "Nix store into the system store."
+    __status=$?
     env_var_set__121_v0 "nosystem" "1"
     __status=$?
 }
 
-opt_no_precompiled__220_v0() {
-    echo_warning__139_v0 "Ignoring precompiled binaries for testing purposes."
-    echo_warning__139_v0 "This implies --nixie-ignore-system."
+opt_no_precompiled__219_v0() {
+    >&2 echo "Ignoring precompiled binaries for testing purposes."
+    __status=$?
+    >&2 echo "This implies --nixie-ignore-system."
+    __status=$?
     env_var_set__121_v0 "nobins" "1"
     __status=$?
     env_var_set__121_v0 "nosystem" "1"
     __status=$?
 }
 
-notfound__221_v0() {
-    local cmd_274="${1}"
+notfound__220_v0() {
+    local cmd_268="${1}"
     env_var_get__122_v0 "0"
     __status=$?
-    local self_275="${ret_env_var_get122_v0}"
-    echo_error__140_v0 "No such option: --nixie-${cmd_274}. Run '${self_275} --nixie-help' for available options." 1
+    local self_269="${ret_env_var_get122_v0}"
+    echo_error__140_v0 "No such option: --nixie-${cmd_268}. Run '${self_269} --nixie-help' for available options." 1
 }
 
-eval_cmd__222_v0() {
-    local cmd_249="${1}"
-    if [ "$([ "_${cmd_249}" != "_help" ]; echo $?)" != 0 ]; then
-        cmd_help__215_v0 
-    elif [ "$([ "_${cmd_249}" != "_print-config" ]; echo $?)" != 0 ]; then
-        cmd_print_config__216_v0 
-    elif [ "$([ "_${cmd_249}" != "_extract" ]; echo $?)" != 0 ]; then
-        cmd_extract__217_v0 
-    elif [ "$([ "_${cmd_249}" != "_cleanup" ]; echo $?)" != 0 ]; then
-        cmd_cleanup__218_v0 
-    elif [ "$([ "_${cmd_249}" != "_ignore-system" ]; echo $?)" != 0 ]; then
-        opt_ignore_system__219_v0 
-    elif [ "$([ "_${cmd_249}" != "_no-precompiled" ]; echo $?)" != 0 ]; then
-        opt_no_precompiled__220_v0 
+eval_cmd__221_v0() {
+    local cmd_242="${1}"
+    if [ "$([ "_${cmd_242}" != "_help" ]; echo $?)" != 0 ]; then
+        cmd_help__214_v0 
+    elif [ "$([ "_${cmd_242}" != "_print-config" ]; echo $?)" != 0 ]; then
+        cmd_print_config__215_v0 
+    elif [ "$([ "_${cmd_242}" != "_extract" ]; echo $?)" != 0 ]; then
+        cmd_extract__216_v0 
+    elif [ "$([ "_${cmd_242}" != "_cleanup" ]; echo $?)" != 0 ]; then
+        cmd_cleanup__217_v0 
+    elif [ "$([ "_${cmd_242}" != "_ignore-system" ]; echo $?)" != 0 ]; then
+        opt_ignore_system__218_v0 
+    elif [ "$([ "_${cmd_242}" != "_no-precompiled" ]; echo $?)" != 0 ]; then
+        opt_no_precompiled__219_v0 
     else
-        notfound__221_v0 "${cmd_249}"
+        notfound__220_v0 "${cmd_242}"
     fi
 }
 
-catch_args__223_v0() {
-    local args_241=("${1}")
-    eval "local args_241_deref_90=(\"\${${args_241[0]}[@]}\")"
-    local local_args_242=("${args_241_deref_90[@]}")
-    eval "${args_241}=()"
-    for arg_243 in "${local_args_242[@]}"; do
-        local cmd_244=""
-        starts_with__23_v0 "${arg_243}" "--nixie-"
+catch_args__222_v0() {
+    local args_234=("${1}")
+    eval "local args_234_deref_90=(\"\${${args_234[0]}[@]}\")"
+    local local_args_235=("${args_234_deref_90[@]}")
+    eval "${args_234}=()"
+    for arg_236 in "${local_args_235[@]}"; do
+        local cmd_237=""
+        starts_with__23_v0 "${arg_236}" "--nixie-"
         local ret_starts_with23_v0__110_12="${ret_starts_with23_v0}"
         if [ "${ret_starts_with23_v0__110_12}" != 0 ]; then
             local __length_34="--nixie-"
-            slice__25_v0 "${arg_243}" "${#__length_34}" 0
-            cmd_244="${ret_slice25_v0}"
-            eval_cmd__222_v0 "${cmd_244}"
+            slice__25_v0 "${arg_236}" "${#__length_34}" 0
+            cmd_237="${ret_slice25_v0}"
+            eval_cmd__221_v0 "${cmd_237}"
         else
-            eval "${args_241}+=(\"\${arg_243}\")"
+            eval "${args_234}+=(\"\${arg_236}\")"
         fi
     done
 }
 
-file_download__327_v0() {
-    local url_2781="${1}"
-    local path_2782="${2}"
+file_download__326_v0() {
+    local url_2823="${1}"
+    local path_2824="${2}"
     is_command__124_v0 "curl"
     local ret_is_command124_v0__15_9="${ret_is_command124_v0}"
     is_command__124_v0 "wget"
@@ -693,55 +709,55 @@ file_download__327_v0() {
     is_command__124_v0 "aria2c"
     local ret_is_command124_v0__21_9="${ret_is_command124_v0}"
     if [ "${ret_is_command124_v0__15_9}" != 0 ]; then
-        curl -L -o "${path_2782}" "${url_2781}">/dev/null 2>&1
+        curl -L -o "${path_2824}" "${url_2823}">/dev/null 2>&1
         __status=$?
     elif [ "${ret_is_command124_v0__18_9}" != 0 ]; then
-        wget "${url_2781}" -P "${path_2782}">/dev/null 2>&1
+        wget "${url_2823}" -P "${path_2824}">/dev/null 2>&1
         __status=$?
     elif [ "${ret_is_command124_v0__21_9}" != 0 ]; then
-        aria2c "${url_2781}" -d "${path_2782}">/dev/null 2>&1
+        aria2c "${url_2823}" -d "${path_2824}">/dev/null 2>&1
         __status=$?
     else
-        ret_file_download327_v0=''
+        ret_file_download326_v0=''
         return 1
     fi
 }
 
-cachix_url__334_v0() {
-    local derivation_2778="${1}"
-    local member_2779="${2}"
+cachix_url__333_v0() {
+    local derivation_2820="${1}"
+    local member_2821="${2}"
     env_var_get__122_v0 "SOURCE_CACHE"
     __status=$?
-    local __SOURCE_CACHE_2780="${ret_env_var_get122_v0}"
-    ret_cachix_url334_v0="https://${__SOURCE_CACHE_2780}/serve/${derivation_2778}/${member_2779}"
+    local __SOURCE_CACHE_2822="${ret_env_var_get122_v0}"
+    ret_cachix_url333_v0="https://${__SOURCE_CACHE_2822}/serve/${derivation_2820}/${member_2821}"
     return 0
 }
 
-pull_binary__336_v0() {
-    local member_2773="${1}"
-    local dest_2774="${2}"
+pull_binary__335_v0() {
+    local member_2815="${1}"
+    local dest_2816="${2}"
     env_var_get__122_v0 "NIX_BINS_DERIVATION"
     __status=$?
-    local __NIX_BINS_DERIVATION_2775="${ret_env_var_get122_v0}"
-    untar__184_v0 "${member_2773}" 0
+    local __NIX_BINS_DERIVATION_2817="${ret_env_var_get122_v0}"
+    untar__184_v0 "${member_2815}" 0
     __status=$?
-    local where_2776="${ret_untar184_v0}"
+    local where_2818="${ret_untar184_v0}"
     if [ "$(( __status != 0 ))" != 0 ]; then
         local command_36
-        command_36="$(mktemp -t nixie_${member_2773}_XXXXXXXX)"
+        command_36="$(mktemp -t nixie_${member_2815}_XXXXXXXX)"
         __status=$?
-        local tmpf_2777="${command_36}"
-        cachix_url__334_v0 "${__NIX_BINS_DERIVATION_2775}" "${member_2773}"
-        local ret_cachix_url334_v0__89_23="${ret_cachix_url334_v0}"
-        file_download__327_v0 "${ret_cachix_url334_v0__89_23}" "${tmpf_2777}"
+        local tmpf_2819="${command_36}"
+        cachix_url__333_v0 "${__NIX_BINS_DERIVATION_2817}" "${member_2815}"
+        local ret_cachix_url333_v0__89_23="${ret_cachix_url333_v0}"
+        file_download__326_v0 "${ret_cachix_url333_v0__89_23}" "${tmpf_2819}"
         __status=$?
         if [ "${__status}" != 0 ]; then
-            ret_pull_binary336_v0=''
+            ret_pull_binary335_v0=''
             return "${__status}"
         fi
-        where_2776="${tmpf_2777}"
+        where_2818="${tmpf_2819}"
     fi
-    mv "${where_2776}" "${dest_2774}"
+    mv "${where_2818}" "${dest_2816}"
     __status=$?
 }
 
@@ -758,8 +774,8 @@ __status=$?
 env_var_get__122_v0 "TERM"
 __status=$?
 __TERM_44="${ret_env_var_get122_v0}"
-can_set_title__353_v0() {
-    local has_statusline_2798=1
+can_set_title__352_v0() {
+    local has_statusline_2841=1
     tput hs
     __status=$?
     if [ "${__status}" != 0 ]; then
@@ -778,22 +794,23 @@ can_set_title__353_v0() {
                 __status=$?
                 fsl_41="${command_42}"
             else
-                has_statusline_2798=0
+                has_statusline_2841=0
             fi
         else
-            has_statusline_2798=0
+            has_statusline_2841=0
         fi
     fi
-    ret_can_set_title353_v0="${has_statusline_2798}"
+    ret_can_set_title352_v0="${has_statusline_2841}"
     return 0
 }
 
-set_title__354_v0() {
-    local title_2797="${1}"
-    can_set_title__353_v0 
-    local ret_can_set_title353_v0__43_8="${ret_can_set_title353_v0}"
-    if [ "${ret_can_set_title353_v0__43_8}" != 0 ]; then
-        printf '%s\n' "${tsl_40}""${title_2797}""${fsl_41}"
+set_title__353_v0() {
+    local title_2840="${1}"
+    can_set_title__352_v0 
+    local ret_can_set_title352_v0__43_8="${ret_can_set_title352_v0}"
+    if [ "${ret_can_set_title352_v0__43_8}" != 0 ]; then
+        >&2 echo "${tsl_40}""${title_2840}""${fsl_41}"
+        __status=$?
     fi
 }
 
@@ -811,8 +828,8 @@ rmcup_48="${command_46}"
 env_var_get__122_v0 "TERM"
 __status=$?
 __TERM_49="${ret_env_var_get122_v0}"
-can_set_title__373_v0() {
-    local has_statusline_2811=1
+can_set_title__372_v0() {
+    local has_statusline_2854=1
     tput hs
     __status=$?
     if [ "${__status}" != 0 ]; then
@@ -831,27 +848,29 @@ can_set_title__373_v0() {
                 __status=$?
                 fsl_46="${command_48}"
             else
-                has_statusline_2811=0
+                has_statusline_2854=0
             fi
         else
-            has_statusline_2811=0
+            has_statusline_2854=0
         fi
     fi
-    ret_can_set_title373_v0="${has_statusline_2811}"
+    ret_can_set_title372_v0="${has_statusline_2854}"
     return 0
 }
 
-set_title__374_v0() {
-    local title_2810="${1}"
-    can_set_title__373_v0 
-    local ret_can_set_title373_v0__43_8="${ret_can_set_title373_v0}"
-    if [ "${ret_can_set_title373_v0__43_8}" != 0 ]; then
-        printf '%s\n' "${tsl_45}""${title_2810}""${fsl_46}"
+set_title__373_v0() {
+    local title_2853="${1}"
+    can_set_title__372_v0 
+    local ret_can_set_title372_v0__43_8="${ret_can_set_title372_v0}"
+    if [ "${ret_can_set_title372_v0__43_8}" != 0 ]; then
+        >&2 echo "${tsl_45}""${title_2853}""${fsl_46}"
+        __status=$?
     fi
 }
 
-exit_alt_buffer__376_v0() {
-    printf '%s\n' "${rmcup_48}"
+exit_alt_buffer__375_v0() {
+    >&2 echo ${rmcup_48}
+    __status=$?
 }
 
 __SELF_50=""
@@ -886,13 +905,13 @@ if [ "${ret_text_contains17_v0__15_4}" != 0 ]; then
 else
     echo_error__140_v0 "This script must be run from an absolute or relative path." 1
 fi
-bail__381_v0() {
-    local message_2808="${1}"
-    local archive_2809="${2}"
-    exit_alt_buffer__376_v0 
-    set_title__374_v0 ""
-    echo_error__140_v0 "${message_2808}" 0
-    if [ "${archive_2809}" != 0 ]; then
+bail__380_v0() {
+    local message_2851="${1}"
+    local archive_2852="${2}"
+    exit_alt_buffer__375_v0 
+    set_title__373_v0 ""
+    echo_error__140_v0 "${message_2851}" 0
+    if [ "${archive_2852}" != 0 ]; then
         echo_error__140_v0 "This script can be rebuilt using the nixie tool." 0
     fi
     exit 1
@@ -900,264 +919,272 @@ bail__381_v0() {
     __status=$?
 }
 
-get_self__382_v0() {
-    ret_get_self382_v0="${__SELF_50}"
+get_self__381_v0() {
+    ret_get_self381_v0="${__SELF_50}"
     return 0
 }
 
-dump_archive__383_v0() {
+dump_archive__382_v0() {
     local command_50
     command_50="$(mktemp -t nixie_XXXXXXXX.tar)"
     __status=$?
-    local dest_2807="${command_50}"
+    local dest_2850="${command_50}"
     cat ${__SELF_50} | (
         read -r M
         while ! [[ "$M" =~ ^-----BEGIN\ ARCHIVE\ SECTION----- ]]
         do read -r M || return 1
         done
-        gzip -d -c 2>/dev/null > ${dest_2807}
+        gzip -d -c 2>/dev/null > ${dest_2850}
     )
     __status=$?
     if [ "${__status}" != 0 ]; then
         if [ "$(( __status != 2 ))" != 0 ]; then
-            bail__381_v0 "Could not find the script's resource archive." 1
+            bail__380_v0 "Could not find the script's resource archive." 1
         fi
     fi
-    ret_dump_archive383_v0="${dest_2807}"
+    ret_dump_archive382_v0="${dest_2850}"
     return 0
 }
 
-untar__384_v0() {
-    local member_2805="${1}"
-    local dump_2806="${2}"
-    dump_archive__383_v0 
-    local archive_2812="${ret_dump_archive383_v0}"
-    local tar_cmd_2813="tar -x ${member_2805} -f ${archive_2812}"
-    if [ "${dump_2806}" != 0 ]; then
-        tar_cmd_2813="tar -x -O ${member_2805} -f ${archive_2812}"
+untar__383_v0() {
+    local member_2848="${1}"
+    local dump_2849="${2}"
+    dump_archive__382_v0 
+    local archive_2855="${ret_dump_archive382_v0}"
+    local tar_cmd_2856="tar -x ${member_2848} -f ${archive_2855}"
+    if [ "${dump_2849}" != 0 ]; then
+        tar_cmd_2856="tar -x -O ${member_2848} -f ${archive_2855}"
     fi
     local command_51
-    command_51="$(${tar_cmd_2813})"
+    command_51="$(${tar_cmd_2856})"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        local tar_status_2814="${__status}"
-        rm ${archive_2812}
+        local tar_status_2857="${__status}"
+        rm ${archive_2855}
         __status=$?
-        ret_untar384_v0=''
-        return "${tar_status_2814}"
+        ret_untar383_v0=''
+        return "${tar_status_2857}"
     fi
-    local tar_out_2815="${command_51}"
-    rm ${archive_2812}
+    local tar_out_2858="${command_51}"
+    rm ${archive_2855}
     __status=$?
-    ret_untar384_v0="${tar_out_2815}"
-    return 0
+    if [ "${dump_2849}" != 0 ]; then
+        ret_untar383_v0="${tar_out_2858}"
+        return 0
+    else
+        ret_untar383_v0="${member_2848}"
+        return 0
+    fi
 }
 
-get_osname__387_v0() {
+get_osname__386_v0() {
     local command_52
     command_52="$(uname -s)"
     __status=$?
-    ret_get_osname387_v0="${command_52}"
+    ret_get_osname386_v0="${command_52}"
     return 0
 }
 
-get_cache_root__392_v0() {
+get_cache_root__391_v0() {
     env_var_get__122_v0 "HOME"
     __status=$?
-    local userhome_2792="${ret_env_var_get122_v0}"
-    get_osname__387_v0 
-    local osname_2793="${ret_get_osname387_v0}"
-    if [ "$([ "_${osname_2793}" != "_Darwin" ]; echo $?)" != 0 ]; then
-        ret_get_cache_root392_v0="${userhome_2792}/Library/Caches"
-        return 0
+    local userhome_2834="${ret_env_var_get122_v0}"
+    get_osname__386_v0 
+    local osname_2835="${ret_get_osname386_v0}"
+    local result_2836=""
+    if [ "$([ "_${osname_2835}" != "_Darwin" ]; echo $?)" != 0 ]; then
+        result_2836="${userhome_2834}/Library/Caches"
     else
-        ret_get_cache_root392_v0="${userhome_2792}/.cache"
-        return 0
+        result_2836="${userhome_2834}/.cache"
     fi
+    mkdir -p ${result_2836}
+    __status=$?
+    ret_get_cache_root391_v0="${result_2836}"
+    return 0
 }
 
-get_repo_root__393_v0() {
-    get_self__382_v0 
-    local ret_get_self382_v0__77_24="${ret_get_self382_v0}"
-    split__5_v0 "${ret_get_self382_v0__77_24}" "/"
-    local self_a_2787=("${ret_split5_v0[@]}")
-    array_pop__77_v0 "self_a_2787"
+get_repo_root__392_v0() {
+    get_self__381_v0 
+    local ret_get_self381_v0__82_24="${ret_get_self381_v0}"
+    split__5_v0 "${ret_get_self381_v0__82_24}" "/"
+    local self_a_2829=("${ret_split5_v0[@]}")
+    array_pop__77_v0 "self_a_2829"
     __status=$?
-    join__8_v0 self_a_2787[@] "/"
-    local ret_join8_v0__80_26="${ret_join8_v0}"
-    local self_dir_2788="/""${ret_join8_v0__80_26}"
+    join__8_v0 self_a_2829[@] "/"
+    local ret_join8_v0__85_26="${ret_join8_v0}"
+    local self_dir_2830="/""${ret_join8_v0__85_26}"
     local command_53
-    command_53="$(git -C ${self_dir_2788} rev-parse --show-toplevel)"
+    command_53="$(git -C ${self_dir_2830} rev-parse --show-toplevel)"
     __status=$?
     if [ "${__status}" != 0 ]; then
         echo_warning__139_v0 "Failed to find current Git repository, using script parent directory."
-        ret_get_repo_root393_v0="${self_dir_2788}"
+        ret_get_repo_root392_v0="${self_dir_2830}"
         return 0
     fi
-    ret_get_repo_root393_v0="${command_53}"
+    ret_get_repo_root392_v0="${command_53}"
     return 0
 }
 
-get_source_root__397_v0() {
-    get_repo_root__393_v0 
-    local repo_root_2789="${ret_get_repo_root393_v0}"
-    ret_get_source_root397_v0="${repo_root_2789}/.nixie/sources"
+get_source_root__396_v0() {
+    get_repo_root__392_v0 
+    local repo_root_2831="${ret_get_repo_root392_v0}"
+    ret_get_source_root396_v0="${repo_root_2831}/.nixie/sources"
     return 0
 }
 
-cachix_url__407_v0() {
-    local derivation_2820="${1}"
-    local member_2821="${2}"
+cachix_url__406_v0() {
+    local derivation_2863="${1}"
+    local member_2864="${2}"
     env_var_get__122_v0 "SOURCE_CACHE"
     __status=$?
-    local __SOURCE_CACHE_2822="${ret_env_var_get122_v0}"
-    ret_cachix_url407_v0="https://${__SOURCE_CACHE_2822}/serve/${derivation_2820}/${member_2821}"
+    local __SOURCE_CACHE_2865="${ret_env_var_get122_v0}"
+    ret_cachix_url406_v0="https://${__SOURCE_CACHE_2865}/serve/${derivation_2863}/${member_2864}"
     return 0
 }
 
-pull_source_file__408_v0() {
-    local member_2800="${1}"
-    local dest_2801="${2}"
+pull_source_file__407_v0() {
+    local member_2843="${1}"
+    local dest_2844="${2}"
     env_var_get__122_v0 "SOURCE_DERIVATION"
     __status=$?
-    local __SOURCE_DERIVATION_2802="${ret_env_var_get122_v0}"
-    local where_2803=""
-    local my_status_2804=1
+    local __SOURCE_DERIVATION_2845="${ret_env_var_get122_v0}"
+    local where_2846=""
+    local my_status_2847=1
     env_var_test__119_v0 "_NIXIE_TESTING_SKIP_TARBALL"
     local ret_env_var_test119_v0__36_12="${ret_env_var_test119_v0}"
     if [ "$(( ! ret_env_var_test119_v0__36_12 ))" != 0 ]; then
-        untar__384_v0 "sources/${member_2800}" 0
+        untar__383_v0 "sources/${member_2843}" 0
         __status=$?
-        where_2803="${ret_untar384_v0}"
-        my_status_2804="${__status}"
+        where_2846="${ret_untar383_v0}"
+        my_status_2847="${__status}"
     fi
     env_var_test__119_v0 "_NIXIE_TESTING_SOURCES_DIR"
     local ret_env_var_test119_v0__41_8="${ret_env_var_test119_v0}"
-    if [ "$(( ret_env_var_test119_v0__41_8 && $(( my_status_2804 != 0 )) ))" != 0 ]; then
+    if [ "$(( ret_env_var_test119_v0__41_8 && $(( my_status_2847 != 0 )) ))" != 0 ]; then
         env_var_get__122_v0 "_NIXIE_TESTING_SOURCES_DIR"
         __status=$?
-        local srcdir_2816="${ret_env_var_get122_v0}"
+        local srcdir_2859="${ret_env_var_get122_v0}"
         local command_54
-        command_54="$(mktemp -t -d nixie_${member_2800}_XXXXXXXX)"
+        command_54="$(mktemp -t -d nixie_${member_2843}_XXXXXXXX)"
         __status=$?
-        local tmpd_2817="${command_54}"
-        file_exists__42_v0 "${srcdir_2816}/${member_2800}.tar.gz"
+        local tmpd_2860="${command_54}"
+        file_exists__42_v0 "${srcdir_2859}/${member_2843}.tar.gz"
         local ret_file_exists42_v0__45_12="${ret_file_exists42_v0}"
         if [ "${ret_file_exists42_v0__45_12}" != 0 ]; then
-            gzip -d -c ${srcdir_2816}/${member_2800}.tar.gz | tar -x -C ${tmpd_2817}
+            gzip -d -c ${srcdir_2859}/${member_2843}.tar.gz | tar -x -C ${tmpd_2860}
             __status=$?
-            my_status_2804="${__status}"
-            where_2803="${tmpd_2817}/${member_2800}"
+            my_status_2847="${__status}"
+            where_2846="${tmpd_2860}/${member_2843}"
         else
-            my_status_2804=1
+            my_status_2847=1
         fi
     fi
-    if [ "$(( my_status_2804 != 0 ))" != 0 ]; then
+    if [ "$(( my_status_2847 != 0 ))" != 0 ]; then
         local command_55
         command_55="$(mktemp -t nixie_src_XXXXXXXX.tgz)"
         __status=$?
-        local tmpf_2818="${command_55}"
+        local tmpf_2861="${command_55}"
         local command_56
-        command_56="$(mktemp -t -d nixie_${member_2800}_XXXXXXXX)"
+        command_56="$(mktemp -t -d nixie_${member_2843}_XXXXXXXX)"
         __status=$?
-        local tmpd_2819="${command_56}"
-        cachix_url__407_v0 "${__SOURCE_DERIVATION_2802}" "${member_2800}.tar.gz"
-        local ret_cachix_url407_v0__58_23="${ret_cachix_url407_v0}"
-        file_download__327_v0 "${ret_cachix_url407_v0__58_23}" "${tmpf_2818}"
-        __status=$?
-        if [ "${__status}" != 0 ]; then
-            ret_pull_source_file408_v0=''
-            return "${__status}"
-        fi
-        gzip -d -c ${tmpf_2818} | tar -x -C ${tmpd_2819}
+        local tmpd_2862="${command_56}"
+        cachix_url__406_v0 "${__SOURCE_DERIVATION_2845}" "${member_2843}.tar.gz"
+        local ret_cachix_url406_v0__58_23="${ret_cachix_url406_v0}"
+        file_download__326_v0 "${ret_cachix_url406_v0__58_23}" "${tmpf_2861}"
         __status=$?
         if [ "${__status}" != 0 ]; then
-            ret_pull_source_file408_v0=''
+            ret_pull_source_file407_v0=''
             return "${__status}"
         fi
-        rm -f ${tmpf_2818}
+        gzip -d -c ${tmpf_2861} | tar -x -C ${tmpd_2862}
         __status=$?
-        where_2803="${tmpd_2819}/${member_2800}"
+        if [ "${__status}" != 0 ]; then
+            ret_pull_source_file407_v0=''
+            return "${__status}"
+        fi
+        rm -f ${tmpf_2861}
+        __status=$?
+        where_2846="${tmpd_2862}/${member_2843}"
     fi
-    rm -rf ${dest_2801}
+    rm -rf ${dest_2844}
     __status=$?
-    mv "${where_2803}" "${dest_2801}"
+    mv "${where_2846}" "${dest_2844}"
     __status=$?
 }
 
 step_current_55=1
-pkg_exists__417_v0() {
-    local package_2799="${1}"
-    pkg-config ${package_2799}
+pkg_exists__416_v0() {
+    local package_2842="${1}"
+    pkg-config ${package_2842}
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_pkg_exists417_v0=0
+        ret_pkg_exists416_v0=0
         return 0
     fi
-    ret_pkg_exists417_v0=1
+    ret_pkg_exists416_v0=1
     return 0
 }
 
-step_title__418_v0() {
-    local name_2795="${1}"
+step_title__417_v0() {
+    local name_2838="${1}"
     env_var_get__122_v0 "step_total"
     __status=$?
-    local step_total_2796="${ret_env_var_get122_v0}"
+    local step_total_2839="${ret_env_var_get122_v0}"
     clear
     __status=$?
-    set_title__354_v0 "Building Nix: ${name_2795} (${step_current_55}/${step_total_2796})"
+    set_title__353_v0 "Building Nix: ${name_2838} (${step_current_55}/${step_total_2839})"
     step_current_55="$(( step_current_55 + 1 ))"
 }
 
-get_source_root__419_v0() {
-    get_repo_root__393_v0 
-    local repo_root_2790="${ret_get_repo_root393_v0}"
-    ret_get_source_root419_v0="${repo_root_2790}/.nixie/sources"
+get_source_root__418_v0() {
+    get_repo_root__392_v0 
+    local repo_root_2832="${ret_get_repo_root392_v0}"
+    ret_get_source_root418_v0="${repo_root_2832}/.nixie/sources"
     return 0
 }
 
-build_openssl_inner__424_v0() {
-    get_dll_ext__390_v0 
-    local dll_ext_516="${ret_get_dll_ext390_v0}"
-    get_cache_root__392_v0 
-    local cache_root_519="${ret_get_cache_root392_v0}"
+build_openssl_inner__423_v0() {
+    get_dll_ext__389_v0 
+    local dll_ext_512="${ret_get_dll_ext389_v0}"
+    get_cache_root__391_v0 
+    local cache_root_516="${ret_get_cache_root391_v0}"
     chmod +x ./config
     __status=$?
     ./config
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_openssl_inner424_v0=''
+        ret_build_openssl_inner423_v0=''
         return "${__status}"
     fi
-    make_headers__423_v0 
+    make_headers__422_v0 
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_openssl_inner424_v0=''
+        ret_build_openssl_inner423_v0=''
         return "${__status}"
     fi
-    make libcrypto.${dll_ext_516} libcrypto.pc
+    make libcrypto.${dll_ext_512} libcrypto.pc
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_openssl_inner424_v0=''
+        ret_build_openssl_inner423_v0=''
         return "${__status}"
     fi
-    cp ./libcrypto.* ${cache_root_519}/nix-deps/lib/
+    cp ./libcrypto.* ${cache_root_516}/nix-deps/lib/
     __status=$?
-    cp ./libcrypto.pc ${cache_root_519}/nix-deps/lib/pkgconfig
+    cp ./libcrypto.pc ${cache_root_516}/nix-deps/lib/pkgconfig
     __status=$?
-    cp -r ./include ${cache_root_519}/nix-deps/
+    cp -r ./include ${cache_root_516}/nix-deps/
     __status=$?
 }
 
-build_openssl__425_v0() {
-    get_source_root__419_v0 
-    local source_root_2791="${ret_get_source_root419_v0}"
-    get_cache_root__392_v0 
-    step_title__418_v0 "libcrypto"
-    pkg_exists__417_v0 "libcrypto"
-    local ret_pkg_exists417_v0__56_8="${ret_pkg_exists417_v0}"
-    if [ "${ret_pkg_exists417_v0__56_8}" != 0 ]; then
-        ret_build_openssl425_v0=0
+build_openssl__424_v0() {
+    get_source_root__418_v0 
+    local source_root_2833="${ret_get_source_root418_v0}"
+    get_cache_root__391_v0 
+    step_title__417_v0 "libcrypto"
+    pkg_exists__416_v0 "libcrypto"
+    local ret_pkg_exists416_v0__56_8="${ret_pkg_exists416_v0}"
+    if [ "${ret_pkg_exists416_v0__56_8}" != 0 ]; then
+        ret_build_openssl424_v0=0
         return 0
     fi
     env_var_test__119_v0 "OPENSSL_LIBS"
@@ -1165,312 +1192,312 @@ build_openssl__425_v0() {
     env_var_test__119_v0 "OPENSSL_CFLAGS"
     local ret_env_var_test119_v0__58_41="${ret_env_var_test119_v0}"
     if [ "$(( ret_env_var_test119_v0__58_8 && ret_env_var_test119_v0__58_41 ))" != 0 ]; then
-        ret_build_openssl425_v0=0
+        ret_build_openssl424_v0=0
         return 0
     fi
-    pull_source_file__408_v0 "openssl" "${source_root_2791}/openssl"
+    pull_source_file__407_v0 "openssl" "${source_root_2833}/openssl"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_openssl425_v0=''
+        ret_build_openssl424_v0=''
         return "${__status}"
     fi
-    (cd ${source_root_2791}/openssl && build_openssl_inner__424_v0)
+    (cd ${source_root_2833}/openssl && build_openssl_inner__423_v0)
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_openssl425_v0=''
+        ret_build_openssl424_v0=''
         return "${__status}"
     fi
 }
 
-build_lowdown_inner__435_v0() {
-    get_cache_root__392_v0 
-    local cache_root_774="${ret_get_cache_root392_v0}"
-    ./configure PREFIX=${cache_root_774}/nix-deps
+build_lowdown_inner__434_v0() {
+    get_cache_root__391_v0 
+    local cache_root_776="${ret_get_cache_root391_v0}"
+    ./configure PREFIX=${cache_root_776}/nix-deps
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_lowdown_inner435_v0=''
+        ret_build_lowdown_inner434_v0=''
         return "${__status}"
     fi
     make
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_lowdown_inner435_v0=''
+        ret_build_lowdown_inner434_v0=''
         return "${__status}"
     fi
-    get_osname__387_v0 
-    local ret_get_osname387_v0__26_8="${ret_get_osname387_v0}"
-    if [ "$([ "_${ret_get_osname387_v0__26_8}" != "_Darwin" ]; echo $?)" != 0 ]; then
-        macos_build_post__434_v0 
+    get_osname__386_v0 
+    local ret_get_osname386_v0__26_8="${ret_get_osname386_v0}"
+    if [ "$([ "_${ret_get_osname386_v0__26_8}" != "_Darwin" ]; echo $?)" != 0 ]; then
+        macos_build_post__433_v0 
         __status=$?
         if [ "${__status}" != 0 ]; then
-            ret_build_lowdown_inner435_v0=''
+            ret_build_lowdown_inner434_v0=''
             return "${__status}"
         fi
     fi
     make install_shared
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_lowdown_inner435_v0=''
+        ret_build_lowdown_inner434_v0=''
         return "${__status}"
     fi
 }
 
-build_lowdown__436_v0() {
-    get_source_root__419_v0 
-    local source_root_2832="${ret_get_source_root419_v0}"
-    get_cache_root__392_v0 
-    step_title__418_v0 "lowdown"
-    pkg_exists__417_v0 "lowdown"
-    local ret_pkg_exists417_v0__41_8="${ret_pkg_exists417_v0}"
-    if [ "${ret_pkg_exists417_v0__41_8}" != 0 ]; then
-        ret_build_lowdown436_v0=0
+build_lowdown__435_v0() {
+    get_source_root__418_v0 
+    local source_root_2875="${ret_get_source_root418_v0}"
+    get_cache_root__391_v0 
+    step_title__417_v0 "lowdown"
+    pkg_exists__416_v0 "lowdown"
+    local ret_pkg_exists416_v0__41_8="${ret_pkg_exists416_v0}"
+    if [ "${ret_pkg_exists416_v0__41_8}" != 0 ]; then
+        ret_build_lowdown435_v0=0
         return 0
     fi
-    pull_source_file__408_v0 "lowdown" "${source_root_2832}/lowdown"
+    pull_source_file__407_v0 "lowdown" "${source_root_2875}/lowdown"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_lowdown436_v0=''
+        ret_build_lowdown435_v0=''
         return "${__status}"
     fi
-    (cd ${source_root_2832}/lowdown && build_lowdown_inner__435_v0)
+    (cd ${source_root_2875}/lowdown && build_lowdown_inner__434_v0)
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_lowdown436_v0=''
+        ret_build_lowdown435_v0=''
         return "${__status}"
     fi
 }
 
-build_nlohmann_json__445_v0() {
-    get_source_root__419_v0 
-    local source_root_2827="${ret_get_source_root419_v0}"
-    get_cache_root__392_v0 
-    local cache_root_2828="${ret_get_cache_root392_v0}"
-    step_title__418_v0 "nlohmann_json"
-    pkg_exists__417_v0 "nlohmann_json"
-    local ret_pkg_exists417_v0__21_8="${ret_pkg_exists417_v0}"
-    if [ "${ret_pkg_exists417_v0__21_8}" != 0 ]; then
-        ret_build_nlohmann_json445_v0=0
+build_nlohmann_json__444_v0() {
+    get_source_root__418_v0 
+    local source_root_2870="${ret_get_source_root418_v0}"
+    get_cache_root__391_v0 
+    local cache_root_2871="${ret_get_cache_root391_v0}"
+    step_title__417_v0 "nlohmann_json"
+    pkg_exists__416_v0 "nlohmann_json"
+    local ret_pkg_exists416_v0__21_8="${ret_pkg_exists416_v0}"
+    if [ "${ret_pkg_exists416_v0__21_8}" != 0 ]; then
+        ret_build_nlohmann_json444_v0=0
         return 0
     fi
-    pull_source_file__408_v0 "nlohmann_json" "${source_root_2827}/nlohmann_json"
+    pull_source_file__407_v0 "nlohmann_json" "${source_root_2870}/nlohmann_json"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_nlohmann_json445_v0=''
+        ret_build_nlohmann_json444_v0=''
         return "${__status}"
     fi
     local command_57
-    command_57="$(grep "^version:" ${source_root_2827}/nlohmann_json/wsjcpp.yml | cut -d '"' -f 2 | cut -d 'v' -f 2)"
+    command_57="$(grep "^version:" ${source_root_2870}/nlohmann_json/wsjcpp.yml | cut -d '"' -f 2 | cut -d 'v' -f 2)"
     __status=$?
-    local version_2829="${command_57}"
-    file_write__44_v0 "${cache_root_2828}/nix-deps/lib/pkgconfig/nlohmann_json.pc" "Name: nlohmann_json
-Version: ${version_2829}
+    local version_2872="${command_57}"
+    file_write__44_v0 "${cache_root_2871}/nix-deps/lib/pkgconfig/nlohmann_json.pc" "Name: nlohmann_json
+Version: ${version_2872}
 Description: JSON for Modern C++
-Cflags: -I${source_root_2827}/nlohmann_json/include"
+Cflags: -I${source_root_2870}/nlohmann_json/include"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_nlohmann_json445_v0=''
+        ret_build_nlohmann_json444_v0=''
         return "${__status}"
     fi
 }
 
 modules_56=("predef" "chrono" "container" "context" "coroutine" "system" "thread")
-find_boost_libs__454_v0() {
-    local libs_2824=("${!1}")
-    for lib_2825 in "${libs_2824[@]}"; do
-        local libname_2826="libboost_${lib_2825}*"
-        file_exists__42_v0 "/usr/lib/${libname_2826}"
+find_boost_libs__453_v0() {
+    local libs_2867=("${!1}")
+    for lib_2868 in "${libs_2867[@]}"; do
+        local libname_2869="libboost_${lib_2868}*"
+        file_exists__42_v0 "/usr/lib/${libname_2869}"
         local ret_file_exists42_v0__23_20="${ret_file_exists42_v0}"
-        file_exists__42_v0 "/usr/local/lib/${libname_2826}"
+        file_exists__42_v0 "/usr/local/lib/${libname_2869}"
         local ret_file_exists42_v0__24_20="${ret_file_exists42_v0}"
         if [ "$(( ! $(( ret_file_exists42_v0__23_20 || ret_file_exists42_v0__24_20 )) ))" != 0 ]; then
-            ret_find_boost_libs454_v0=0
+            ret_find_boost_libs453_v0=0
             return 0
         fi
-        dir_exists__41_v0 "/usr/include/boost/${lib_2825}"
+        dir_exists__41_v0 "/usr/include/boost/${lib_2868}"
         local ret_dir_exists41_v0__26_20="${ret_dir_exists41_v0}"
-        dir_exists__41_v0 "/usr/local/include/boost/${lib_2825}"
+        dir_exists__41_v0 "/usr/local/include/boost/${lib_2868}"
         local ret_dir_exists41_v0__27_20="${ret_dir_exists41_v0}"
         if [ "$(( ! $(( ret_dir_exists41_v0__26_20 || ret_dir_exists41_v0__27_20 )) ))" != 0 ]; then
-            ret_find_boost_libs454_v0=0
+            ret_find_boost_libs453_v0=0
             return 0
         fi
     done
-    ret_find_boost_libs454_v0=1
+    ret_find_boost_libs453_v0=1
     return 0
 }
 
-build_boost_inner__455_v0() {
-    local args_607=("variant=release" "link=static" "--stagedir=.")
-    for mod_608 in "${modules_56[@]}"; do
-        args_607+=("--with-${mod_608}")
+build_boost_inner__454_v0() {
+    local args_605=("variant=release" "link=static" "--stagedir=.")
+    for mod_606 in "${modules_56[@]}"; do
+        args_605+=("--with-${mod_606}")
     done
     ./bootstrap.sh
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_boost_inner455_v0=''
+        ret_build_boost_inner454_v0=''
         return "${__status}"
     fi
-    ./b2 "${args_607[@]}"
+    ./b2 "${args_605[@]}"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_boost_inner455_v0=''
+        ret_build_boost_inner454_v0=''
         return "${__status}"
     fi
 }
 
-build_boost__456_v0() {
-    get_source_root__419_v0 
-    local source_root_2823="${ret_get_source_root419_v0}"
-    step_title__418_v0 "boost"
+build_boost__455_v0() {
+    get_source_root__418_v0 
+    local source_root_2866="${ret_get_source_root418_v0}"
+    step_title__417_v0 "boost"
     local array_61=("atomic")
     local array_add_62=("${array_61[@]}" "${modules_56[@]}")
-    find_boost_libs__454_v0 array_add_62[@]
-    local ret_find_boost_libs454_v0__56_8="${ret_find_boost_libs454_v0}"
-    if [ "${ret_find_boost_libs454_v0__56_8}" != 0 ]; then
-        ret_build_boost456_v0=0
+    find_boost_libs__453_v0 array_add_62[@]
+    local ret_find_boost_libs453_v0__56_8="${ret_find_boost_libs453_v0}"
+    if [ "${ret_find_boost_libs453_v0__56_8}" != 0 ]; then
+        ret_build_boost455_v0=0
         return 0
     fi
-    pull_source_file__408_v0 "boost" "${source_root_2823}/boost"
+    pull_source_file__407_v0 "boost" "${source_root_2866}/boost"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_boost456_v0=''
+        ret_build_boost455_v0=''
         return "${__status}"
     fi
-    (cd ${source_root_2823}/boost && build_boost_inner__455_v0)
+    (cd ${source_root_2866}/boost && build_boost_inner__454_v0)
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_boost456_v0=''
+        ret_build_boost455_v0=''
         return "${__status}"
     fi
-    env_var_set__121_v0 "BOOST_ROOT" "${source_root_2823}/boost"
+    env_var_set__121_v0 "BOOST_ROOT" "${source_root_2866}/boost"
     __status=$?
     export BOOST_ROOT
     __status=$?
 }
 
-build_autoconf_dep__464_v0() {
-    local lib_name_2834="${1}"
-    local inc_prefix_2835="${2}"
-    get_source_root__419_v0 
-    local source_root_2836="${ret_get_source_root419_v0}"
-    get_cache_root__392_v0 
-    local cache_root_2837="${ret_get_cache_root392_v0}"
-    local my_source_2838="${source_root_2836}/${lib_name_2834}"
-    step_title__418_v0 "${lib_name_2834}"
-    pkg_exists__417_v0 "${lib_name_2834}"
-    local ret_pkg_exists417_v0__26_8="${ret_pkg_exists417_v0}"
-    if [ "${ret_pkg_exists417_v0__26_8}" != 0 ]; then
-        ret_build_autoconf_dep464_v0=''
+build_autoconf_dep__463_v0() {
+    local lib_name_2877="${1}"
+    local inc_prefix_2878="${2}"
+    get_source_root__418_v0 
+    local source_root_2879="${ret_get_source_root418_v0}"
+    get_cache_root__391_v0 
+    local cache_root_2880="${ret_get_cache_root391_v0}"
+    local my_source_2881="${source_root_2879}/${lib_name_2877}"
+    step_title__417_v0 "${lib_name_2877}"
+    pkg_exists__416_v0 "${lib_name_2877}"
+    local ret_pkg_exists416_v0__26_8="${ret_pkg_exists416_v0}"
+    if [ "${ret_pkg_exists416_v0__26_8}" != 0 ]; then
+        ret_build_autoconf_dep463_v0=''
         return 0
     fi
-    pull_source_file__408_v0 "${lib_name_2834}" "${my_source_2838}"
+    pull_source_file__407_v0 "${lib_name_2877}" "${my_source_2881}"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_autoconf_dep464_v0=''
+        ret_build_autoconf_dep463_v0=''
         return "${__status}"
     fi
-    ( unset C_INCLUDE_PATH CPLUS_INCLUDE_PATH     && cd ${my_source_2838}     && ./configure --prefix=${cache_root_2837}/nix-deps     && make && make install )
+    ( unset C_INCLUDE_PATH CPLUS_INCLUDE_PATH     && cd ${my_source_2881}     && ./configure --prefix=${cache_root_2880}/nix-deps     && make && make install )
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_autoconf_dep464_v0=''
+        ret_build_autoconf_dep463_v0=''
         return "${__status}"
     fi
 }
 
-build_nix_inner__474_v0() {
-    get_source_root__419_v0 
-    local source_root_1066="${ret_get_source_root419_v0}"
-    local venv_1067="${source_root_1066}/nix/venv"
+build_nix_inner__473_v0() {
+    get_source_root__418_v0 
+    local source_root_1075="${ret_get_source_root418_v0}"
+    local venv_1076="${source_root_1075}/nix/venv"
     mkdir build && cd build
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_nix_inner474_v0=''
+        ret_build_nix_inner473_v0=''
         return "${__status}"
     fi
-    ${venv_1067}/bin/meson setup -Dlibstore:seccomp-sandboxing=disabled                             -Dlibcmd:readline-flavor=editline                             -Dlibexpr:gc=disabled                             -Dlibutil:cpuid=disabled                             -Ddoc-gen=false                             -Dunit-tests=false                             -Dbindings=false                             ..
+    ${venv_1076}/bin/meson setup -Dlibstore:seccomp-sandboxing=disabled                             -Dlibcmd:readline-flavor=editline                             -Dlibexpr:gc=disabled                             -Dlibutil:cpuid=disabled                             -Ddoc-gen=false                             -Dunit-tests=false                             -Dbindings=false                             ..
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_nix_inner474_v0=''
+        ret_build_nix_inner473_v0=''
         return "${__status}"
     fi
-    ${venv_1067}/bin/ninja
+    ${venv_1076}/bin/ninja
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_nix_inner474_v0=''
+        ret_build_nix_inner473_v0=''
         return "${__status}"
     fi
 }
 
-build_nix__475_v0() {
-    get_source_root__419_v0 
-    local source_root_2839="${ret_get_source_root419_v0}"
-    get_cache_root__392_v0 
-    local cache_root_2840="${ret_get_cache_root392_v0}"
-    local venv_2841="${source_root_2839}/nix/venv"
-    step_title__418_v0 "nix"
-    pull_source_file__408_v0 "nix" "${source_root_2839}/nix"
+build_nix__474_v0() {
+    get_source_root__418_v0 
+    local source_root_2882="${ret_get_source_root418_v0}"
+    get_cache_root__391_v0 
+    local cache_root_2883="${ret_get_cache_root391_v0}"
+    local venv_2884="${source_root_2882}/nix/venv"
+    step_title__417_v0 "nix"
+    pull_source_file__407_v0 "nix" "${source_root_2882}/nix"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_nix475_v0=''
+        ret_build_nix474_v0=''
         return "${__status}"
     fi
-    python3 -m venv --system-site-packages "${venv_2841}"
+    python3 -m venv --system-site-packages "${venv_2884}"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_nix475_v0=''
+        ret_build_nix474_v0=''
         return "${__status}"
     fi
-    export LIBRARY_PATH=${cache_root_2840}/nix-deps/lib:$LIBRARY_PATH
+    export LIBRARY_PATH=${cache_root_2883}/nix-deps/lib:$LIBRARY_PATH
     __status=$?
-    export PKG_CONFIG_PATH=${cache_root_2840}/nix-deps/lib/pkgconfig:${cache_root_2840}/nix-deps/share/pkgconfig:$PKG_CONFIG_PATH
+    export PKG_CONFIG_PATH=${cache_root_2883}/nix-deps/lib/pkgconfig:${cache_root_2883}/nix-deps/share/pkgconfig:$PKG_CONFIG_PATH
     __status=$?
-    ${venv_2841}/bin/pip install meson ninja
+    ${venv_2884}/bin/pip install meson ninja
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_nix475_v0=''
+        ret_build_nix474_v0=''
         return "${__status}"
     fi
-    (cd ${source_root_2839}/nix && build_nix_inner__474_v0)
+    (cd ${source_root_2882}/nix && build_nix_inner__473_v0)
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_build_nix475_v0=''
+        ret_build_nix474_v0=''
         return "${__status}"
     fi
-    mv "${source_root_2839}/nix/src/nix/nix" "${cache_root_2840}/nix-static"
+    mv "${source_root_2882}/nix/src/nix/nix" "${cache_root_2883}/nix-static"
     __status=$?
 }
 
-darwin_export_sdk__477_v0() {
+darwin_export_sdk__476_v0() {
     local command_63
     command_63="$(xcrun --show-sdk-path)"
     __status=$?
-    local sdk_path_2784="${command_63}"
-    dir_exists__41_v0 "${sdk_path_2784}"
+    local sdk_path_2826="${command_63}"
+    dir_exists__41_v0 "${sdk_path_2826}"
     local ret_dir_exists41_v0__30_12="${ret_dir_exists41_v0}"
     if [ "$(( ! ret_dir_exists41_v0__30_12 ))" != 0 ]; then
         bail__181_v0 "The macOS SDK from Xcode or CommandLineTools is required to build Nix." 0
     fi
-    local sdk_libs_2785="${sdk_path_2784}/usr/lib"
-    local sdk_cflags_2786="-I${sdk_path_2784}/usr/include"
-    env_var_set__121_v0 "LIBCURL_LIBS" "${sdk_libs_2785}"
+    local sdk_libs_2827="${sdk_path_2826}/usr/lib"
+    local sdk_cflags_2828="-I${sdk_path_2826}/usr/include"
+    env_var_set__121_v0 "LIBCURL_LIBS" "${sdk_libs_2827}"
     __status=$?
-    env_var_set__121_v0 "LIBCURL_CFLAGS" "${sdk_cflags_2786}"
+    env_var_set__121_v0 "LIBCURL_CFLAGS" "${sdk_cflags_2828}"
     __status=$?
-    env_var_set__121_v0 "LIBARCHIVE_LIBS" "${sdk_libs_2785}"
+    env_var_set__121_v0 "LIBARCHIVE_LIBS" "${sdk_libs_2827}"
     __status=$?
-    env_var_set__121_v0 "LIBARCHIVE_CFLAGS" "${sdk_cflags_2786}"
+    env_var_set__121_v0 "LIBARCHIVE_CFLAGS" "${sdk_cflags_2828}"
     __status=$?
-    env_var_set__121_v0 "OPENSSL_LIBS" "${sdk_libs_2785}"
+    env_var_set__121_v0 "OPENSSL_LIBS" "${sdk_libs_2827}"
     __status=$?
-    env_var_set__121_v0 "OPENSSL_CFLAGS" "${sdk_cflags_2786}"
+    env_var_set__121_v0 "OPENSSL_CFLAGS" "${sdk_cflags_2828}"
     __status=$?
     export LIBCURL_LIBS LIBCURL_CFLAGS                   LIBARCHIVE_LIBS LIBARCHIVE_CFLAGS                   OPENSSL_LIBS OPENSSL_CFLAGS
     __status=$?
 }
 
-try_build_nix__478_v0() {
+try_build_nix__477_v0() {
     get_cache_root__200_v0 
-    local cache_root_2783="${ret_get_cache_root200_v0}"
+    local cache_root_2825="${ret_get_cache_root200_v0}"
     local array_64=("cc" "c++" "pkg-config" "make" "flex" "bison" "perl")
     check_deps__185_v0 array_64[@]
     __status=$?
@@ -1480,389 +1507,391 @@ try_build_nix__478_v0() {
     get_osname__195_v0 
     local ret_get_osname195_v0__60_8="${ret_get_osname195_v0}"
     if [ "$([ "_${ret_get_osname195_v0__60_8}" != "_Darwin" ]; echo $?)" != 0 ]; then
-        darwin_export_sdk__477_v0 
+        darwin_export_sdk__476_v0 
     fi
     env_var_set__121_v0 "step_total" "9"
     __status=$?
-    get_source_root__397_v0 
-    local ret_get_source_root397_v0__65_22="${ret_get_source_root397_v0}"
-    dir_create__47_v0 "${ret_get_source_root397_v0__65_22}"
+    get_source_root__396_v0 
+    local ret_get_source_root396_v0__65_22="${ret_get_source_root396_v0}"
+    dir_create__47_v0 "${ret_get_source_root396_v0__65_22}"
     __status=$?
-    dir_create__47_v0 "${cache_root_2783}/nix-deps/lib/pkgconfig"
+    dir_create__47_v0 "${cache_root_2825}/nix-deps/lib/pkgconfig"
     __status=$?
-    build_openssl__425_v0 
+    build_openssl__424_v0 
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_try_build_nix478_v0=''
+        ret_try_build_nix477_v0=''
         return "${__status}"
     fi
-    build_boost__456_v0 
+    build_boost__455_v0 
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_try_build_nix478_v0=''
+        ret_try_build_nix477_v0=''
         return "${__status}"
     fi
-    build_nlohmann_json__445_v0 
+    build_nlohmann_json__444_v0 
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_try_build_nix478_v0=''
+        ret_try_build_nix477_v0=''
         return "${__status}"
     fi
-    build_lowdown__436_v0 
+    build_lowdown__435_v0 
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_try_build_nix478_v0=''
+        ret_try_build_nix477_v0=''
         return "${__status}"
     fi
-    build_autoconf_dep__464_v0 "libbrotlicommon" "c/include"
+    build_autoconf_dep__463_v0 "libbrotlicommon" "c/include"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_try_build_nix478_v0=''
+        ret_try_build_nix477_v0=''
         return "${__status}"
     fi
-    build_autoconf_dep__464_v0 "libsodium" "src/libsodium/include"
+    build_autoconf_dep__463_v0 "libsodium" "src/libsodium/include"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_try_build_nix478_v0=''
+        ret_try_build_nix477_v0=''
         return "${__status}"
     fi
-    build_autoconf_dep__464_v0 "libeditline" "include"
+    build_autoconf_dep__463_v0 "libeditline" "include"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_try_build_nix478_v0=''
+        ret_try_build_nix477_v0=''
         return "${__status}"
     fi
-    build_autoconf_dep__464_v0 "libarchive" "libarchive"
+    build_autoconf_dep__463_v0 "libarchive" "libarchive"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_try_build_nix478_v0=''
+        ret_try_build_nix477_v0=''
         return "${__status}"
     fi
-    build_nix__475_v0 
+    build_nix__474_v0 
     __status=$?
     if [ "${__status}" != 0 ]; then
-        ret_try_build_nix478_v0=''
+        ret_try_build_nix477_v0=''
         return "${__status}"
     fi
 }
 
-is_nix_installed__480_v0() {
+is_nix_installed__479_v0() {
     env_var_test__119_v0 "nosystem"
     local ret_env_var_test119_v0__24_8="${ret_env_var_test119_v0}"
     if [ "${ret_env_var_test119_v0__24_8}" != 0 ]; then
-        ret_is_nix_installed480_v0=0
+        ret_is_nix_installed479_v0=0
         return 0
     fi
     dir_exists__41_v0 "/nix/store"
     local ret_dir_exists41_v0__29_8="${ret_dir_exists41_v0}"
     if [ "${ret_dir_exists41_v0__29_8}" != 0 ]; then
-        ret_is_nix_installed480_v0=1
+        ret_is_nix_installed479_v0=1
         return 0
     fi
-    ret_is_nix_installed480_v0=0
+    ret_is_nix_installed479_v0=0
     return 0
 }
 
-get_nix__481_v0() {
+get_nix__480_v0() {
     get_cache_root__200_v0 
-    local cache_root_2765="${ret_get_cache_root200_v0}"
+    local cache_root_2807="${ret_get_cache_root200_v0}"
     get_osname__195_v0 
-    local osname_2766="${ret_get_osname195_v0}"
+    local osname_2808="${ret_get_osname195_v0}"
     get_system__197_v0 
-    local system_2770="${ret_get_system197_v0}"
-    local nix_path_2771="${cache_root_2765}/nix-static"
-    local fakedir_path_2772="${cache_root_2765}/nix-deps/lib/libfakedir.dylib"
+    local system_2812="${ret_get_system197_v0}"
+    local nix_path_2813="${cache_root_2807}/nix-static"
+    local fakedir_path_2814="${cache_root_2807}/nix-deps/lib/libfakedir.dylib"
     enter_alt_buffer__175_v0 
     set_title__174_v0 "Building Nix..."
     trap "teardown__177_v0; exit 1" SIGKILL SIGTERM SIGINT SIGABRT
     __status=$?
-    file_exists__42_v0 "${fakedir_path_2772}"
+    file_exists__42_v0 "${fakedir_path_2814}"
     local ret_file_exists42_v0__58_35="${ret_file_exists42_v0}"
-    if [ "$(( $([ "_${osname_2766}" != "_Darwin" ]; echo $?) && $(( ! ret_file_exists42_v0__58_35 )) ))" != 0 ]; then
-        dir_create__47_v0 "${cache_root_2765}/nix-deps/lib"
+    if [ "$(( $([ "_${osname_2808}" != "_Darwin" ]; echo $?) && $(( ! ret_file_exists42_v0__58_35 )) ))" != 0 ]; then
+        dir_create__47_v0 "${cache_root_2807}/nix-deps/lib"
         __status=$?
-        pull_binary__336_v0 "libfakedir.dylib" "${fakedir_path_2772}"
+        pull_binary__335_v0 "libfakedir.dylib" "${fakedir_path_2814}"
         __status=$?
         if [ "${__status}" != 0 ]; then
             teardown__177_v0 1
-            ret_get_nix481_v0=''
+            ret_get_nix480_v0=''
             return 1
         fi
     fi
     get_self__182_v0 
     local ret_get_self182_v0__67_62="${ret_get_self182_v0}"
-    exists_newer__180_v0 "${fakedir_path_2772}" "${ret_get_self182_v0__67_62}"
+    exists_newer__180_v0 "${fakedir_path_2814}" "${ret_get_self182_v0__67_62}"
     local ret_exists_newer180_v0__67_35="${ret_exists_newer180_v0}"
-    if [ "$(( $([ "_${osname_2766}" != "_Darwin" ]; echo $?) && $(( ! ret_exists_newer180_v0__67_35 )) ))" != 0 ]; then
-        pull_binary__336_v0 "libfakedir.dylib" "${fakedir_path_2772}"
+    if [ "$(( $([ "_${osname_2808}" != "_Darwin" ]; echo $?) && $(( ! ret_exists_newer180_v0__67_35 )) ))" != 0 ]; then
+        pull_binary__335_v0 "libfakedir.dylib" "${fakedir_path_2814}"
         __status=$?
     fi
-    file_exists__42_v0 "${nix_path_2771}"
+    file_exists__42_v0 "${nix_path_2813}"
     local ret_file_exists42_v0__71_8="${ret_file_exists42_v0}"
     if [ "${ret_file_exists42_v0__71_8}" != 0 ]; then
         teardown__177_v0 0
-        ret_get_nix481_v0=0
+        ret_get_nix480_v0=0
         return 0
     fi
     env_var_test__119_v0 "nobins"
     local ret_env_var_test119_v0__76_8="${ret_env_var_test119_v0}"
     if [ "${ret_env_var_test119_v0__76_8}" != 0 ]; then
-        try_build_nix__478_v0 
+        try_build_nix__477_v0 
         __status=$?
         if [ "${__status}" != 0 ]; then
             teardown__177_v0 1
-            ret_get_nix481_v0=''
+            ret_get_nix480_v0=''
             return 1
         fi
     fi
-    pull_binary__336_v0 "nix.${system_2770}" "${nix_path_2771}"
+    pull_binary__335_v0 "nix.${system_2812}" "${nix_path_2813}"
     __status=$?
     if [ "${__status}" != 0 ]; then
-        try_build_nix__478_v0 
+        try_build_nix__477_v0 
         __status=$?
         if [ "${__status}" != 0 ]; then
             teardown__177_v0 1
-            ret_get_nix481_v0=''
+            ret_get_nix480_v0=''
             return 1
         fi
     fi
-    chmod +x ${nix_path_2771}
+    chmod +x ${nix_path_2813}
     __status=$?
     teardown__177_v0 0
-    ret_get_nix481_v0=0
+    ret_get_nix480_v0=0
     return 0
 }
 
-migrate_nix_store__482_v0() {
+migrate_nix_store__481_v0() {
     get_nix_root__199_v0 
-    local ret_get_nix_root199_v0__105_30="${ret_get_nix_root199_v0}"
+    local ret_get_nix_root199_v0__105_36="${ret_get_nix_root199_v0}"
     local command_65
-    command_65="$(readlink -f ${ret_get_nix_root199_v0__105_30})"
+    command_65="$(readlink -f ${ret_get_nix_root199_v0__105_36})"
     __status=$?
-    if [ "${__status}" != 0 ]; then
+    nix_root_2806="${command_65}"
+    if [ "$(( __status != 0 ))" != 0 ]; then
         get_nix_root__199_v0 
+        nix_root_2806="${ret_get_nix_root199_v0}"
     fi
-    nix_root_2764="${command_65}"
-    dir_exists__41_v0 "${nix_root_2764}/nix/store"
-    local ret_dir_exists41_v0__109_12="${ret_dir_exists41_v0}"
-    if [ "$(( ! ret_dir_exists41_v0__109_12 ))" != 0 ]; then
-        ret_migrate_nix_store482_v0=0
+    dir_exists__41_v0 "${nix_root_2806}/nix/store"
+    local ret_dir_exists41_v0__110_12="${ret_dir_exists41_v0}"
+    if [ "$(( ! ret_dir_exists41_v0__110_12 ))" != 0 ]; then
+        ret_migrate_nix_store481_v0=0
         return 0
     fi
-    echo "Migrating Nix store to system-wide install..."
-    nix copy --from ${nix_root_2764} --all --no-check-sigs
+    >&2 echo "Migrating Nix store to system-wide install..."
+    __status=$?
+    nix --extra-experimental-features nix-command copy --from ${nix_root_2806} --all --no-check-sigs
     __status=$?
     if [ "$(( __status == 0 ))" != 0 ]; then
-        chmod -R +wx ${nix_root_2764} && rm -rf ${nix_root_2764}
+        chmod -R +wx ${nix_root_2806} && rm -rf ${nix_root_2806}
         __status=$?
     fi
 }
 
-unpack_channels__483_v0() {
+unpack_channels__482_v0() {
     get_repo_root__201_v0 
-    local repo_root_2757="${ret_get_repo_root201_v0}"
+    local repo_root_2799="${ret_get_repo_root201_v0}"
     get_self__182_v0 
-    local ret_get_self182_v0__125_52="${ret_get_self182_v0}"
-    exists_newer__180_v0 "${repo_root_2757}/.nixie/channels" "${ret_get_self182_v0__125_52}"
-    local ret_exists_newer180_v0__125_8="${ret_exists_newer180_v0}"
-    if [ "${ret_exists_newer180_v0__125_8}" != 0 ]; then
+    local ret_get_self182_v0__126_52="${ret_get_self182_v0}"
+    exists_newer__180_v0 "${repo_root_2799}/.nixie/channels" "${ret_get_self182_v0__126_52}"
+    local ret_exists_newer180_v0__126_8="${ret_exists_newer180_v0}"
+    if [ "${ret_exists_newer180_v0__126_8}" != 0 ]; then
         env_var_get__122_v0 "NIX_PATH"
         __status=$?
-        local __NIX_PATH_2763="${ret_env_var_get122_v0}"
-        env_var_set__121_v0 "NIX_PATH" "${repo_root_2757}/.nixie/channels:${__NIX_PATH_2763}"
+        local __NIX_PATH_2805="${ret_env_var_get122_v0}"
+        env_var_set__121_v0 "NIX_PATH" "${repo_root_2799}/.nixie/channels:${__NIX_PATH_2805}"
         __status=$?
         export NIX_PATH
         __status=$?
-        ret_unpack_channels483_v0=0
+        ret_unpack_channels482_v0=0
         return 0
     fi
     echo "Unpacking Nix channels, hang tight..."
-    dir_create__47_v0 "${repo_root_2757}/.nixie"
+    dir_create__47_v0 "${repo_root_2799}/.nixie"
     __status=$?
-    untar__184_v0 "channels -C ${repo_root_2757}/.nixie" 0
+    untar__184_v0 "channels -C ${repo_root_2799}/.nixie" 0
     __status=$?
     if [ "${__status}" != 0 ]; then
-        mkdir ${repo_root_2757}/.nixie/channels
+        mkdir ${repo_root_2799}/.nixie/channels
         __status=$?
     fi
 }
 
-populate_extras__484_v0() {
-    local args_2747=()
+populate_extras__483_v0() {
+    local args_2789=()
     env_var_get__122_v0 "EXTRA_FEATURES"
     __status=$?
-    local __EXTRA_FEATURES_2748="${ret_env_var_get122_v0}"
+    local __EXTRA_FEATURES_2790="${ret_env_var_get122_v0}"
     env_var_get__122_v0 "EXTRA_SUBSTITUTERS"
     __status=$?
-    local __EXTRA_SUBSTITUTERS_2749="${ret_env_var_get122_v0}"
+    local __EXTRA_SUBSTITUTERS_2791="${ret_env_var_get122_v0}"
     env_var_get__122_v0 "EXTRA_TRUSTED_PUBLIC_KEYS"
     __status=$?
-    local __EXTRA_TRUSTED_PUBLIC_KEYS_2750="${ret_env_var_get122_v0}"
+    local __EXTRA_TRUSTED_PUBLIC_KEYS_2792="${ret_env_var_get122_v0}"
     get_nix_root__199_v0 
-    local nix_root_2751="${ret_get_nix_root199_v0}"
-    if [ "$([ "_${__EXTRA_FEATURES_2748}" == "_" ]; echo $?)" != 0 ]; then
-        args_2747+=("--extra-experimental-features" "${__EXTRA_FEATURES_2748}")
+    local nix_root_2793="${ret_get_nix_root199_v0}"
+    if [ "$([ "_${__EXTRA_FEATURES_2790}" == "_" ]; echo $?)" != 0 ]; then
+        args_2789+=("--extra-experimental-features" "${__EXTRA_FEATURES_2790}")
     fi
-    if [ "$([ "_${__EXTRA_SUBSTITUTERS_2749}" == "_" ]; echo $?)" != 0 ]; then
-        args_2747+=("--extra-substituters" "${__EXTRA_SUBSTITUTERS_2749}")
+    if [ "$([ "_${__EXTRA_SUBSTITUTERS_2791}" == "_" ]; echo $?)" != 0 ]; then
+        args_2789+=("--extra-substituters" "${__EXTRA_SUBSTITUTERS_2791}")
     fi
-    if [ "$([ "_${__EXTRA_TRUSTED_PUBLIC_KEYS_2750}" == "_" ]; echo $?)" != 0 ]; then
-        args_2747+=("--extra-trusted-public-keys" "${__EXTRA_TRUSTED_PUBLIC_KEYS_2750}")
+    if [ "$([ "_${__EXTRA_TRUSTED_PUBLIC_KEYS_2792}" == "_" ]; echo $?)" != 0 ]; then
+        args_2789+=("--extra-trusted-public-keys" "${__EXTRA_TRUSTED_PUBLIC_KEYS_2792}")
     fi
     get_osname__195_v0 
-    local ret_get_osname195_v0__161_8="${ret_get_osname195_v0}"
-    is_nix_installed__480_v0 
-    local ret_is_nix_installed480_v0__161_41="${ret_is_nix_installed480_v0}"
-    if [ "$(( $([ "_${ret_get_osname195_v0__161_8}" == "_Darwin" ]; echo $?) && $(( ! ret_is_nix_installed480_v0__161_41 )) ))" != 0 ]; then
+    local ret_get_osname195_v0__162_8="${ret_get_osname195_v0}"
+    is_nix_installed__479_v0 
+    local ret_is_nix_installed479_v0__162_41="${ret_is_nix_installed479_v0}"
+    if [ "$(( $([ "_${ret_get_osname195_v0__162_8}" == "_Darwin" ]; echo $?) && $(( ! ret_is_nix_installed479_v0__162_41 )) ))" != 0 ]; then
         local command_71
-        command_71="$(readlink -f ${nix_root_2751})"
+        command_71="$(readlink -f ${nix_root_2793})"
         __status=$?
-        args_2747+=("--store" "${command_71}")
+        args_2789+=("--store" "${command_71}")
     fi
-    ret_populate_extras484_v0=("${args_2747[@]}")
+    ret_populate_extras483_v0=("${args_2789[@]}")
     return 0
 }
 
-launch_darwin_workaround__485_v0() {
-    local name_2856="${1}"
-    local nix_path_2857="${2}"
-    local args_2858=("${!3}")
+launch_darwin_workaround__484_v0() {
+    local name_2899="${1}"
+    local nix_path_2900="${2}"
+    local args_2901=("${!3}")
     get_cache_root__200_v0 
-    local cache_root_2859="${ret_get_cache_root200_v0}"
+    local cache_root_2902="${ret_get_cache_root200_v0}"
     get_nix_root__199_v0 
-    local nix_root_2860="${ret_get_nix_root199_v0}"
-    local fakedir_path_2861="${cache_root_2859}/nix-deps/lib/libfakedir.dylib"
+    local nix_root_2903="${ret_get_nix_root199_v0}"
+    local fakedir_path_2904="${cache_root_2902}/nix-deps/lib/libfakedir.dylib"
     env_var_set__121_v0 "FAKEDIR_PATTERN" "/nix"
     __status=$?
-    env_var_set__121_v0 "FAKEDIR_TARGET" "${nix_root_2860}/nix"
+    env_var_set__121_v0 "FAKEDIR_TARGET" "${nix_root_2903}/nix"
     __status=$?
     export FAKEDIR_PATTERN FAKEDIR_TARGET
     __status=$?
-    _NIX_TEST_NO_SANDBOX=1             DYLD_INSERT_LIBRARIES="${fakedir_path_2861}"             DYLD_LIBRARY_PATH="${cache_root_2859}/nix-deps/lib"                 exec -a ${name_2856} "${nix_path_2857}" "${args_2858[@]}"
+    _NIX_TEST_NO_SANDBOX=1             DYLD_INSERT_LIBRARIES="${fakedir_path_2904}"             DYLD_LIBRARY_PATH="${cache_root_2902}/nix-deps/lib"                 exec -a ${name_2899} "${nix_path_2900}" "${args_2901[@]}"
     __status=$?
 }
 
-launch_shell_command__486_v0() {
-    local nix_path_2862="${1}"
-    local cmd_2863="${2}"
-    local extras_2864=("${!3}")
-    local args_2865=("${!4}")
+launch_shell_command__485_v0() {
+    local nix_path_2905="${1}"
+    local cmd_2906="${2}"
+    local extras_2907=("${!3}")
+    local args_2908=("${!4}")
     get_repo_root__201_v0 
-    local repo_root_2866="${ret_get_repo_root201_v0}"
+    local repo_root_2909="${ret_get_repo_root201_v0}"
     env_var_get__122_v0 "PWD"
     __status=$?
-    local pwd_2867="${ret_env_var_get122_v0}"
-    local name_2868="nix-shell"
-    local shell_cmd_2869=("${repo_root_2866}/shell.nix" "--command" "${cmd_2863} ${args_2865[@]}")
-    file_exists__42_v0 "${pwd_2867}/flake.nix"
-    local ret_file_exists42_v0__210_8="${ret_file_exists42_v0}"
-    if [ "${ret_file_exists42_v0__210_8}" != 0 ]; then
-        name_2868="nix"
-        local array_73=("develop" "${pwd_2867}" "-c" "${cmd_2863}")
-        shell_cmd_2869=("${array_73[@]}" "${args_2865[@]}")
+    local pwd_2910="${ret_env_var_get122_v0}"
+    local name_2911="nix-shell"
+    local shell_cmd_2912=("${repo_root_2909}/shell.nix" "--command" "${cmd_2906} ${args_2908[@]}")
+    file_exists__42_v0 "${pwd_2910}/flake.nix"
+    local ret_file_exists42_v0__211_8="${ret_file_exists42_v0}"
+    if [ "${ret_file_exists42_v0__211_8}" != 0 ]; then
+        name_2911="nix"
+        local array_73=("develop" "${pwd_2910}" "-c" "${cmd_2906}")
+        shell_cmd_2912=("${array_73[@]}" "${args_2908[@]}")
     else
-        file_exists__42_v0 "${repo_root_2866}/flake.nix"
-        local ret_file_exists42_v0__213_16="${ret_file_exists42_v0}"
-        if [ "${ret_file_exists42_v0__213_16}" != 0 ]; then
-            name_2868="nix"
-            local array_75=("develop" "${repo_root_2866}" "-c" "${cmd_2863}")
-            shell_cmd_2869=("${array_75[@]}" "${args_2865[@]}")
+        file_exists__42_v0 "${repo_root_2909}/flake.nix"
+        local ret_file_exists42_v0__214_16="${ret_file_exists42_v0}"
+        if [ "${ret_file_exists42_v0__214_16}" != 0 ]; then
+            name_2911="nix"
+            local array_75=("develop" "${repo_root_2909}" "-c" "${cmd_2906}")
+            shell_cmd_2912=("${array_75[@]}" "${args_2908[@]}")
         else
-            file_exists__42_v0 "${pwd_2867}/shell.nix"
-            local ret_file_exists42_v0__216_16="${ret_file_exists42_v0}"
-            if [ "${ret_file_exists42_v0__216_16}" != 0 ]; then
-                shell_cmd_2869=("${pwd_2867}/shell.nix" "--command" "${cmd_2863} ${args_2865[@]}")
+            file_exists__42_v0 "${pwd_2910}/shell.nix"
+            local ret_file_exists42_v0__217_16="${ret_file_exists42_v0}"
+            if [ "${ret_file_exists42_v0__217_16}" != 0 ]; then
+                shell_cmd_2912=("${pwd_2910}/shell.nix" "--command" "${cmd_2906} ${args_2908[@]}")
             fi
         fi
     fi
     get_osname__195_v0 
-    local ret_get_osname195_v0__220_8="${ret_get_osname195_v0}"
-    is_nix_installed__480_v0 
-    local ret_is_nix_installed480_v0__220_41="${ret_is_nix_installed480_v0}"
-    if [ "$(( $([ "_${ret_get_osname195_v0__220_8}" != "_Darwin" ]; echo $?) && $(( ! ret_is_nix_installed480_v0__220_41 )) ))" != 0 ]; then
-        local array_add_78=("${extras_2864[@]}" "${shell_cmd_2869[@]}")
-        launch_darwin_workaround__485_v0 "${name_2868}" "${nix_path_2862}" array_add_78[@]
+    local ret_get_osname195_v0__221_8="${ret_get_osname195_v0}"
+    is_nix_installed__479_v0 
+    local ret_is_nix_installed479_v0__221_41="${ret_is_nix_installed479_v0}"
+    if [ "$(( $([ "_${ret_get_osname195_v0__221_8}" != "_Darwin" ]; echo $?) && $(( ! ret_is_nix_installed479_v0__221_41 )) ))" != 0 ]; then
+        local array_add_78=("${extras_2907[@]}" "${shell_cmd_2912[@]}")
+        launch_darwin_workaround__484_v0 "${name_2911}" "${nix_path_2905}" array_add_78[@]
     else
-        exec -a ${name_2868} ${nix_path_2862} "${extras_2864[@]}" "${shell_cmd_2869[@]}"
+        exec -a ${name_2911} ${nix_path_2905} "${extras_2907[@]}" "${shell_cmd_2912[@]}"
         __status=$?
     fi
 }
 
-launch_nix_shebang__487_v0() {
-    local nix_path_2845="${1}"
-    local file_2846="${2}"
-    local extras_2847=("${!3}")
-    local args_2848=("${!4}")
-    local shebang_2849=""
-    i_2851=0;
-    while IFS= read -r line_2850 || [ -n "$line_2850" ]; do
-        if [ "$(( i_2851 == 1 ))" != 0 ]; then
-            shebang_2849="${line_2850}"
+launch_nix_shebang__486_v0() {
+    local nix_path_2888="${1}"
+    local file_2889="${2}"
+    local extras_2890=("${!3}")
+    local args_2891=("${!4}")
+    local shebang_2892=""
+    i_2894=0;
+    while IFS= read -r line_2893 || [ -n "$line_2893" ]; do
+        if [ "$(( i_2894 == 1 ))" != 0 ]; then
+            shebang_2892="${line_2893}"
             break
         fi
-        (( i_2851++ )) || true
-    done <"${file_2846}"
-    starts_with__23_v0 "${shebang_2849}" "#"'!'""
-    local ret_starts_with23_v0__247_12="${ret_starts_with23_v0}"
-    if [ "$(( ! ret_starts_with23_v0__247_12 ))" != 0 ]; then
-        ret_launch_nix_shebang487_v0=''
+        (( i_2894++ )) || true
+    done <"${file_2889}"
+    starts_with__23_v0 "${shebang_2892}" "#"'!'""
+    local ret_starts_with23_v0__248_12="${ret_starts_with23_v0}"
+    if [ "$(( ! ret_starts_with23_v0__248_12 ))" != 0 ]; then
+        ret_launch_nix_shebang486_v0=''
         return 0
     fi
-    slice__25_v0 "${shebang_2849}" 2 0
-    local ret_slice25_v0__249_27="${ret_slice25_v0}"
-    split__5_v0 "${ret_slice25_v0__249_27}" " "
-    local bang_args_2852=("${ret_split5_v0[@]}")
-    array_shift__78_v0 "bang_args_2852"
+    slice__25_v0 "${shebang_2892}" 2 0
+    local ret_slice25_v0__250_27="${ret_slice25_v0}"
+    split__5_v0 "${ret_slice25_v0__250_27}" " "
+    local bang_args_2895=("${ret_split5_v0[@]}")
+    array_shift__78_v0 "bang_args_2895"
     __status=$?
-    local name_2853="${ret_array_shift78_v0}"
-    i_2855=0;
-    for arg_2854 in "${bang_args_2852[@]}"; do
-        if [ "$([ "_${arg_2854}" != "_-i" ]; echo $?)" != 0 ]; then
-            bang_args_2852["${i_2855}"]="--command"
-            bang_args_2852["$(( i_2855 + 1 ))"]="${bang_args_2852[$(( i_2855 + 1 ))]} ${file_2846} ${args_2848[@]}"
+    local name_2896="${ret_array_shift78_v0}"
+    i_2898=0;
+    for arg_2897 in "${bang_args_2895[@]}"; do
+        if [ "$([ "_${arg_2897}" != "_-i" ]; echo $?)" != 0 ]; then
+            bang_args_2895["${i_2898}"]="--command"
+            bang_args_2895["$(( i_2898 + 1 ))"]="${bang_args_2895[$(( i_2898 + 1 ))]} ${file_2889} ${args_2891[@]}"
             break
         fi
-        (( i_2855++ )) || true
+        (( i_2898++ )) || true
     done
     get_osname__195_v0 
-    local ret_get_osname195_v0__261_8="${ret_get_osname195_v0}"
-    is_nix_installed__480_v0 
-    local ret_is_nix_installed480_v0__261_41="${ret_is_nix_installed480_v0}"
-    if [ "$(( $([ "_${ret_get_osname195_v0__261_8}" != "_Darwin" ]; echo $?) && $(( ! ret_is_nix_installed480_v0__261_41 )) ))" != 0 ]; then
-        local array_add_79=("${extras_2847[@]}" "${bang_args_2852[@]}")
-        launch_darwin_workaround__485_v0 "${name_2853}" "${nix_path_2845}" array_add_79[@]
+    local ret_get_osname195_v0__262_8="${ret_get_osname195_v0}"
+    is_nix_installed__479_v0 
+    local ret_is_nix_installed479_v0__262_41="${ret_is_nix_installed479_v0}"
+    if [ "$(( $([ "_${ret_get_osname195_v0__262_8}" != "_Darwin" ]; echo $?) && $(( ! ret_is_nix_installed479_v0__262_41 )) ))" != 0 ]; then
+        local array_add_79=("${extras_2890[@]}" "${bang_args_2895[@]}")
+        launch_darwin_workaround__484_v0 "${name_2896}" "${nix_path_2888}" array_add_79[@]
     else
-        exec -a ${name_2853} ${nix_path_2845} "${extras_2847[@]}" "${bang_args_2852[@]}"
+        exec -a ${name_2896} ${nix_path_2888} "${extras_2890[@]}" "${bang_args_2895[@]}"
         __status=$?
     fi
 }
 
-launch_nix__488_v0() {
-    local self_2742="${1}"
-    local args_2743=("${!2}")
+launch_nix__487_v0() {
+    local self_2784="${1}"
+    local args_2785=("${!2}")
     get_cache_root__200_v0 
-    local cache_root_2744="${ret_get_cache_root200_v0}"
+    local cache_root_2786="${ret_get_cache_root200_v0}"
     get_nix_root__199_v0 
-    local nix_path_2746="${cache_root_2744}/nix-static"
-    populate_extras__484_v0 
-    local extras_2753=("${ret_populate_extras484_v0[@]}")
-    split__5_v0 "${self_2742}" "/"
-    local ret_split5_v0__278_33=("${ret_split5_v0[@]}")
-    array_last__74_v0 ret_split5_v0__278_33[@]
+    local nix_path_2788="${cache_root_2786}/nix-static"
+    populate_extras__483_v0 
+    local extras_2795=("${ret_populate_extras483_v0[@]}")
+    split__5_v0 "${self_2784}" "/"
+    local ret_split5_v0__279_33=("${ret_split5_v0[@]}")
+    array_last__74_v0 ret_split5_v0__279_33[@]
     __status=$?
-    local name_2756="${ret_array_last74_v0}"
-    starts_with__23_v0 "${name_2756}" "nix-"
-    local ret_starts_with23_v0__280_8="${ret_starts_with23_v0}"
-    if [ "${ret_starts_with23_v0__280_8}" != 0 ]; then
-        unpack_channels__483_v0 
+    local name_2798="${ret_array_last74_v0}"
+    starts_with__23_v0 "${name_2798}" "nix-"
+    local ret_starts_with23_v0__281_8="${ret_starts_with23_v0}"
+    if [ "${ret_starts_with23_v0__281_8}" != 0 ]; then
+        unpack_channels__482_v0 
     fi
-    is_nix_installed__480_v0 
-    local ret_is_nix_installed480_v0__283_8="${ret_is_nix_installed480_v0}"
-    if [ "${ret_is_nix_installed480_v0__283_8}" != 0 ]; then
-        migrate_nix_store__482_v0 
-        nix_path_2746="nix"
+    is_nix_installed__479_v0 
+    local ret_is_nix_installed479_v0__284_8="${ret_is_nix_installed479_v0}"
+    if [ "${ret_is_nix_installed479_v0__284_8}" != 0 ]; then
+        migrate_nix_store__481_v0 
+        nix_path_2788="nix"
     else
-        get_nix__481_v0 
+        get_nix__480_v0 
         __status=$?
         if [ "${__status}" != 0 ]; then
             bail__181_v0 "Failed to obtain Nix. Check your internet connection." 0
@@ -1870,30 +1899,30 @@ launch_nix__488_v0() {
     fi
     export NIX_SSL_CERT_FILE
     __status=$?
-    file_exists__42_v0 "${args_2743[0]}"
-    local ret_file_exists42_v0__294_8="${ret_file_exists42_v0}"
-    ends_with__24_v0 "${args_2743[0]}" ".nix"
-    local ret_ends_with24_v0__294_37="${ret_ends_with24_v0}"
-    if [ "$(( ret_file_exists42_v0__294_8 && $(( ! ret_ends_with24_v0__294_37 )) ))" != 0 ]; then
-        local args_shebang_2844=("${args_2743[@]}")
-        array_shift__78_v0 "args_shebang_2844"
+    file_exists__42_v0 "${args_2785[0]}"
+    local ret_file_exists42_v0__295_8="${ret_file_exists42_v0}"
+    ends_with__24_v0 "${args_2785[0]}" ".nix"
+    local ret_ends_with24_v0__295_37="${ret_ends_with24_v0}"
+    if [ "$(( ret_file_exists42_v0__295_8 && $(( ! ret_ends_with24_v0__295_37 )) ))" != 0 ]; then
+        local args_shebang_2887=("${args_2785[@]}")
+        array_shift__78_v0 "args_shebang_2887"
         __status=$?
-        launch_nix_shebang__487_v0 "${nix_path_2746}" "${args_2743[0]}" extras_2753[@] args_shebang_2844[@]
+        launch_nix_shebang__486_v0 "${nix_path_2788}" "${args_2785[0]}" extras_2795[@] args_shebang_2887[@]
     fi
-    starts_with__23_v0 "${name_2756}" "nix"
-    local ret_starts_with23_v0__300_12="${ret_starts_with23_v0}"
-    if [ "$(( ! ret_starts_with23_v0__300_12 ))" != 0 ]; then
-        launch_shell_command__486_v0 "${nix_path_2746}" "${name_2756}" extras_2753[@] args_2743[@]
+    starts_with__23_v0 "${name_2798}" "nix"
+    local ret_starts_with23_v0__301_12="${ret_starts_with23_v0}"
+    if [ "$(( ! ret_starts_with23_v0__301_12 ))" != 0 ]; then
+        launch_shell_command__485_v0 "${nix_path_2788}" "${name_2798}" extras_2795[@] args_2785[@]
     fi
     get_osname__195_v0 
-    local ret_get_osname195_v0__304_8="${ret_get_osname195_v0}"
-    is_nix_installed__480_v0 
-    local ret_is_nix_installed480_v0__304_41="${ret_is_nix_installed480_v0}"
-    if [ "$(( $([ "_${ret_get_osname195_v0__304_8}" != "_Darwin" ]; echo $?) && $(( ! ret_is_nix_installed480_v0__304_41 )) ))" != 0 ]; then
-        local array_add_80=("${extras_2753[@]}" "${args_2743[@]}")
-        launch_darwin_workaround__485_v0 "${name_2756}" "${nix_path_2746}" array_add_80[@]
+    local ret_get_osname195_v0__305_8="${ret_get_osname195_v0}"
+    is_nix_installed__479_v0 
+    local ret_is_nix_installed479_v0__305_41="${ret_is_nix_installed479_v0}"
+    if [ "$(( $([ "_${ret_get_osname195_v0__305_8}" != "_Darwin" ]; echo $?) && $(( ! ret_is_nix_installed479_v0__305_41 )) ))" != 0 ]; then
+        local array_add_80=("${extras_2795[@]}" "${args_2785[@]}")
+        launch_darwin_workaround__484_v0 "${name_2798}" "${nix_path_2788}" array_add_80[@]
     else
-        exec -a ${name_2756} ${nix_path_2746} "${extras_2753[@]}" "${args_2743[@]}"
+        exec -a ${name_2798} ${nix_path_2788} "${extras_2795[@]}" "${args_2785[@]}"
         __status=$?
     fi
 }
@@ -1904,7 +1933,7 @@ __status=$?
 if [ "${__status}" != 0 ]; then
     exit 1
 fi
-load_features__490_v0() {
+load_features__489_v0() {
     untar__184_v0 "features" 1
     __status=$?
     if [ "${__status}" != 0 ]; then
@@ -1934,25 +1963,27 @@ load_features__490_v0() {
 
 declare -r cmdl_68=("$0" "$@")
 args_7=("${cmdl_68[@]}")
-load_features__490_v0 
-catch_args__223_v0 "args_7"
+load_features__489_v0 
+catch_args__222_v0 "args_7"
 array_shift__78_v0 "args_7"
 __status=$?
-self_282="${ret_array_shift78_v0}"
+self_276="${ret_array_shift78_v0}"
 file_exists__42_v0 "/etc/pki/tls/certs/ca-bundle.crt"
-ret_file_exists42_v0__69_5="${ret_file_exists42_v0}"
+ret_file_exists42_v0__68_5="${ret_file_exists42_v0}"
 get_osname__195_v0 
-ret_get_osname195_v0__71_5="${ret_get_osname195_v0}"
-if [ "${ret_file_exists42_v0__69_5}" != 0 ]; then
+ret_get_osname195_v0__70_5="${ret_get_osname195_v0}"
+if [ "${ret_file_exists42_v0__68_5}" != 0 ]; then
     env_var_set__121_v0 "NIX_SSL_CERT_FILE" "/etc/pki/tls/certs/ca-bundle.crt"
     __status=$?
-elif [ "$([ "_${ret_get_osname195_v0__71_5}" != "_Darwin" ]; echo $?)" != 0 ]; then
+elif [ "$([ "_${ret_get_osname195_v0__70_5}" != "_Darwin" ]; echo $?)" != 0 ]; then
     env_var_set__121_v0 "NIX_SSL_CERT_FILE" "/etc/ssl/cert.pem"
     __status=$?
 fi
-launch_nix__488_v0 "${self_282}" args_7[@]
+launch_nix__487_v0 "${self_276}" args_7[@]
 exit 0
 cat <<DONOTPARSE
 
 -----BEGIN ARCHIVE SECTION-----[?1049h
-ãNßiˇ ÌŒÀnÇ@`÷<Öq/êBX∏@ú¶ì6⁄¿`Ïäå‡r—Ç∑ÙEMM”}õ4˝øÕôú˘œôë+±?‘´F˘A§côÊµvæW2¥á˜Û≠o?Ë∫“# /84{QwO*ˇ]pﬂç©ÀCü£~ïùÒ∂,EïÙd!ÚU”Woô úÒêSøÀ}vπúN¢◊p¸¬ºËôæ]/ÉYË{4Ú\Ôâﬁñûj±”bßŸY€÷Î{dB}6w9õMGô;"€U˘©Õœcôº/≥¥h-˚î$%),u —òMÉØCÌ“vÃ<∂À£\∑¶ §ué©ë»ÿŸH)Isb4öwøæƒbXÑÆ*                  Ÿ≥™` (  [?1049l [2K[37;2m# (tarball data)[0m
+ã›®iˇ ÌŒOoÇ0pŒ|
+„]”ä< vY≥E(∆ùHêâ¸∑}˙°ffŸ}Kñ=øÀ€º}ﬁ∑U©‹ÌÎ¥—~i-ÎR[ﬂ+1mÛvæˆÌ•Záhø`ﬂÏd›>©˝Ol)|7∫cÆ}åªUqÍ≈õıZVIGΩ 2m∫˙5Ñì@p
+Ê∑πœÆ√@∞iÙNπ=∞ÁÀe0}èEûÎ›≥Î“c-∑˝X∆yqÍoÍÏô2ü/\¡Á≥q.Û˜7jVtıRT ŒrµMï—Êê«ë„Ë3æå&||R[bñEBsî¨*€Ü3(’äXáCíë“:q-⁄_ü„1Ü}bˆ$’5                 ÄøÏt'¸Ô (  [?1049l [2K[37;2m# (tarball data)[0m
