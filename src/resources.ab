@@ -7,11 +7,10 @@ import { file_exists } from "std/fs"
 import { env_var_get, env_var_test } from "std/env"
 
 import { untar } from "./common.ab"
+import { SOURCE_CACHE, SOURCE_DERIVATION, NIX_BINS_DERIVATION } from "./features.ab"
 
 fun cachix_url(derivation: Text, member: Text): Text
 {
-    let SOURCE_CACHE = trust env_var_get("SOURCE_CACHE")
-
     return "https://{SOURCE_CACHE}/serve/{derivation}/{member}"
 }
 
@@ -27,8 +26,6 @@ fun cachix_url(derivation: Text, member: Text): Text
 /// - `dest`: The target directory to move the package contents into
 pub fun pull_source_file(member: Text, dest: Text): Null?
 {
-    let SOURCE_DERIVATION = trust env_var_get("SOURCE_DERIVATION")
-
     let where = ""
     let my_status = 1
 
@@ -80,8 +77,6 @@ pub fun pull_source_file(member: Text, dest: Text): Null?
 /// - `dest`: The target filename to move the file into
 pub fun pull_binary(member: Text, dest: Text): Null?
 {
-    let NIX_BINS_DERIVATION = trust env_var_get("NIX_BINS_DERIVATION")
-
     let where = trust untar(member)
     if status != 0 {
         let tmpf = trust $mktemp -t nixie_{member}_XXXXXXXX$

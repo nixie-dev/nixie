@@ -13,6 +13,8 @@ import { get_osname, get_system, get_cache_root
        , get_nix_root, get_repo_root }            from "./platform.ab"
 import { pull_binary }                            from "./resources.ab"
 import { try_build_nix }                          from "./builders.ab"
+import { EXTRA_FEATURES, EXTRA_SUBSTITUTERS
+       , EXTRA_TRUSTED_PUBLIC_KEYS }              from "./features.ab"
 
 /// Determine whether Nix is installed system-wide. Nixie can launch the
 /// system-wide Nix when it is available, using the script's bundled options.
@@ -144,10 +146,6 @@ fun populate_extras(): [Text]
 {
     let args = [Text]
 
-    let EXTRA_FEATURES            = trust env_var_get("EXTRA_FEATURES")
-    let EXTRA_SUBSTITUTERS        = trust env_var_get("EXTRA_SUBSTITUTERS")
-    let EXTRA_TRUSTED_PUBLIC_KEYS = trust env_var_get("EXTRA_TRUSTED_PUBLIC_KEYS")
-
     let nix_root = get_nix_root()
 
     if EXTRA_FEATURES != "":
@@ -237,7 +235,7 @@ fun launch_shell_command(nix_path: Text, cmd: Text, extras: [Text], args: [Text]
 fun launch_nix_shebang(nix_path: Text, file: Text, extras: [Text], args: [Text]): Null
 {
     let shebang = ""
-    for i, line in lines(file) {
+    for i, line in trust lines(file) {
         if i == 1 {
             shebang = line
             break

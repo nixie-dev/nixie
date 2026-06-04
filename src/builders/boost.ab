@@ -67,6 +67,5 @@ pub fun build_boost()
 main(cmdl)
 {
     trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
-    trust env_var_set("step_total", "1")
     build_boost()?
 }

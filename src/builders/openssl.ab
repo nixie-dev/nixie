@@ -47,9 +47,6 @@ pub fun build_openssl()
 {
     let source_root = get_source_root()
     let cache_root = get_cache_root()
-    // Workaround for amber-lang/amber#1043
-    let dll_ext = get_dll_ext()
-    let _ = split_lines("hello")
 
     step_title("libcrypto")
 
@@ -67,7 +64,6 @@ pub fun build_openssl()
 main(cmdl)
 {
     trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
-    trust env_var_set("step_total", "1")
     build_openssl()?
 }
 

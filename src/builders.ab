@@ -10,7 +10,7 @@ import { check_deps, bail }              from "./common.ab"
 import { pull_source_file, pull_binary } from "./resources.ab"
 import { get_osname, get_cache_root }    from "./platform.ab"
 
-import { get_source_root }      from "./builders/common.ab"
+import { get_source_root, step_total }   from "./builders/common.ab"
 
 import { build_openssl }        from "./builders/openssl.ab"
 import { build_lowdown }        from "./builders/lowdown.ab"
@@ -54,13 +54,13 @@ pub fun try_build_nix()
 {
     let cache_root = get_cache_root()
 
+    step_total = 9
+
     check_deps(["cc", "c++", "pkg-config", "make", "flex", "bison", "perl"])
         failed { bail("Missing required dependencies to build from source.") }
 
     if get_osname() == "Darwin":
         darwin_export_sdk()
-
-    trust env_var_set("step_total", "9")
 
     trust dir_create(get_source_root())
     trust dir_create("{cache_root}/nix-deps/lib/pkgconfig")

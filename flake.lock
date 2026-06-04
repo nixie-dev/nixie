@@ -8,11 +8,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1772528384,
-        "narHash": "sha256-KsSaLlrYtpsxq5lxpkyCR1VGx1c3pGmMzTJG5HavMms=",
+        "lastModified": 1780252401,
+        "narHash": "sha256-M2BucUe+RvkDGW/0r3YEy6QLM0gu7gMa652l2QWLSBo=",
         "owner": "amber-lang",
         "repo": "amber",
-        "rev": "dd1b7dc7313b1de1c0b958ba17f06655f3ff9d42",
+        "rev": "32bdcbdf08af80ba35b9ad2731a77b9ab30ae830",
         "type": "github"
       },
       "original": {

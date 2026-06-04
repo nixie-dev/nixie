@@ -1,0 +1,44 @@
+// Nixie © Karim Vergnes <me@thesola.io>
+// Licensed under GNU GPLv2
+// Set of environment variables expected in features
+
+#[allow_public_mutable]
+pub let SOURCE_CACHE        = ""
+#[allow_public_mutable]
+pub let SOURCE_DERIVATION   = ""
+#[allow_public_mutable]
+pub let NIX_BINS_DERIVATION = ""
+
+#[allow_public_mutable]
+pub let EXTRA_FEATURES              = ""
+#[allow_public_mutable]
+pub let EXTRA_SUBSTITUTERS          = ""
+#[allow_public_mutable]
+pub let EXTRA_TRUSTED_PUBLIC_KEYS   = ""
+
+#[allow_public_mutable]
+pub let NIXIE_VERSION = ""
+
+import { untar, bail } from "./common.ab"
+
+/// Populate environment variables from the features file in the archive.
+pub fun load_features(): Null?
+{
+    let envfile = untar("features", true) failed {
+        bail("The resource archive is missing or malformed.", true)
+    }
+
+    $eval {envfile}$ failed {
+        bail("The environment file in the resource archive is malformed.", true)
+    }
+
+    SOURCE_CACHE        = env_var_get("SOURCE_CACHE")?
+    SOURCE_DERIVATION   = env_var_get("SOURCE_DERIVATION")?
+    NIX_BINS_DERIVATION = env_var_get("NIX_BINS_DERIVATION")?
+
+    EXTRA_FEATURES              = trust env_var_get("EXTRA_FEATURES")
+    EXTRA_SUBSTITUTERS          = trust env_var_get("EXTRA_SUBSTITUTERS")
+    EXTRA_TRUSTED_PUBLIC_KEYS   = trust env_var_get("EXTRA_TRUSTED_PUBLIC_KEYS")
+
+    NIXIE_VERSION = trust env_var_get("NIXIE_VERSION")
+}

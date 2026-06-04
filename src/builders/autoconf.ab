@@ -47,6 +47,5 @@ main(cmdl)
     let inc_prefix = cmdl[2]
 
     trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
-    trust env_var_set("step_total", "1")
     build_autoconf_dep(lib_name, inc_prefix)?
 }
