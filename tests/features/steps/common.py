@@ -8,6 +8,7 @@ def init_git(context):
 @given("a Nix wrapper generated with offline {offline}")
 @when("the Nix wrapper is generated with offline {offline}")
 def gen_offline(context, offline):
+    context.nixos.succeed("rm -f nix")
     cmdline = f"nixie init --sources-derivation {context.nixos.sources} --binaries-derivation {context.nixos.static_bins}"
     if "binaries" in offline:
         cmdline += " --with-binaries"

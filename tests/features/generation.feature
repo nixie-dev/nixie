@@ -9,7 +9,7 @@ Feature: Nixie can generate a Nix script with offline resources
             | nix.Linux.x86_64        |
             | nix.Darwin.x86_64       |
             | nix.Linux.aarch64       |
-            | nix.Darwin.aarch64      |
+            | nix.Darwin.arm64        |
             | libfakedir.dylib        |
 
     Scenario: Offline sources

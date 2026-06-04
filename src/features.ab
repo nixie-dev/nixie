@@ -19,6 +19,8 @@ pub let EXTRA_TRUSTED_PUBLIC_KEYS   = ""
 #[allow_public_mutable]
 pub let NIXIE_VERSION = ""
 
+import { env_var_get } from "std/env"
+
 import { untar, bail } from "./common.ab"
 
 /// Populate environment variables from the features file in the archive.

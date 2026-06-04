@@ -2,9 +2,6 @@
 // Licensed under GNU GPLv2
 // Common functions for source-based builders
 
-import { env_var_get } from "std/env"
-import { dir_create } from "std/fs"
-
 import { set_title } from "../term.ab"
 import { get_repo_root } from "../platform.ab"
 

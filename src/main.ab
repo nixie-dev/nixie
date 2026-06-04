@@ -3,7 +3,7 @@
 // Entry point for script logic
 let args = [Text]
 
-import { env_var_get, env_var_set } from "std/env"
+import { env_var_set }              from "std/env"
 import { array_shift }              from "std/array"
 import { file_exists }              from "std/fs"
 
@@ -14,7 +14,7 @@ import { launch_nix }       from "./nix.ab"
 import { load_features }    from "./features.ab"
 
 check_deps(["tar", "gzip", "uname"]) failed {
-    exit 1
+    exit(1)
 }
 
 main(cmdl)
