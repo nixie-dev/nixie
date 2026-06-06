@@ -18,12 +18,12 @@ Feature: Nixie can generate a Nix script with offline resources
         And the Nix wrapper is extracted
         Then the Nix wrapper should contain these files
             | filename                |
-            | libbrotlicommon         |
-            | libsodium               |
-            | libeditline             |
-            | libarchive              |
-            | boost                   |
-            | lowdown                 |
-            | nix                     |
-            | nlohmann_json           |
-            | openssl                 |
+            | sources/libbrotlicommon |
+            | sources/libsodium       |
+            | sources/libeditline     |
+            | sources/libarchive      |
+            | sources/boost           |
+            | sources/lowdown         |
+            | sources/nix             |
+            | sources/nlohmann_json   |
+            | sources/openssl         |

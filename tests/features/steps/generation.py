@@ -7,7 +7,7 @@ def nixie_extract(context):
 
 @then("the Nix wrapper should contain these files")
 def check_extracted(context):
-    filelist = context.nixos.succeed("ls nixie").split('\n')
+    filelist = context.nixos.succeed("find nixie -maxdepth 2").split('\n')
     for row in context.table.rows:
-        if row.cells[0] not in filelist:
+        if f"nixie/{row.cells[0]}" not in filelist:
             raise AssertionError(f"Missing entry: {row.cells[0]}")
