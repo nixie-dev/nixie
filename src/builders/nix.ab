@@ -59,7 +59,6 @@ pub fun build_nix()
 
 main(cmdl)
 {
-    trust env_var_set("_nixie_testing_skip_tarball", "1")
-    trust env_var_set("step_total", "1")
+    trust env_var_set("_NIXIE_TESTING_SKIP_TARBALL", "1")
     build_nix()?
 }

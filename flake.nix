@@ -1,18 +1,23 @@
 { description = "Put Nix in everything!";
 
-  inputs.nixpkgs.url = github:nixos/nixpkgs;
-  inputs.amber.url = github:amber-lang/amber;
-  inputs.nix.url = github:nixos/nix/2.26.2;
-  inputs.fakedir =
-    { url = github:nixie-dev/fakedir;
+  inputs = {
+    nixpkgs.url = github:nixos/nixpkgs;
+    amber.url   = github:amber-lang/amber;
+    nix.url     = github:nixos/nix/2.26.2;
+    fakedir = {
+      url = github:nixie-dev/fakedir;
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.utils.follows = "flake-utils";
     };
 
+    # Only required for macOS unit tests
+    nix-darwin.url = github:nix-darwin/nix-darwin;
+  };
+
   nixConfig.extra-substituters = "https://nix-wrap.cachix.org";
   nixConfig.extra-trusted-public-keys = "nix-wrap.cachix.org-1:FcfSb7e+LmXBZE/MdaFWcs4bW2OQQeBnB/kgWlkZmYI=";
 
-  outputs = { self, nix, nixpkgs, flake-utils, fakedir, amber, ... }:
+  outputs = { self, nix, nixpkgs, nix-darwin, flake-utils, fakedir, amber, ... }:
   flake-utils.lib.eachDefaultSystem
     (system:
     let pkgs = import nixpkgs { inherit system; };
@@ -35,13 +40,10 @@
         libfakedir = fakedir.packages.${system}.fakedir;
       } else {});
 
-      checks =
-        let callTest = f: pkgs.callPackage f { inherit (self.packages.${system}) nixie sources static-bins; };
-        in {
-          generation = callTest ./tests/generation.nix;
-          rootless = callTest ./tests/rootless.nix;
-          migration = callTest ./tests/migration.nix;
-        };
+      checks = import ./tests {
+        inherit nixpkgs system nix-darwin;
+        inherit (self.outputs.packages.${system}) nixie sources static-bins;
+      };
 
       devShells = {
         default = pkgs.mkShell {

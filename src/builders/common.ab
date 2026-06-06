@@ -2,11 +2,13 @@
 // Licensed under GNU GPLv2
 // Common functions for source-based builders
 
-import { env_var_get } from "std/env"
-import { dir_create } from "std/fs"
-
 import { set_title } from "../term.ab"
 import { get_repo_root } from "../platform.ab"
+
+// The following variable gets set to the number of steps in builders.ab.
+// This value is a default for the testing entrypoints in each builder module
+#[allow_public_mutable]
+pub let step_total = 1
 
 let step_current = 1
 
@@ -23,8 +25,6 @@ pub fun pkg_exists(package: Text): Bool
 /// Change the terminal title to a build step, and increments the step counter.
 pub fun step_title(name: Text): Null
 {
-    let step_total = trust env_var_get("step_total")
-
     trust $clear$
 
     set_title("Building Nix: {name} ({step_current}/{step_total})")
