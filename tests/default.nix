@@ -4,13 +4,20 @@
 let
   pkgs = import nixpkgs { inherit system; };
 
+  makeReport = test:
+    (pkgs.callPackage ./report.nix { inherit test; });
+
   makeDarwinTest = featureName: configuration: import ./template-darwin.nix { inherit pkgs configuration featureName sources static-bins; };
   makeLinuxTest = featureName: configuration: import ./template-linux.nix { inherit pkgs configuration featureName sources static-bins; };
 
-  makeTest =
+  makeTest' =
     if pkgs.stdenv.isLinux       then makeLinuxTest
     else if pkgs.stdenv.isDarwin then makeDarwinTest
     else throw "Unsupported platform: ${pkgs.stdenv.platform}";
+
+  makeTest = n: c:
+    let test = makeTest' n c;
+    in test // { report = makeReport test; };
 
   defaultConfig = {
     environment.systemPackages = with pkgs; [

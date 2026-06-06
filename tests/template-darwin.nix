@@ -20,7 +20,7 @@ let
       };
 
       stdenv.systemPackages = [
-        pkgs.python3.withPackages (ps: with ps; [ behave ])
+        pkgs.python3.withPackages (ps: with ps; [ behave allure-behave ])
       ];
 
       config = {
@@ -50,8 +50,10 @@ let
                   return true
                 raise AssertionError(f"Command '{cmd}' succeeded unexpectedly")
 
-                conf = Configuration("${featurePath}/${featureName}.feature", userdata = { "succeed": succeed, "fail": fail, "sources": "${sources}", "static_bins": "${static-bins}" })
-
+              conf = Configuration("${featurePath}/${featureName}.feature", userdata = { "succeed": succeed, "fail": fail, "sources": "${sources}", "static_bins": "${static-bins}" })
+              conf.format = [ "allure_behave.formatter:AllureFormatter", "pretty" ]
+              conf.outputs = []
+              conf.setup_outputs(['allure_output'])
               exit(run_behave(conf))
             EOF
             echo >&2 ok

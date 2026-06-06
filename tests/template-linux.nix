@@ -7,7 +7,7 @@ pkgs.testers.nixosTest {
   name = featureName;
   nodes = { machine = configuration; };
 
-  extraPythonPackages = p: with p; [ behave ];
+  extraPythonPackages = p: with p; [ behave allure-behave ];
 
   skipTypeCheck = true;
 
@@ -22,6 +22,9 @@ pkgs.testers.nixosTest {
       return machine.fail(cmd)
 
     conf = Configuration("${featurePath}/${featureName}.feature", userdata = { "succeed": succeed, "fail": fail, "sources": "${sources}", "static_bins": "${static-bins}" })
+    conf.format = [ "allure_behave.formatter:AllureFormatter", "pretty" ]
+    conf.outputs = []
+    conf.setup_outputs(['allure_output'])
     start_all()
     exit(run_behave(conf))
   '';
