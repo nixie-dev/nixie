@@ -19,14 +19,13 @@ let
         };
       };
 
-      stdenv.systemPackages = [
-        pkgs.python3.withPackages (ps: with ps; [ behave allure-behave ])
-      ];
-
       config = {
+        environment.systemPackages = [
+          (pkgs.python3.withPackages (ps: with ps; [ behave allure-behave ]))
+        ];
         system.stateVersion = lib.mkDefault config.system.maxStateVersion;
 
-        system.build.run-test = pkgs.runCommand "darwin-test-${testName}"
+        system.build.run-test = pkgs.runCommand "darwin-test-${featureName}"
           { allowSubstitutes = false; preferLocalBuild = true; }
           ''
             #! ${pkgs.stdenv.shell}
@@ -54,6 +53,7 @@ let
               conf.format = [ "allure_behave.formatter:AllureFormatter", "pretty" ]
               conf.outputs = []
               conf.setup_outputs(['allure_output'])
+
               exit(run_behave(conf))
             EOF
             echo >&2 ok

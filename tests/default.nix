@@ -7,8 +7,8 @@ let
   makeReport = test:
     (pkgs.callPackage ./report.nix { inherit test; });
 
-  makeDarwinTest = featureName: configuration: import ./template-darwin.nix { inherit pkgs configuration featureName sources static-bins; };
-  makeLinuxTest = featureName: configuration: import ./template-linux.nix { inherit pkgs configuration featureName sources static-bins; };
+  makeDarwinTest = featureName: configuration: import ./template-darwin.nix { inherit nixpkgs nix-darwin configuration featureName sources static-bins system; };
+  makeLinuxTest = featureName: configuration: import ./template-linux.nix { inherit pkgs configuration featureName sources static-bins system; };
 
   makeTest' =
     if pkgs.stdenv.isLinux       then makeLinuxTest
